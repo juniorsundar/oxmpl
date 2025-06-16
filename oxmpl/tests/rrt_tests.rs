@@ -79,11 +79,11 @@ fn is_path_valid(
         let state_b = &path.0[i + 1];
 
         if !checker.is_valid(state_a) {
-            println!("Path invalid: State {:?} is in collision.", state_a);
+            println!("Path invalid: State {state_a:?} is in collision.");
             return false;
         }
         if (i + 1 == path.0.len() - 1) && !checker.is_valid(state_b) {
-            println!("Path invalid: Final state {:?} is in collision.", state_b);
+            println!("Path invalid: Final state {state_b:?} is in collision.");
             return false;
         }
 
@@ -96,8 +96,7 @@ fn is_path_valid(
                 space.interpolate(state_a, state_b, t, &mut interpolated_state);
                 if !checker.is_valid(&interpolated_state) {
                     println!(
-                        "Path invalid: Motion between {:?} and {:?} is in collision at {:?}.",
-                        state_a, state_b, interpolated_state
+                        "Path invalid: Motion between {state_a:?} and {state_b:?} is in collision at {interpolated_state:?}."
                     );
                     return false;
                 }

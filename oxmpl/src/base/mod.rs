@@ -1,4 +1,9 @@
+// Copyright (c) 2025 Junior Sundar
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 mod spaces;
+mod states;
 
 pub mod error;
 pub mod goal;

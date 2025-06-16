@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Junior Sundar
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 use std::{
     sync::Arc,
     time::{Duration, Instant},
@@ -15,15 +19,38 @@ use crate::base::{
     validity::StateValidityChecker,
 };
 
-// A helper struct to build the tree. Each node stores its state
-// and the index of its parent in the tree vector.
+// A helper struct to build the tree. Each node stores its state and the index of its parent in the
+// tree vector.
 #[derive(Clone)]
 struct Node<S: State> {
     state: S,
     parent_index: Option<usize>,
 }
 
-/// The RRT (Rapidly-exploring Random Tree) planner.
+/// implementation of the Rapidly-exploring Random Tree (RRT) algorithm.
+///
+/// RRT is a randomized, sampling-based algorithm designed to efficiently search high-dimensional
+/// and complex spaces. It works by incrementally building a tree of valid states, with the tree
+/// being biased to grow towards unexplored areas of the space.
+///
+/// # Algorithm Overview
+/// 1. Start with a tree containing only the start state.
+/// 2. Loop:
+///    a. Sample a random state `q_rand` from the state space.
+///    b. Find the node `q_near` in the tree closest to `q_rand`.
+///    c. Extend from `q_near` towards `q_rand` by a fixed `max_distance` to create `q_new`.
+///    d. If the motion from `q_near` to `q_new` is valid (e.g., collision-free), add `q_new` to
+///    the tree as a child of `q_near`.
+///    e. If `q_new` is in the goal region, a solution is found.
+///
+/// This implementation includes goal-biasing, a common optimization where the planner occasionally
+/// samples from the goal region directly to speed up convergence.
+///
+/// # Trait Bounds
+///
+/// To use this planner, the following trait bounds must be met:
+/// - The `State` type (`S`) must be `Clone`.
+/// - The `Goal` type (`G`) must implement `GoalSampleableRegion` to support goal-biasing.
 pub struct RRT<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
     /// The maximum distance between nodes in the tree. This is the "step size".
     pub max_distance: f64,
@@ -31,7 +58,7 @@ pub struct RRT<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
     pub goal_bias: f64,
 
     problem_def: Option<Arc<ProblemDefinition<S, SP, G>>>,
-    validity_checker: Option<Arc<dyn StateValidityChecker<S> + Send + Sync>>,
+    validity_checker: Option<Arc<dyn StateValidityChecker<S>>>,
     tree: Vec<Node<S>>,
 }
 
@@ -41,6 +68,11 @@ where
     SP: StateSpace<StateType = S>,
     G: Goal<S>,
 {
+    /// Creates a new `RRT` planner with the specified parameters.
+    ///
+    /// # Parameters
+    /// * `max_distance` - The maximum length of a single branch in the tree.
+    /// * `goal_bias` - The probability (0.0 to 1.0) of sampling the goal.
     pub fn new(max_distance: f64, goal_bias: f64) -> Self {
         RRT {
             max_distance,
@@ -51,8 +83,11 @@ where
         }
     }
 
-    /// Helper function to check if the motion between two states is valid.
-    /// This involves discretizing the path and checking each intermediate step.
+    /// An internal helper function to check if the motion between two states is valid.
+    ///
+    /// It works by discretizing the straight-line path between `from` and `to` into small steps
+    /// and calling the `StateValidityChecker` on each intermediate state. If any intermediate
+    /// state is invalid, the entire motion is considered invalid.
     fn check_motion(&self, from: &S, to: &S) -> bool {
         // We need access to the space and checker from our stored setup info.
         if let (Some(pd), Some(vc)) = (&self.problem_def, &self.validity_checker) {
@@ -95,7 +130,7 @@ where
     fn setup(
         &mut self,
         problem_def: Arc<ProblemDefinition<S, SP, G>>,
-        validity_checker: Arc<dyn StateValidityChecker<S> + Send + Sync>,
+        validity_checker: Arc<dyn StateValidityChecker<S>>,
     ) {
         self.problem_def = Some(problem_def);
         self.validity_checker = Some(validity_checker);
@@ -121,6 +156,7 @@ where
         let start_time = Instant::now();
         let mut rng = rand::rng();
 
+        // Main Loop
         loop {
             // 1. Check for timeout
             if start_time.elapsed() > timeout {
@@ -184,6 +220,6 @@ where
                 }
             }
         }
-        // Err(PlanningError::NoSolutionFound)
+        // TODO: Limit iteration counts and add Err(PlanningError::NoSolutionFound)
     }
 }

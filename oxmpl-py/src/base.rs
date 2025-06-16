@@ -20,7 +20,8 @@ pub struct PyRealVectorState(pub Arc<OxmplRealVectorState>);
 impl PyRealVectorState {
     #[new]
     fn new(values: Vec<f64>) -> Self {
-        Self(Arc::new(OxmplRealVectorState { values }))
+        let state = OxmplRealVectorState::new(values);
+        Self(Arc::new(state))
     }
 
     #[getter]
