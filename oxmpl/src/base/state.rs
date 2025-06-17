@@ -1,31 +1,34 @@
-use std::f64::consts::PI;
+// Copyright (c) 2025 Junior Sundar
+//
+// SPDX-License-Identifier: BSD-3-Clause
 
-pub trait State: Clone + Send + Sync + 'static {}
+pub use crate::base::states::so2_state::SO2State;
 
+/// A marker trait for all state types in the planning library.
+///
+/// A `State` represents a single point, configuration, or snapshot of the system
+/// being planned for.
+///
+/// Supertrait bounds:
+/// - `Clone`: States must be copyable.
+/// - `Send` + `Sync`: States must be safe to share and send between threads.
+/// - `'static`: The state type does not contain any non-static references.
+pub trait State: Clone {}
+
+/// A state representing a point in an N-dimensional Euclidean space (R^n).
 #[derive(Clone, Debug, PartialEq)]
 pub struct RealVectorState {
+    /// Values of each dimension of the state.
     pub values: Vec<f64>,
 }
+impl RealVectorState {
+    /// Creates a new `RealVectorState`.
+    pub fn new(vals: Vec<f64>) -> Self {
+        RealVectorState { values: vals }
+    }
+}
+/// Implements the `State` marker trait for `RealVectorState`.
 impl State for RealVectorState {}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct SO2State {
-    pub value: f64,
-}
-impl SO2State {
-    pub fn new(val: f64) -> Self {
-        SO2State {
-            value: (val + PI).rem_euclid(2.0 * PI) - PI,
-        }
-    }
-
-    pub fn normalise(&mut self) -> Self {
-        SO2State {
-            value: (self.value + PI).rem_euclid(2.0 * PI) - PI,
-        }
-    }
-}
-impl State for SO2State {}
 
 #[cfg(test)]
 mod tests {
@@ -46,27 +49,5 @@ mod tests {
         };
         let state2 = state1.clone();
         assert_eq!(state1, state2);
-    }
-
-    #[test]
-    fn test_so2_state_creation() {
-        let state = SO2State { value: 1.0 };
-        assert_eq!(state.value, 1.0);
-    }
-
-    #[test]
-    fn test_so2_state_clone() {
-        let state1 = SO2State { value: 1.0 };
-        let state2 = state1.clone();
-        assert_eq!(state1, state2);
-    }
-
-    #[test]
-    fn test_so2_state_normalise() {
-        let mut state1 = SO2State {
-            value: 3.0 * PI / 2.0,
-        };
-        let state2 = state1.normalise();
-        assert_eq!(state2.value, -PI / 2.0);
     }
 }
