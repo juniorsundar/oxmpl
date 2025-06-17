@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Junior Sundar
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 use std::{error, fmt};
 
 #[derive(Debug, PartialEq)]
@@ -38,7 +42,7 @@ pub enum StateSamplingError {
     ZeroVolume,
     /// It was not possible to generate a sample that satisfies the goal conditions.
     GoalRegionUnsatisfiable,
-    /// An iterative sampling attempt (like for a goal region) failed to find a sample within a set number of attempts.
+    /// An iterative sampling attempt failed to find a sample within a set number of attempts.
     GoalSamplingTimeout { attempts: u32 },
 }
 impl fmt::Display for StateSamplingError {
