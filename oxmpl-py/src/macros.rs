@@ -1,19 +1,41 @@
-/// A macro to generate a full PyO3 wrapper for a given planner.
+/// Generates a complete PyO3 wrapper for a concrete planner type.
 ///
-/// This macro acts as a template to reduce repetitive boilerplate code. It takes a
+/// This macro reduces boilerplate by acting as a template for creating Python
+/// classes from your core Rust planners. It generates a `#[pyclass]` struct
+/// and a `#[pymethods]` implementation with a standard constructor, a `setup`
+/// method, and a `solve` method.
+///
+/// # Arguments
+///
+/// - `$wrapper_name:ident`: The name for the new Rust wrapper struct (e.g., `PyRrtRv`).
+/// - `$python_name:literal`: The name of the class as it will be exposed in Python (e.g., `"RRT"`).
+/// - `$concrete_planner_ty:ty`: The full, concrete Rust type of the planner to be wrapped.
+///   This type alias should be defined *before* calling the macro.
+/// - `$problem_def_py_ty:ty`: The Python wrapper for the `ProblemDefinition`.
+/// - `$path_py_ty:ty`: The Python wrapper for the resulting `Path`.
+///
+/// # Usage
+///
+/// ```rust,ignore
+/// // 1. Define a concrete type alias for your generic planner.
+/// type RrtForRealVector = RRT<RealVectorState, RealVectorStateSpace, PyGoal>;
+///
+/// // 2. Invoke the macro with the required types.
+/// define_planner!(
+///     PyRrtRv,
+///     "RRT",
+///     RrtForRealVector,
+///     PyProblemDefinition,
+///     PyPath
+/// );
+/// ```
 #[macro_export]
 macro_rules! define_planner {
     (
-        // $wrapper_name: The name for the Rust struct that will wrap the planner.
         $wrapper_name:ident,
-        // $python_name: The name of the class as it will be exposed to Python.
         $python_name:literal,
-        // $concrete_planner_ty: The full, concrete Rust type of the planner to be wrapped.
-        //   This type alias should be defined *before* calling the macro.
         $concrete_planner_ty:ty,
-        // $problem_def_py_ty: The Python wrapper for the ProblemDefinition.
         $problem_def_py_ty:ty,
-        // $path_py_ty: The Python wrapper for the resulting Path.
         $path_py_ty:ty
     ) => {
         #[pyclass(name = $python_name, unsendable)]
@@ -23,6 +45,7 @@ macro_rules! define_planner {
 
         #[pymethods]
         impl $wrapper_name {
+            /// The Python `__init__` constructor.
             #[new]
             fn new(max_distance: f64, goal_bias: f64) -> Self {
                 let planner_instance = <$concrete_planner_ty>::new(max_distance, goal_bias);
@@ -31,6 +54,10 @@ macro_rules! define_planner {
                 }
             }
 
+            /// Configures the planner for a specific problem.
+            ///
+            /// This method bridges the Python objects (like a function for validity checking) into
+            /// the Rust types required by the core `oxmpl` planner.
             fn setup(
                 &mut self,
                 problem_def_py: &$problem_def_py_ty,
@@ -49,10 +76,13 @@ macro_rules! define_planner {
                 Ok(())
             }
 
+            /// Attempts to solve the planning problem within a given timeout.
             fn solve(&mut self, timeout_secs: f32) -> PyResult<$path_py_ty> {
                 let timeout = Duration::from_secs_f32(timeout_secs);
                 let result = self.planner.lock().unwrap().solve(timeout);
 
+                // Converts the Rust `Result<Path, PlanningError>` into a Python
+                // result, raising an exception on failure.
                 match result {
                     Ok(path) => Ok(<$path_py_ty>::from_rust_path(path)),
                     Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),

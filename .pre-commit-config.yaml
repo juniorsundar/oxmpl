@@ -11,23 +11,28 @@ repos:
     -   id: rustfmt
         name: rustfmt
         description: Format Rust files using rustfmt.
-        entry: cargo fmt -- --check
+        # This hook should be 'entry: cargo' and 'args: [...]' too
+        entry: cargo 
+        args: ['fmt', '--', '--check']
         language: rust
         types: [rust]
-        stages: [pre-commit]
 
     -   id: clippy
         name: clippy
         description: Check for lints using clippy.
-        entry: cargo clippy -- -D warnings
+        # Ensure 'entry' is ONLY 'cargo'
+        entry: cargo
+        # Ensure the command is in 'args'
+        args: ['clippy', '--', '-D', 'warnings']
         language: rust
         types: [rust]
-        stages: [pre-commit]
 
     -   id: check
         name: cargo-check
         description: Check the package for errors with cargo check.
-        entry: cargo check
+        # Ensure 'entry' is ONLY 'cargo'
+        entry: cargo
+        # Ensure the command is in 'args'
+        args: ['check']
         language: rust
         types: [rust]
-        stages: [pre-commit]

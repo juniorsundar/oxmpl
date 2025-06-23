@@ -7,7 +7,10 @@ use crate::base::{PyGoal, PyPath, PyProblemDefinition, PyStateValidityChecker};
 use oxmpl::base::{planner::Planner, space::RealVectorStateSpace, state::RealVectorState};
 use oxmpl::geometric::planners::rrt::RRT;
 
+/// A concrete type alias for the RRT planner configured for `RealVectorState`.
 type RrtForRealVector = RRT<RealVectorState, RealVectorStateSpace, PyGoal>;
+
+// Generate the Python wrapper for the RRT planner using the macro.
 define_planner!(
     PyRrtRv,             // The Rust wrapper struct name
     "RRT",               // The Python class name

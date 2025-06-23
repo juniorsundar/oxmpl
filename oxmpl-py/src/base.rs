@@ -12,6 +12,13 @@ use oxmpl::base::{
     validity::StateValidityChecker,
 };
 
+/// A state in an N-dimensional Euclidean space (R^n).
+///
+/// This class represents a single point or configuration, defined by a list of floating-point
+/// numbers.
+///
+/// Args:
+///     values (List[float]): A list of numbers representing the state's components.
 #[pyclass(name = "RealVectorState", unsendable)]
 #[derive(Clone)]
 pub struct PyRealVectorState(pub Arc<OxmplRealVectorState>);
@@ -20,10 +27,12 @@ pub struct PyRealVectorState(pub Arc<OxmplRealVectorState>);
 impl PyRealVectorState {
     #[new]
     fn new(values: Vec<f64>) -> Self {
+        // Creates the underlying Rust struct and wraps it for Python.
         let state = OxmplRealVectorState::new(values);
         Self(Arc::new(state))
     }
 
+    /// list[float]: The components of the state vector.
     #[getter]
     fn get_values(&self) -> Vec<f64> {
         self.0.values.clone()
@@ -34,12 +43,24 @@ impl PyRealVectorState {
     }
 }
 
+/// Defines an N-dimensional space for `RealVectorState` instances.
+///
+/// This class defines the planning space, including its dimensionality and boundaries.
 #[pyclass(name = "RealVectorStateSpace", unsendable)]
 #[derive(Clone)]
 pub struct PyRealVectorStateSpace(pub Arc<OxmplRealVectorStateSpace>);
 
 #[pymethods]
 impl PyRealVectorStateSpace {
+    /// Creates a new `RealVectorStateSpace`.
+    ///
+    /// Args:
+    ///     dimension (int): The number of dimensions for the space.
+    ///     bounds (Optional[List[Tuple[float, float]]]): If provided, defines the
+    ///         min and max for each dimension. If `None`, the space is unbounded.
+    ///
+    /// Raises:
+    ///     ValueError: If the provided inputs are invalid.
     #[new]
     #[pyo3(signature = (dimension, bounds=None))]
     fn new(dimension: usize, bounds: Option<Vec<(f64, f64)>>) -> PyResult<Self> {
@@ -48,24 +69,29 @@ impl PyRealVectorStateSpace {
             Err(e) => Err(PyValueError::new_err(e.to_string())),
         }
     }
+
+    /// Computes the Euclidean (L2) distance between two states.
     fn distance(&self, state1: &PyRealVectorState, state2: &PyRealVectorState) -> f64 {
         // This calls the real Rust implementation.
         self.0.distance(&state1.0, &state2.0)
     }
 }
 
+/// A sequence of states representing a solution path found by a planner.
 #[pyclass(name = "Path")]
 #[derive(Clone)]
 pub struct PyPath(pub OxmplPath<OxmplRealVectorState>);
 
 #[pymethods]
 impl PyPath {
+    /// Creates a new Path object from a list of states.
     #[new]
     fn py_new(states: Vec<PyRealVectorState>) -> Self {
         let rust_states = states.into_iter().map(|s| (*s.0).clone()).collect();
         Self(OxmplPath(rust_states))
     }
 
+    /// list[RealVectorState]: The sequence of states that make up the path.
     #[getter]
     fn get_states(&self) -> Vec<PyRealVectorState> {
         self.0
@@ -75,6 +101,7 @@ impl PyPath {
             .collect()
     }
 
+    /// The number of states in the path.
     fn __len__(&self) -> usize {
         self.0 .0.len()
     }
@@ -85,12 +112,16 @@ impl PyPath {
 }
 
 impl PyPath {
+    /// An internal helper to create a `PyPath` from a core Rust path. Not exposed to Python.
     pub fn from_rust_path(path: OxmplPath<OxmplRealVectorState>) -> Self {
         Self(path)
     }
 }
 
-// Note: This wrapper is specifically for RealVectorState problems.
+/// Encapsulates all the components of a motion planning problem.
+///
+/// This class bundles the state space, start state, and goal definition, which can then be passed
+/// to a planner's `setup` method.
 #[pyclass(name = "ProblemDefinition", unsendable)]
 #[derive(Clone)]
 pub struct PyProblemDefinition(
@@ -100,6 +131,13 @@ pub struct PyProblemDefinition(
 #[pymethods]
 impl PyProblemDefinition {
     #[new]
+    /// Creates a new `ProblemDefinition`.
+    ///
+    /// Args:
+    ///     space (RealVectorStateSpace): The space in which to plan.
+    ///     start_state (RealVectorState): The starting configuration.
+    ///     goal (object): A Python object that implements the required goal methods
+    ///         (`is_satisfied`, `distance_goal`, `sample_goal`).
     fn new(space: PyRealVectorStateSpace, start_state: PyRealVectorState, goal: PyObject) -> Self {
         let goal_wrapper = PyGoal { instance: goal };
         let pd = ProblemDefinition {
@@ -111,6 +149,8 @@ impl PyProblemDefinition {
     }
 }
 
+/// An internal Rust struct that implements the `StateValidityChecker` trait by calling a
+/// user-provided Python function.
 pub struct PyStateValidityChecker {
     pub callback: PyObject,
 }
@@ -142,6 +182,8 @@ impl StateValidityChecker<OxmplRealVectorState> for PyStateValidityChecker {
     }
 }
 
+/// An internal Rust struct that implements the `Goal` trait hierarchy
+/// by calling methods on a user-provided Python goal object.
 pub struct PyGoal {
     pub instance: PyObject,
 }
