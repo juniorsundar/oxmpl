@@ -150,7 +150,7 @@ where
         let pd = self
             .problem_def
             .as_ref()
-            .expect("Planner setup was not called before solve.");
+            .ok_or(PlanningError::PlannerUninitialised)?;
         let goal = &pd.goal;
 
         let start_time = Instant::now();

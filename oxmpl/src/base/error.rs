@@ -77,6 +77,8 @@ pub enum PlanningError {
     Timeout,
     /// No solution found.
     NoSolutionFound,
+    // Planner was not setup first.
+    PlannerUninitialised,
 }
 impl fmt::Display for PlanningError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -86,6 +88,12 @@ impl fmt::Display for PlanningError {
             }
             Self::NoSolutionFound => {
                 write!(f, "No solution found.")
+            }
+            Self::PlannerUninitialised => {
+                write!(
+                    f,
+                    "<Planner>.setup() was not called, thus Planner is unititialised."
+                )
             }
         }
     }
