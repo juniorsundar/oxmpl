@@ -31,14 +31,15 @@ pub struct RRTConnect<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
 
     problem_def: Option<Arc<ProblemDefinition<S, SP, G>>>,
     validity_checker: Option<Arc<dyn StateValidityChecker<S>>>,
-    tree: Vec<Node<S>>,
+    tree_a: Vec<Node<S>>,
+    tree_b: Vec<Node<S>>,
 }
 
 impl<S, SP, G> RRTConnect<S, SP, G>
 where
     S: State,
     SP: StateSpace<StateType = S>,
-    G: Goal<S>,
+    G: Goal<S> + GoalSampleableRegion<S>,
 {
     pub fn new(max_distance: f64, goal_bias: f64) -> Self {
         RRTConnect {
@@ -46,8 +47,51 @@ where
             goal_bias,
             problem_def: None,
             validity_checker: None,
-            tree: Vec::new(),
+            tree_a: Vec::new(),
+            tree_b: Vec::new(),
         }
+    }
+
+    fn generate_random_configuration(&self, rng: &mut impl Rng) -> Result<S, PlanningError> {
+        let pd = self
+            .problem_def
+            .as_ref()
+            .ok_or(PlanningError::PlannerUninitialised)?;
+        let goal = &pd.goal;
+
+        let q_rand = if rng.random_bool(self.goal_bias) {
+            goal.sample_goal(rng).unwrap()
+        } else {
+            pd.space.sample_uniform(rng).unwrap()
+        };
+
+        Ok(q_rand)
+    }
+
+    fn find_nearest_node_idx(
+        &self,
+        q_target: &S,
+        tree: &[Node<S>],
+    ) -> Result<(usize, f64), PlanningError> {
+        let pd = self
+            .problem_def
+            .as_ref()
+            .ok_or(PlanningError::PlannerUninitialised)?;
+        let mut nearest_node_index = 0;
+        let mut min_dist = pd.space.distance(&tree[0].state, q_target);
+
+        for (i, node) in tree.iter().enumerate().skip(1) {
+            let dist = pd.space.distance(&node.state, q_target);
+            if dist < min_dist {
+                min_dist = dist;
+                nearest_node_index = i;
+            }
+        }
+        Ok((nearest_node_index, min_dist))
+    }
+
+    fn extend_branch() {
+        todo!()
     }
 
     fn check_motion(&self, from: &S, to: &S) -> bool {
@@ -89,21 +133,31 @@ where
     ) {
         self.problem_def = Some(problem_def);
         self.validity_checker = Some(validity_checker);
-        self.tree.clear();
+        self.tree_a.clear();
+        self.tree_b.clear();
+        let pd = self.problem_def.as_ref().unwrap();
 
-        let start_state = self.problem_def.as_ref().unwrap().start_states[0].clone();
+        let start_state = pd.start_states[0].clone();
         let start_node = Node {
             state: start_state,
             parent_index: None,
         };
-        self.tree.push(start_node);
+        self.tree_a.push(start_node);
+
+        let mut rng = rand::rng();
+        let goal_state = pd.goal.sample_goal(&mut rng).unwrap();
+        let goal_node = Node {
+            state: goal_state,
+            parent_index: None,
+        };
+        self.tree_b.push(goal_node);
     }
 
     fn solve(&mut self, timeout: Duration) -> Result<Path<S>, PlanningError> {
         let pd = self
             .problem_def
             .as_ref()
-            .expect("Planner setup was not called before solve.");
+            .ok_or(PlanningError::PlannerUninitialised)?;
         let goal = &pd.goal;
 
         let start_time = Instant::now();
@@ -114,23 +168,11 @@ where
                 return Err(PlanningError::Timeout);
             }
 
-            let q_rand = if rng.random_bool(self.goal_bias) {
-                goal.sample_goal(&mut rng).unwrap()
-            } else {
-                pd.space.sample_uniform(&mut rng).unwrap()
-            };
+            let q_rand = self.generate_random_configuration(&mut rng)?;
 
-            let mut nearest_node_index = 0;
-            let mut min_dist = pd.space.distance(&self.tree[0].state, &q_rand);
-
-            for i in 1..self.tree.len() {
-                let dist = pd.space.distance(&self.tree[i].state, &q_rand);
-                if dist < min_dist {
-                    min_dist = dist;
-                    nearest_node_index = i;
-                }
-            }
-            let q_near = &self.tree[nearest_node_index].state;
+            let (nearest_node_index, min_dist) =
+                self.find_nearest_node_idx(&q_rand, &self.tree_a)?;
+            let q_near = &self.tree_a[nearest_node_index].state;
 
             let mut q_new = q_near.clone();
             if min_dist > self.max_distance {
@@ -145,16 +187,16 @@ where
                     state: q_new.clone(),
                     parent_index: Some(nearest_node_index),
                 };
-                let new_node_index = self.tree.len();
-                self.tree.push(new_node);
+                let new_node_index = self.tree_a.len();
+                self.tree_a.push(new_node);
 
                 if goal.is_satisfied(&q_new) {
-                    println!("Solution found after {} nodes.", self.tree.len());
+                    println!("Solution found after {} nodes.", self.tree_a.len());
                     let mut path_states = Vec::new();
                     let mut current_index = Some(new_node_index);
                     while let Some(index) = current_index {
-                        path_states.push(self.tree[index].state.clone());
-                        current_index = self.tree[index].parent_index;
+                        path_states.push(self.tree_a[index].state.clone());
+                        current_index = self.tree_a[index].parent_index;
                     }
                     path_states.reverse();
                     return Ok(Path(path_states));
