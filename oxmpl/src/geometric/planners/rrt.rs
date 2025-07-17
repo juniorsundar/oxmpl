@@ -116,6 +116,18 @@ where
             false
         }
     }
+
+    fn reconstruct_path(&self, start_node_idx: usize) -> Path<S> {
+        let mut path_states = Vec::new();
+        let mut current_index = Some(start_node_idx);
+        while let Some(index) = current_index {
+            path_states.push(self.tree[index].state.clone());
+            current_index = self.tree[index].parent_index;
+        }
+        path_states.reverse();
+
+        Path(path_states)
+    }
 }
 
 // The main implementation of the Planner trait for RRT.
@@ -203,20 +215,12 @@ where
                     state: q_new.clone(),
                     parent_index: Some(nearest_node_index),
                 };
-                let new_node_index = self.tree.len();
                 self.tree.push(new_node);
 
                 // 7. Check if the new node satisfies the goal
                 if goal.is_satisfied(&q_new) {
                     println!("Solution found after {} nodes.", self.tree.len());
-                    let mut path_states = Vec::new();
-                    let mut current_index = Some(new_node_index);
-                    while let Some(index) = current_index {
-                        path_states.push(self.tree[index].state.clone());
-                        current_index = self.tree[index].parent_index;
-                    }
-                    path_states.reverse();
-                    return Ok(Path(path_states));
+                    return Ok(self.reconstruct_path(self.tree.len() - 1));
                 }
             }
         }

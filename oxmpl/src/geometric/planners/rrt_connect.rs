@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use std::{
+    mem,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -52,46 +53,41 @@ where
         }
     }
 
-    fn generate_random_configuration(&self, rng: &mut impl Rng) -> Result<S, PlanningError> {
-        let pd = self
-            .problem_def
-            .as_ref()
-            .ok_or(PlanningError::PlannerUninitialised)?;
-        let goal = &pd.goal;
-
-        let q_rand = if rng.random_bool(self.goal_bias) {
-            goal.sample_goal(rng).unwrap()
-        } else {
-            pd.space.sample_uniform(rng).unwrap()
-        };
-
-        Ok(q_rand)
-    }
-
-    fn find_nearest_node_idx(
+    fn extend_branch(
         &self,
-        q_target: &S,
         tree: &[Node<S>],
-    ) -> Result<(usize, f64), PlanningError> {
-        let pd = self
-            .problem_def
-            .as_ref()
-            .ok_or(PlanningError::PlannerUninitialised)?;
+        q_target: &S,
+        max_distance: &f64,
+        problem_def: &ProblemDefinition<S, SP, G>,
+    ) -> Result<(S, usize), PlanningError> {
         let mut nearest_node_index = 0;
-        let mut min_dist = pd.space.distance(&tree[0].state, q_target);
+        let mut min_dist = problem_def.space.distance(&tree[0].state, q_target);
 
         for (i, node) in tree.iter().enumerate().skip(1) {
-            let dist = pd.space.distance(&node.state, q_target);
+            let dist = problem_def.space.distance(&node.state, q_target);
             if dist < min_dist {
                 min_dist = dist;
                 nearest_node_index = i;
             }
         }
-        Ok((nearest_node_index, min_dist))
-    }
 
-    fn extend_branch() {
-        todo!()
+        let q_near = &tree[nearest_node_index].state;
+
+        let mut q_new = q_near.clone();
+        if min_dist > *max_distance {
+            let t = max_distance / min_dist;
+            problem_def
+                .space
+                .interpolate(q_near, q_target, t, &mut q_new);
+        } else {
+            q_new = q_target.clone();
+        }
+
+        if self.check_motion(q_near, &q_new) {
+            Ok((q_new, nearest_node_index))
+        } else {
+            Err(PlanningError::PlannerUninitialised)
+        }
     }
 
     fn check_motion(&self, from: &S, to: &S) -> bool {
@@ -117,6 +113,27 @@ where
         } else {
             false
         }
+    }
+
+    fn reconstruct_path(&self, start_node_idx: usize, goal_node_idx: usize) -> Path<S> {
+        let mut path_states = Vec::new();
+
+        let mut current_index = Some(start_node_idx);
+        while let Some(index) = current_index {
+            path_states.push(self.tree_a[index].state.clone());
+            current_index = self.tree_a[index].parent_index;
+        }
+        path_states.reverse();
+
+        let mut current_index = Some(goal_node_idx);
+        while let Some(index) = current_index {
+            if index != goal_node_idx {
+                path_states.push(self.tree_b[index].state.clone());
+            }
+            current_index = self.tree_b[index].parent_index;
+        }
+
+        Path(path_states)
     }
 }
 
@@ -154,54 +171,54 @@ where
     }
 
     fn solve(&mut self, timeout: Duration) -> Result<Path<S>, PlanningError> {
+        let start_time = Instant::now();
+        let mut rng = rand::rng();
         let pd = self
             .problem_def
             .as_ref()
             .ok_or(PlanningError::PlannerUninitialised)?;
-        let goal = &pd.goal;
-
-        let start_time = Instant::now();
-        let mut rng = rand::rng();
 
         loop {
             if start_time.elapsed() > timeout {
                 return Err(PlanningError::Timeout);
             }
 
-            let q_rand = self.generate_random_configuration(&mut rng)?;
+            let goal = &pd.goal;
 
-            let (nearest_node_index, min_dist) =
-                self.find_nearest_node_idx(&q_rand, &self.tree_a)?;
-            let q_near = &self.tree_a[nearest_node_index].state;
-
-            let mut q_new = q_near.clone();
-            if min_dist > self.max_distance {
-                let t = self.max_distance / min_dist;
-                pd.space.interpolate(q_near, &q_rand, t, &mut q_new);
+            let q_rand = if rng.random_bool(self.goal_bias) {
+                goal.sample_goal(&mut rng).unwrap()
             } else {
-                q_new = q_rand;
-            }
+                pd.space.sample_uniform(&mut rng).unwrap()
+            };
 
-            if self.check_motion(q_near, &q_new) {
-                let new_node = Node {
-                    state: q_new.clone(),
-                    parent_index: Some(nearest_node_index),
-                };
-                let new_node_index = self.tree_a.len();
-                self.tree_a.push(new_node);
+            if let Ok((q_new_from_start, nn_idx_new_from_start)) =
+                self.extend_branch(&self.tree_a, &q_rand, &self.max_distance, pd)
+            {
+                self.tree_a.push(Node {
+                    state: q_new_from_start.clone(),
+                    parent_index: Some(nn_idx_new_from_start),
+                });
+                if let Ok((q_connect_from_goal, nn_idx_connect_from_goal)) =
+                    self.extend_branch(&self.tree_b, &q_new_from_start, &self.max_distance, pd)
+                {
+                    self.tree_a.push(Node {
+                        state: q_connect_from_goal.clone(),
+                        parent_index: Some(nn_idx_connect_from_goal),
+                    });
 
-                if goal.is_satisfied(&q_new) {
-                    println!("Solution found after {} nodes.", self.tree_a.len());
-                    let mut path_states = Vec::new();
-                    let mut current_index = Some(new_node_index);
-                    while let Some(index) = current_index {
-                        path_states.push(self.tree_a[index].state.clone());
-                        current_index = self.tree_a[index].parent_index;
+                    if pd.space.distance(&q_new_from_start, &q_connect_from_goal) < 1e-9 {
+                        println!(
+                            "Solution found after {} total nodes.",
+                            self.tree_a.len() + self.tree_b.len()
+                        );
+                        return Ok(
+                            self.reconstruct_path(self.tree_a.len() - 1, self.tree_b.len() - 1)
+                        );
                     }
-                    path_states.reverse();
-                    return Ok(Path(path_states));
                 }
             }
+
+            mem::swap(&mut self.tree_a, &mut self.tree_b);
         }
     }
 }
