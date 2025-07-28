@@ -161,12 +161,8 @@ where
                             (new_node_idx_b, new_node_idx_a)
                         };
 
-                        let mut start_path = self
-                            .reconstruct_path(&self.start_tree, start_idx)
-                            .0;
-                        let mut goal_path = self
-                            .reconstruct_path(&self.goal_tree, goal_idx)
-                            .0;
+                        let mut start_path = self.reconstruct_path(&self.start_tree, start_idx).0;
+                        let mut goal_path = self.reconstruct_path(&self.goal_tree, goal_idx).0;
 
                         goal_path.reverse();
                         start_path.extend(goal_path.into_iter().skip(1));
@@ -244,4 +240,3 @@ fn check_motion<S: State + Clone, SP: StateSpace<StateType = S>, G: Goal<S>>(
     }
     true
 }
-
