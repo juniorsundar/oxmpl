@@ -3,7 +3,7 @@ import math
 import random
 
 from oxmpl_py.base import RealVectorState, RealVectorStateSpace, ProblemDefinition
-from oxmpl_py.geometric import RRT
+from oxmpl_py.geometric import RRTConnect
 
 class CircularGoal:
     """
@@ -64,7 +64,7 @@ def test_rrt_problem_with_wall():
     problem_def = ProblemDefinition(space, start_state, goal_region)
 
     # CREATE AND SETUP THE PLANNER
-    planner = RRT(max_distance=0.5, goal_bias=0.05)
+    planner = RRTConnect(max_distance=0.5, goal_bias=0.05)
 
     planner.setup(problem_def, is_state_valid)
 

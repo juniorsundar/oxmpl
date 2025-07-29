@@ -9,7 +9,7 @@ use oxmpl::base::{
     state::RealVectorState,
     validity::StateValidityChecker,
 };
-use oxmpl::geometric::planners::rrt_connect::RRTConnect;
+use oxmpl::geometric::RRTConnect;
 
 use rand::Rng;
 

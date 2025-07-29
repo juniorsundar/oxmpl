@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::base::{PyGoal, PyPath, PyProblemDefinition, PyStateValidityChecker};
 use oxmpl::base::{planner::Planner, space::RealVectorStateSpace, state::RealVectorState};
-use oxmpl::geometric::planners::{rrt::RRT, rrt_connect::RRTConnect};
+use oxmpl::geometric::{RRT, RRTConnect};
 
 /// A concrete type alias for the RRT planner configured for `RealVectorState`.
 type RrtForRealVector = RRT<RealVectorState, RealVectorStateSpace, PyGoal>;
@@ -30,18 +30,15 @@ define_planner!(
 
 pub fn create_module(py: Python<'_>) -> PyResult<Bound<'_, PyModule>> {
     let geometric_module = PyModule::new(py, "geometric")?;
-    let planners_module = PyModule::new(py, "planners")?;
 
     let sys_modules = py
         .import("sys")?
         .getattr("modules")?
         .downcast_into::<PyDict>()?;
+    geometric_module.add_class::<PyRrtConnectRv>()?;
+    geometric_module.add_class::<PyRrtRv>()?;
 
-    planners_module.add_class::<PyRrtRv>()?;
-    planners_module.add_class::<PyRrtConnectRv>()?;
-    geometric_module.add_submodule(&planners_module)?;
-
-    sys_modules.set_item("oxmpl_py.geometric.planners", planners_module)?;
+    sys_modules.set_item("oxmpl_py.geometric", &geometric_module)?;
 
     Ok(geometric_module)
 }
