@@ -27,7 +27,7 @@ struct Node<S: State> {
     parent_index: Option<usize>,
 }
 
-/// implementation of the Rapidly-exploring Random Tree (RRT) algorithm.
+/// An implementation of the Rapidly-exploring Random Tree (RRT) algorithm.
 ///
 /// RRT is a randomized, sampling-based algorithm designed to efficiently search high-dimensional
 /// and complex spaces. It works by incrementally building a tree of valid states, with the tree
@@ -148,7 +148,7 @@ where
         self.validity_checker = Some(validity_checker);
         self.tree.clear();
 
-        // Initialize the tree with the start state.
+        // Initialise the tree with the start state.
         let start_state = self.problem_def.as_ref().unwrap().start_states[0].clone();
         let start_node = Node {
             state: start_state,
@@ -177,7 +177,8 @@ where
 
             // 2. Sample a state (q_rand)
             let q_rand = if rng.random_bool(self.goal_bias) {
-                // TODO: assume sample_goal can't fail here for simplicity, but a real implementation would handle the Result.
+                // TODO: assume sample_goal can't fail here for simplicity, but a real
+                // implementation would handle the Result.
                 goal.sample_goal(&mut rng).unwrap()
             } else {
                 // TODO: assume uniform sampling can't fail if bounds are set correctly.

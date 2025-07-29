@@ -108,8 +108,6 @@ fn is_path_valid(
 
 #[test]
 fn test_rrt_connect_finds_path_around_obstacle() {
-    // Using .expect() is a common and clean way to handle Results in tests
-    // where you know the operation should not fail.
     let space = Arc::new(
         RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]))
             .expect("Failed to create state space for test."),
@@ -147,8 +145,6 @@ fn test_rrt_connect_finds_path_around_obstacle() {
         "Goal target should be valid!"
     );
 
-    // Note: The `goal_bias` parameter is not used by this RRT-Connect implementation,
-    // but we still need to provide it for the constructor.
     let mut planner = RRTConnect::new(0.5, 0.0);
 
     planner.setup(problem_definition, validity_checker.clone());
