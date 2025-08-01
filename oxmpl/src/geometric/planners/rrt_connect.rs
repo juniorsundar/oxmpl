@@ -105,6 +105,91 @@ where
         path_states.reverse();
         Path(path_states)
     }
+
+
+    /// Helper function to extend a tree towards a target state.
+    ///
+    /// This function finds the node in the `tree` nearest to `q_target`. It then creates a new state
+    /// `q_new` by moving from the nearest node towards `q_target` by a distance of at most
+    /// `max_distance`. If the motion to `q_new` is valid, it adds `q_new` to the tree.
+    ///
+    /// Returns a tuple `(ExtendResult, usize)` on success, where `usize` is the index of the new node.
+    /// Returns `None` if the motion was invalid.
+    ///
+    /// > [!WARNING]
+    /// > This is associated function of RRTConnect struct because we are mutating the start and
+    /// > goal trees inside > this. There were a lot of mutability/immutability issues and the
+    /// > compiler was complaining.
+    fn extend(
+        tree: &mut Vec<Node<S>>,
+        q_target: &S,
+        pd: &ProblemDefinition<S, SP, G>,
+        vc: &Arc<dyn StateValidityChecker<S>>,
+        max_distance: f64,
+    ) -> Option<(ExtendResult, usize)> {
+        let mut nearest_node_index = 0;
+        let mut min_dist = pd.space.distance(&tree[0].state, q_target);
+        for (i, node) in tree.iter().enumerate().skip(1) {
+            let dist = pd.space.distance(&node.state, q_target);
+            if dist < min_dist {
+                min_dist = dist;
+                nearest_node_index = i;
+            }
+        }
+
+        let q_near = tree[nearest_node_index].state.clone();
+        let mut q_new = q_near.clone();
+        let result = if min_dist > max_distance {
+            let t = max_distance / min_dist;
+            pd.space.interpolate(&q_near, q_target, t, &mut q_new);
+            ExtendResult::Advanced
+        } else {
+            q_new = q_target.clone();
+            ExtendResult::Reached
+        };
+
+        if Self::check_motion(&q_near, &q_new, pd, vc, max_distance) {
+            let new_node_idx = tree.len();
+            tree.push(Node {
+                state: q_new,
+                parent_index: Some(nearest_node_index),
+            });
+            Some((result, new_node_idx))
+        } else {
+            None
+        }
+    }
+
+    /// An internal helper function to check if the motion between two states is valid.
+    ///
+    /// It works by discretizing the straight-line path between `from` and `to` into small steps and
+    /// calling the `StateValidityChecker` on each intermediate state. If any intermediate state is
+    /// invalid, the entire motion is considered invalid.
+    fn check_motion(
+        from: &S,
+        to: &S,
+        pd: &ProblemDefinition<S, SP, G>,
+        vc: &Arc<dyn StateValidityChecker<S>>,
+        max_distance: f64,
+    ) -> bool {
+        let space = &pd.space;
+        let dist = space.distance(from, to);
+        let num_steps = (dist / (max_distance * 0.1)).ceil() as usize;
+
+        if num_steps <= 1 {
+            return vc.is_valid(to);
+        }
+
+        let mut interpolated_state = from.clone();
+        for i in 1..=num_steps {
+            let t = i as f64 / num_steps as f64;
+            space.interpolate(from, to, t, &mut interpolated_state);
+            if !vc.is_valid(&interpolated_state) {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 /// The main implementation of the Planner trait for RRTConnect.
@@ -181,7 +266,7 @@ where
 
             // 4. Try to extend tree_a towards q_rand.
             if let Some((_extend_result, new_node_idx_a)) =
-                extend(tree_a, &q_rand, pd, vc, self.max_distance)
+                Self::extend(tree_a, &q_rand, pd, vc, self.max_distance)
             {
                 let q_new = &tree_a[new_node_idx_a].state;
 
@@ -193,7 +278,7 @@ where
 
                 // 5. Try to connect tree_b to the new state `q_new`.
                 if let Some((connect_result, new_node_idx_b)) =
-                    extend(tree_b, q_new, pd, vc, self.max_distance)
+                    Self::extend(tree_b, q_new, pd, vc, self.max_distance)
                 {
                     // 6. If the connection reached q_new, a solution is found.
                     if connect_result == ExtendResult::Reached {
@@ -225,87 +310,4 @@ where
             }
         }
     }
-}
-
-/// Helper function to extend a tree towards a target state.
-///
-/// This function finds the node in the `tree` nearest to `q_target`. It then creates a new state
-/// `q_new` by moving from the nearest node towards `q_target` by a distance of at most
-/// `max_distance`. If the motion to `q_new` is valid, it adds `q_new` to the tree.
-///
-/// Returns a tuple `(ExtendResult, usize)` on success, where `usize` is the index of the new node.
-/// Returns `None` if the motion was invalid.
-///
-/// > [!WARNING]
-/// > This is outside the RRTConnect struct because we are mutating the start and goal trees inside
-/// > this. There were a lot of mutability/immutability issues and the compiler was complaining.
-fn extend<S: State + Clone, SP: StateSpace<StateType = S>, G: Goal<S>>(
-    tree: &mut Vec<Node<S>>,
-    q_target: &S,
-    pd: &ProblemDefinition<S, SP, G>,
-    vc: &Arc<dyn StateValidityChecker<S>>,
-    max_distance: f64,
-) -> Option<(ExtendResult, usize)> {
-    let mut nearest_node_index = 0;
-    let mut min_dist = pd.space.distance(&tree[0].state, q_target);
-    for (i, node) in tree.iter().enumerate().skip(1) {
-        let dist = pd.space.distance(&node.state, q_target);
-        if dist < min_dist {
-            min_dist = dist;
-            nearest_node_index = i;
-        }
-    }
-
-    let q_near = tree[nearest_node_index].state.clone();
-    let mut q_new = q_near.clone();
-    let result = if min_dist > max_distance {
-        let t = max_distance / min_dist;
-        pd.space.interpolate(&q_near, q_target, t, &mut q_new);
-        ExtendResult::Advanced
-    } else {
-        q_new = q_target.clone();
-        ExtendResult::Reached
-    };
-
-    if check_motion(&q_near, &q_new, pd, vc, max_distance) {
-        let new_node_idx = tree.len();
-        tree.push(Node {
-            state: q_new,
-            parent_index: Some(nearest_node_index),
-        });
-        Some((result, new_node_idx))
-    } else {
-        None
-    }
-}
-
-/// An internal helper function to check if the motion between two states is valid.
-///
-/// It works by discretizing the straight-line path between `from` and `to` into small steps and
-/// calling the `StateValidityChecker` on each intermediate state. If any intermediate state is
-/// invalid, the entire motion is considered invalid.
-fn check_motion<S: State + Clone, SP: StateSpace<StateType = S>, G: Goal<S>>(
-    from: &S,
-    to: &S,
-    pd: &ProblemDefinition<S, SP, G>,
-    vc: &Arc<dyn StateValidityChecker<S>>,
-    max_distance: f64,
-) -> bool {
-    let space = &pd.space;
-    let dist = space.distance(from, to);
-    let num_steps = (dist / (max_distance * 0.1)).ceil() as usize;
-
-    if num_steps <= 1 {
-        return vc.is_valid(to);
-    }
-
-    let mut interpolated_state = from.clone();
-    for i in 1..=num_steps {
-        let t = i as f64 / num_steps as f64;
-        space.interpolate(from, to, t, &mut interpolated_state);
-        if !vc.is_valid(&interpolated_state) {
-            return false;
-        }
-    }
-    true
 }
