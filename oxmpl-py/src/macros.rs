@@ -13,7 +13,8 @@
 ///   This type alias should be defined *before* calling the macro.
 /// - `$problem_def_py_ty:ty`: The Python wrapper for the `ProblemDefinition`.
 /// - `$path_py_ty:ty`: The Python wrapper for the resulting `Path`.
-///
+/// - `( $( $arg_name:ident: $arg_ty:ty ),* )`: Repeating list of constructor arguments:
+///   `(arg_name: arg_type, ...)`
 /// # Usage
 ///
 /// ```rust,ignore
@@ -26,7 +27,8 @@
 ///     "RRT",
 ///     RrtForRealVector,
 ///     PyProblemDefinition,
-///     PyPath
+///     PyPath,
+///     (max_distance: f64, goal_bias: f64)
 /// );
 /// ```
 #[macro_export]
@@ -36,7 +38,8 @@ macro_rules! define_planner {
         $python_name:literal,
         $concrete_planner_ty:ty,
         $problem_def_py_ty:ty,
-        $path_py_ty:ty
+        $path_py_ty:ty,
+        ( $( $arg_name:ident: $arg_ty:ty ),* )
     ) => {
         #[pyclass(name = $python_name, unsendable)]
         struct $wrapper_name {
@@ -47,8 +50,8 @@ macro_rules! define_planner {
         impl $wrapper_name {
             /// The Python `__init__` constructor.
             #[new]
-            fn new(max_distance: f64, goal_bias: f64) -> Self {
-                let planner_instance = <$concrete_planner_ty>::new(max_distance, goal_bias);
+            fn new( $( $arg_name: $arg_ty ),* ) -> Self {
+                let planner_instance = <$concrete_planner_ty>::new( $( $arg_name ),* );
                 Self {
                     planner: Arc::new(Mutex::new(planner_instance)),
                 }
