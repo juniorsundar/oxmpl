@@ -116,7 +116,7 @@ where
 
     /// Finds all nodes in the tree that are within the `search_radius` of a given node.
     ///
-    /// This is a simple linear scan; 
+    /// This is a simple linear scan;
     /// TODO: Consider using kd-trees.
     fn find_neighbours(&self, node: &Node<S>) -> Vec<usize> {
         let mut neighbours: Vec<usize> = Vec::new();

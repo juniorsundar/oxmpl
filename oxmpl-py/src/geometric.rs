@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::base::{PyGoal, PyPath, PyProblemDefinition, PyStateValidityChecker};
 use oxmpl::base::{planner::Planner, space::RealVectorStateSpace, state::RealVectorState};
-use oxmpl::geometric::{RRT, RRTConnect, RRTStar};
+use oxmpl::geometric::{RRTConnect, RRTStar, RRT};
 
 /// A concrete type alias for the RRT planner configured for `RealVectorState`.
 type RrtForRealVector = RRT<RealVectorState, RealVectorStateSpace, PyGoal>;

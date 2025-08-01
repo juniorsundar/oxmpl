@@ -106,7 +106,6 @@ where
         Path(path_states)
     }
 
-
     /// Helper function to extend a tree towards a target state.
     ///
     /// This function finds the node in the `tree` nearest to `q_target`. It then creates a new state
