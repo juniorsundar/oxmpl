@@ -79,6 +79,8 @@ pub enum PlanningError {
     NoSolutionFound,
     // Planner was not setup first.
     PlannerUninitialised,
+    // Start state is not valid.
+    InvalidStartState,
 }
 impl fmt::Display for PlanningError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -94,6 +96,9 @@ impl fmt::Display for PlanningError {
                     f,
                     "<Planner>.setup() was not called, thus Planner is unititialised."
                 )
+            }
+            Self::InvalidStartState => {
+                write!(f, "Start state is not valid in the current StateSpace.")
             }
         }
     }

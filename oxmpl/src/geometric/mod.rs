@@ -7,3 +7,4 @@ mod planners;
 pub use self::planners::rrt::RRT;
 pub use self::planners::rrt_connect::RRTConnect;
 pub use self::planners::rrt_star::RRTStar;
+pub use self::planners::prm::PRM;
