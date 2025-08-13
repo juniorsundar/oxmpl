@@ -61,6 +61,10 @@ use crate::base::{error::StateSamplingError, state::State};
 ///     fn sample_uniform(&self, rng: &mut impl Rng) -> Result<Self::StateType, StateSamplingError> {
 ///         Ok(Point1D { x: rng.gen_range(self.bounds.0..self.bounds.1) })
 ///     }
+///
+///     fn get_longest_valid_segment_length(&self) -> f64 {
+///         (self.bounds.1 - self.bounds.0) * 0.05
+///     }
 /// }
 ///
 /// let space = LineSegmentSpace { bounds: (0.0, 10.0) };
@@ -68,6 +72,7 @@ use crate::base::{error::StateSamplingError, state::State};
 /// let random_state = space.sample_uniform(&mut rng).unwrap();
 ///
 /// assert!(space.satisfies_bounds(&random_state));
+/// assert_eq!(space.get_longest_valid_segment_length(), 0.5);
 /// ```
 pub trait StateSpace {
     /// StateType defines what is acceptable in current StateSpace
@@ -130,4 +135,10 @@ pub trait StateSpace {
     /// Returns a `StateSamplingError::UnboundedDimension` if the space is unbounded
     /// in any dimension, as uniform sampling from an infinite domain is not possible.
     fn sample_uniform(&self, rng: &mut impl Rng) -> Result<Self::StateType, StateSamplingError>;
+
+    /// Gets the length of the longest segment that can be assumed valid.
+    ///
+    /// This is a heuristic used to determine the resolution for motion validation. A smaller value
+    /// means motions are checked more frequently.
+    fn get_longest_valid_segment_length(&self) -> f64;
 }

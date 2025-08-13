@@ -20,6 +20,8 @@ pub struct RealVectorStateSpace {
     /// The bounds for each dimension, defining the valid region for planning. Each tuple is
     /// `(lower, upper)`. For unbounded dimensions it is`f64::NEG_INFINITY` and `f64::INFINITY`
     pub bounds: Vec<(f64, f64)>,
+
+    longest_valid_segment_fraction: f64,
 }
 
 impl RealVectorStateSpace {
@@ -89,7 +91,40 @@ impl RealVectorStateSpace {
             }
         };
 
-        Ok(Self { dimension, bounds })
+        Ok(Self {
+            dimension,
+            bounds,
+            longest_valid_segment_fraction: 0.05,
+        })
+    }
+
+    /// A helper to calculate the diagonal of the space's bounding box.
+    pub fn get_maximum_extent(&self) -> f64 {
+        if self
+            .bounds
+            .iter()
+            .any(|(low, high)| !low.is_finite() || !high.is_finite())
+        {
+            1.0
+        } else {
+            let sum_sq_diff: f64 = self
+                .bounds
+                .iter()
+                .map(|(low, high)| (high - low).powi(2))
+                .sum();
+            sum_sq_diff.sqrt()
+        }
+    }
+
+    /// Allows a user to configure the motion checking resolution.
+    pub fn set_longest_valid_segment_fraction(&mut self, fraction: f64) {
+        if fraction > 0.0 && fraction <= 1.0 {
+            self.longest_valid_segment_fraction = fraction;
+        } else if fraction <= 0.0 {
+            self.longest_valid_segment_fraction = 0.;
+        } else {
+            self.longest_valid_segment_fraction = 1.;
+        }
     }
 }
 
@@ -210,5 +245,9 @@ impl StateSpace for RealVectorStateSpace {
         }
 
         Ok(RealVectorState { values })
+    }
+
+    fn get_longest_valid_segment_length(&self) -> f64 {
+        self.get_maximum_extent() * self.longest_valid_segment_fraction
     }
 }

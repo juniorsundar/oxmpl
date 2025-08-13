@@ -147,7 +147,7 @@ where
             ExtendResult::Reached
         };
 
-        if Self::check_motion(&q_near, &q_new, pd, vc, max_distance) {
+        if Self::check_motion(&q_near, &q_new, pd, vc) {
             let new_node_idx = tree.len();
             tree.push(Node {
                 state: q_new,
@@ -169,11 +169,10 @@ where
         to: &S,
         pd: &ProblemDefinition<S, SP, G>,
         vc: &Arc<dyn StateValidityChecker<S>>,
-        max_distance: f64,
     ) -> bool {
         let space = &pd.space;
         let dist = space.distance(from, to);
-        let num_steps = (dist / (max_distance * 0.1)).ceil() as usize;
+        let num_steps = (dist / (space.get_longest_valid_segment_length() * 0.1)).ceil() as usize;
 
         if num_steps <= 1 {
             return vc.is_valid(to);

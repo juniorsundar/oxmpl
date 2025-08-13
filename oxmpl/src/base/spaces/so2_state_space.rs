@@ -48,4 +48,9 @@ impl StateSpace for SO2StateSpace {
     fn sample_uniform(&self, _rng: &mut impl Rng) -> Result<SO2State, StateSamplingError> {
         todo!()
     }
+
+    fn get_longest_valid_segment_length(&self) -> f64 {
+        todo!()
+    }
+
 }
