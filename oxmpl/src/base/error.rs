@@ -94,7 +94,7 @@ impl fmt::Display for PlanningError {
             Self::PlannerUninitialised => {
                 write!(
                     f,
-                    "<Planner>.setup() was not called, thus Planner is unititialised."
+                    "<Planner>.setup() was not called, thus Planner is uninitialised."
                 )
             }
             Self::InvalidStartState => {
