@@ -1,5 +1,7 @@
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -43,7 +45,7 @@ define_planner!(
 
 #[pyclass(name = "PRM", unsendable)]
 struct PyPrmRv {
-    planner: Arc<Mutex<PrmForRealVector>>,
+    planner: Rc<RefCell<PrmForRealVector>>,
 }
 #[pymethods]
 impl PyPrmRv {
@@ -52,7 +54,7 @@ impl PyPrmRv {
     fn new(timeout: f64, connection_radius: f64) -> Self {
         let planner_instance = <PrmForRealVector>::new(timeout, connection_radius);
         Self {
-            planner: Arc::new(Mutex::new(planner_instance)),
+            planner: Rc::new(RefCell::new(planner_instance)),
         }
     }
     #[doc = r" Configures the planner for a specific problem."]
@@ -68,16 +70,13 @@ impl PyPrmRv {
         let checker = Arc::new(PyStateValidityChecker {
             callback: validity_callback,
         });
-        self.planner
-            .lock()
-            .unwrap()
-            .setup(problem_def_rust, checker);
+        self.planner.borrow_mut().setup(problem_def_rust, checker);
         Ok(())
     }
     #[doc = r" Attempts to solve the planning problem within a given timeout."]
     fn solve(&mut self, timeout_secs: f32) -> PyResult<PyPath> {
         let timeout = Duration::from_secs_f32(timeout_secs);
-        let result = self.planner.lock().unwrap().solve(timeout);
+        let result = self.planner.borrow_mut().solve(timeout);
         match result {
             Ok(path) => Ok(<PyPath>::from_rust_path(path)),
             Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
@@ -86,7 +85,7 @@ impl PyPrmRv {
 
     #[doc = r" Construct roadmap."]
     fn construct_roadmap(&mut self) -> PyResult<()> {
-        let result = self.planner.lock().unwrap().construct_roadmap();
+        let result = self.planner.borrow_mut().construct_roadmap();
         match result {
             Ok(_) => Ok(()),
             Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
