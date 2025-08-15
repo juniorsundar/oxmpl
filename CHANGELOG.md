@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.3.0](https://github.com/juniorsundar/oxmpl/compare/v0.2.0...v0.3.0) (2025-08-15)
+
+
+### Features
+
+* Implement PRM in Python ([50b3f69](https://github.com/juniorsundar/oxmpl/commit/50b3f6913e5cc2b4a290a95002fbdb1e2d4be9ce))
+* Implement PRM in Rust w/ Integration tests ([1add7d4](https://github.com/juniorsundar/oxmpl/commit/1add7d41c0f0d9d4516f9f8d58dffe9b163dc7a8))
+* Implement RRTConnect in Rust ([ba594b9](https://github.com/juniorsundar/oxmpl/commit/ba594b97559e253402e2f96165190845d041fa41))
+* Implement RRTStar in Python ([a70ab5d](https://github.com/juniorsundar/oxmpl/commit/a70ab5d60fb1e501ef5f28a0df2371224aea295c))
+* Implement RRTStar in Rust w/ integration tests ([1642704](https://github.com/juniorsundar/oxmpl/commit/1642704659d861bd2d6924b4e4970feee821bd0e))
+
+
+### Bug Fixes
+
+* PyO3 bindings for PRM ([57d9e82](https://github.com/juniorsundar/oxmpl/commit/57d9e823098f146a24bec5a554c46af82a9fc242))
+
+
+### Code Refactoring
+
+* Module structure for import similar to C++ ([ba58429](https://github.com/juniorsundar/oxmpl/commit/ba5842975e15e0ca89d000c10c4a8ff5a2621423))
+* Move RRTConnect helper functions as associated functions ([736cc1d](https://github.com/juniorsundar/oxmpl/commit/736cc1d749449232debce32763f3fc320ed62d76))
+
+
+### Tests
+
+* Implement RRTConnect integration test ([d67dbbb](https://github.com/juniorsundar/oxmpl/commit/d67dbbbc60f074ba9558074d3e0ee53406be4f1b))
+
 ## 0.2.0 (2025-06-23)
 
 
