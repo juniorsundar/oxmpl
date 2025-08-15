@@ -156,7 +156,10 @@ fn test_rrt_finds_path_around_obstacle() {
     planner.setup(problem_definition, validity_checker.clone());
     match planner.construct_roadmap() {
         Err(_) => panic!("Issue constructing roadmap!"),
-        Ok(_) => assert!(!planner.get_roadmap().is_empty(), "Roadmap was not populated.")
+        Ok(_) => assert!(
+            !planner.get_roadmap().is_empty(),
+            "Roadmap was not populated."
+        ),
     };
 
     let timeout = Duration::from_secs(5);

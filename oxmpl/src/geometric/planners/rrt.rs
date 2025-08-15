@@ -93,10 +93,9 @@ where
         if let (Some(pd), Some(vc)) = (&self.problem_def, &self.validity_checker) {
             let space = &pd.space;
 
-            // Determine the number of steps to check based on distance and resolution.
-            // A simple approach: one check per unit of distance (or a fraction thereof).
             let dist = space.distance(from, to);
-            let num_steps = (dist / (space.get_longest_valid_segment_length() * 0.1)).ceil() as usize;
+            let num_steps =
+                (dist / (space.get_longest_valid_segment_length() * 0.1)).ceil() as usize;
 
             if num_steps <= 1 {
                 return vc.is_valid(to);

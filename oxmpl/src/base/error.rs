@@ -81,6 +81,8 @@ pub enum PlanningError {
     PlannerUninitialised,
     // Start state is not valid.
     InvalidStartState,
+    // State space hasn't been sampled.
+    UnsampledStateSpace,
 }
 impl fmt::Display for PlanningError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -99,6 +101,12 @@ impl fmt::Display for PlanningError {
             }
             Self::InvalidStartState => {
                 write!(f, "Start state is not valid in the current StateSpace.")
+            }
+            Self::UnsampledStateSpace => {
+                write!(
+                    f,
+                    "StateSpace is not sampled. Either Tree or Roadmap is empty."
+                )
             }
         }
     }

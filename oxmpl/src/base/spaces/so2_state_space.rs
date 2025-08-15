@@ -52,5 +52,4 @@ impl StateSpace for SO2StateSpace {
     fn get_longest_valid_segment_length(&self) -> f64 {
         todo!()
     }
-
 }

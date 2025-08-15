@@ -18,16 +18,36 @@ use crate::base::{
     validity::StateValidityChecker,
 };
 
-// A helper struct to build the tree. Each node stores its state and the index of its parent in the
-// tree vector.
+/// Represents a node (or "milestone") in the probabilistic roadmap.
 #[derive(Clone)]
 pub struct Node<S: State> {
+    /// The state associated with this node.
     state: S,
+    /// A list of indices pointing to other connected nodes in the roadmap.
     edges: Vec<usize>,
 }
 
+/// An implementation of the Probabilistic Roadmap (PRM) algorithm.
+///
+/// PRM is a multi-query, sampling-based algorithm that is particularly effective in static
+/// environments. It works by first constructing a "roadmap" graph of valid states and then
+/// querying this graph to find paths.
+///
+/// # Algorithm Overview
+///
+/// 1.  **Construction Phase**:
+///     a. Sample a number of states randomly from the state space.
+///     b. For each valid sample, find all nearby nodes already in the roadmap.
+///     c. If a valid, collision-free motion exists between the new sample and a neighbor, add an
+///     edge connecting them in the roadmap.
+/// 2.  **Query Phase**:
+///     a. Connect the start and goal states to the roadmap.
+///     b. Use a graph search algorithm (in this case, Breadth-First Search) to find a path on the
+///     roadmap from the start to the goal.
 pub struct PRM<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
+    /// The time allocated for roadmap construction, in seconds.
     pub timeout: f64,
+    /// The radius within which to search for neighbors to connect to a new sample.
     pub connection_radius: f64,
 
     problem_def: Option<Arc<ProblemDefinition<S, SP, G>>>,
@@ -41,6 +61,11 @@ where
     SP: StateSpace<StateType = S>,
     G: Goal<S>,
 {
+    /// Creates a new `PRM` planner with the specified parameters.
+    ///
+    /// # Parameters
+    /// * `timeout` - The time in seconds to spend building the roadmap.
+    /// * `connection_radius` - The radius for connecting new nodes to the roadmap.
     pub fn new(timeout: f64, connection_radius: f64) -> Self {
         PRM {
             timeout,
@@ -51,14 +76,22 @@ where
         }
     }
 
+    /// Get private variable `roadmap` as a clone.
+    /// TODO: Determine if this needs to be obtainable.
     pub fn get_roadmap(&self) -> Vec<Node<S>> {
         self.roadmap.clone()
     }
 
+    /// Update ProblemDefinition. This is so that you can use an already sampled roadmap but just
+    /// change the start and goal states.
     pub fn set_problem_definition(&mut self, pd: Arc<ProblemDefinition<S, SP, G>>) {
         self.problem_def = Some(pd);
     }
 
+    /// Constructs the probabilistic roadmap.
+    ///
+    /// This method populates the roadmap by sampling states and connecting them until the
+    /// specified timeout is reached.
     pub fn construct_roadmap(&mut self) -> Result<(), PlanningError> {
         let pd = self
             .problem_def
@@ -119,12 +152,16 @@ where
         Ok(())
     }
 
+    /// An internal helper function to check if the motion between two states is valid.
+    ///
+    /// It works by discretizing the straight-line path between `from` and `to` into small steps
+    /// and calling the `StateValidityChecker` on each intermediate state. If any intermediate
+    /// state is invalid, the entire motion is considered invalid.
     fn check_motion(&self, from: &S, to: &S) -> bool {
         // We need access to the space and checker from our stored setup info.
         if let (Some(pd), Some(vc)) = (&self.problem_def, &self.validity_checker) {
             let space = &pd.space;
-            // Determine the number of steps to check based on distance and resolution.
-            // A simple approach: one check per unit of distance (or a fraction thereof).
+
             let dist = space.distance(from, to);
             let num_steps =
                 (dist / (space.get_longest_valid_segment_length() * 0.1)).ceil() as usize;
@@ -198,12 +235,16 @@ where
             .ok_or(PlanningError::PlannerUninitialised)?;
         let goal = &pd.goal;
 
+        if self.roadmap.is_empty() {
+            return Err(PlanningError::UnsampledStateSpace);
+        }
 
         let start_state = &pd.start_states[0];
         if !vc.is_valid(start_state) {
             return Err(PlanningError::InvalidStartState);
         }
 
+        // Connect start state to the roadmap
         let mut start_connections = Vec::new();
         for i in 0..self.roadmap.len() {
             if pd.space.distance(start_state, &self.roadmap[i].state) < self.connection_radius
@@ -213,6 +254,7 @@ where
             }
         }
 
+        // Find goal nodes in the roadmap
         let mut goal_indices = Vec::new();
         for i in 0..self.roadmap.len() {
             if goal.is_satisfied(&self.roadmap[i].state) {
@@ -224,6 +266,7 @@ where
             return Err(PlanningError::NoSolutionFound);
         }
 
+        // Graph Search (Breadth-First Search)
         let mut queue: VecDeque<usize> = start_connections.clone().into_iter().collect();
         let mut parent_map: HashMap<usize, Option<usize>> = HashMap::new();
         let mut visited = vec![false; self.roadmap.len()];
