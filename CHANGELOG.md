@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/juniorsundar/oxmpl/compare/v0.3.0...v0.3.1) (2025-08-16)
+
+
+### Documentation
+
+* Write up BACKLOG of tasks left ([06d6c17](https://github.com/juniorsundar/oxmpl/commit/06d6c175b6ed959cf7cc7dcfef4c4447ad5afe72))
+
 ## [0.3.0](https://github.com/juniorsundar/oxmpl/compare/v0.2.0...v0.3.0) (2025-08-15)
 
 
