@@ -12,10 +12,12 @@ mod real_vector_state_space;
 mod so2_state;
 mod so2_state_space;
 mod state_validity_checker;
+mod py_state_convert;
 
 pub use goal::PyGoal;
 pub use path::PyPath;
 pub use problem_definition::PyProblemDefinition;
+pub use problem_definition::ProblemDefinitionVariant;
 pub use real_vector_state::PyRealVectorState;
 pub use real_vector_state_space::PyRealVectorStateSpace;
 pub use so2_state::PySO2State;

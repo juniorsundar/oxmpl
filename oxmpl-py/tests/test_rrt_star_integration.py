@@ -61,7 +61,7 @@ def test_rrt_problem_with_wall():
     start_state = RealVectorState([1.0, 5.0])
     goal_region = CircularGoal(space, x=9.0, y=5.0, radius=0.5)
 
-    problem_def = ProblemDefinition(space, start_state, goal_region)
+    problem_def = ProblemDefinition.from_real_vector(space, start_state, goal_region)
 
     # CREATE AND SETUP THE PLANNER
     planner = RRTStar(max_distance=0.5, goal_bias=0.05, search_radius=0.25)

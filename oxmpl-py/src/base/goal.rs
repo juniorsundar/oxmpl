@@ -4,33 +4,35 @@
 
 use pyo3::prelude::*;
 use rand::Rng;
-use std::sync::Arc;
+use std::marker::PhantomData;
 
 use oxmpl::base::{
+    state,
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    state::RealVectorState as OxmplRealVectorState,
 };
 
-use super::real_vector_state::PyRealVectorState;
+use super::py_state_convert::PyStateConvert;
 
-/// An internal Rust struct that implements the `Goal` trait hierarchy
-/// by calling methods on a user-provided Python goal object.
-pub struct PyGoal {
+pub struct PyGoal<State> {
     pub instance: PyObject,
+    pub _phantom: PhantomData<State>,
 }
-impl Clone for PyGoal {
+
+impl<State> Clone for PyGoal<State> {
     fn clone(&self) -> Self {
         Python::with_gil(|py| Self {
             instance: self.instance.clone_ref(py),
+            _phantom: PhantomData,
         })
     }
 }
 
-impl Goal<OxmplRealVectorState> for PyGoal {
-    fn is_satisfied(&self, state: &OxmplRealVectorState) -> bool {
+// Implement the Goal traits for ANY state type that satisfies our conversion trait.
+impl<State: PyStateConvert + state::State> Goal<State> for PyGoal<State> {
+    fn is_satisfied(&self, state: &State) -> bool {
         Python::with_gil(|py| {
-            let py_state = PyRealVectorState(Arc::new(state.clone()));
+            let py_state = state.to_py_wrapper();
             self.instance
                 .call_method1(py, "is_satisfied", (py_state,))
                 .and_then(|res| res.extract(py))
@@ -38,10 +40,11 @@ impl Goal<OxmplRealVectorState> for PyGoal {
         })
     }
 }
-impl GoalRegion<OxmplRealVectorState> for PyGoal {
-    fn distance_goal(&self, state: &OxmplRealVectorState) -> f64 {
+
+impl<State: PyStateConvert + state::State> GoalRegion<State> for PyGoal<State> {
+    fn distance_goal(&self, state: &State) -> f64 {
         Python::with_gil(|py| {
-            let py_state = PyRealVectorState(Arc::new(state.clone()));
+            let py_state = state.to_py_wrapper();
             self.instance
                 .call_method1(py, "distance_goal", (py_state,))
                 .and_then(|res| res.extract(py))
@@ -49,13 +52,14 @@ impl GoalRegion<OxmplRealVectorState> for PyGoal {
         })
     }
 }
-impl GoalSampleableRegion<OxmplRealVectorState> for PyGoal {
-    fn sample_goal(&self, _rng: &mut impl Rng) -> Result<OxmplRealVectorState, StateSamplingError> {
+
+impl<State: PyStateConvert + state::State> GoalSampleableRegion<State> for PyGoal<State> {
+    fn sample_goal(&self, _rng: &mut impl Rng) -> Result<State, StateSamplingError> {
         Python::with_gil(|py| {
             self.instance
                 .call_method0(py, "sample_goal")
-                .and_then(|res| res.extract::<PyRealVectorState>(py))
-                .map(|py_state| (*py_state.0).clone())
+                .and_then(|res| res.extract::<State::Wrapper>(py))
+                .map(State::from_py_wrapper)
                 .map_err(|e| {
                     e.print(py);
                     StateSamplingError::GoalRegionUnsatisfiable
@@ -63,4 +67,3 @@ impl GoalSampleableRegion<OxmplRealVectorState> for PyGoal {
         })
     }
 }
-

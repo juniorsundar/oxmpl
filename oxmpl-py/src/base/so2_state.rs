@@ -29,7 +29,7 @@ impl PySO2State {
     /// float: The component of the state.
     #[getter]
     fn get_values(&self) -> f64 {
-        self.0.value.clone()
+        self.0.value
     }
 
     fn __repr__(&self) -> String {

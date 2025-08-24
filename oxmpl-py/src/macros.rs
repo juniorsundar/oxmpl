@@ -74,13 +74,21 @@ macro_rules! define_planner {
                 let checker = Arc::new(PyStateValidityChecker {
                     callback: validity_callback,
                 });
+                match &problem_def_py.0 {
+                    ProblemDefinitionVariant::RealVector(pd_arc) => {
+                        let checker = Arc::new(PyStateValidityChecker {
+                            callback: validity_callback,
+                        });
 
-                self.planner
-                    .lock()
-                    .unwrap()
-                    .setup(problem_def_rust, checker);
+                        self.planner.borrow_mut().setup(pd_arc.clone(), checker);
+                        Ok(())
+                    }
 
-                Ok(())
+                    // If the user passes any other kind of problem, raise an error.
+                    _ => Err(PyValueError::new_err(
+                            "The PRM planner only supports RealVectorStateSpace.",
+                    )),
+                }
             }
 
             /// Attempts to solve the planning problem within a given timeout.
