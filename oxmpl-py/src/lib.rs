@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Junior Sundar
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 

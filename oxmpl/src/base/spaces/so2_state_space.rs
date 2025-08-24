@@ -15,6 +15,7 @@ use crate::base::{
 ///
 /// This space handles the circular nature of angles, ensuring that distance and interpolation
 /// calculations correctly use the shortest path.
+#[derive(Clone)]
 pub struct SO2StateSpace {
     /// The bounds of the space, as a `(min, max)` tuple.
     pub bounds: (f64, f64),

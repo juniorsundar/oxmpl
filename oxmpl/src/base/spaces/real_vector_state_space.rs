@@ -14,6 +14,7 @@ use crate::base::{
 ///
 /// Most common state space for systems whose configuration can be described by a vector of real
 /// numbers. Supports both bounded (hyper-rectangle) and unbounded configurations.
+#[derive(Clone)]
 pub struct RealVectorStateSpace {
     /// n-Dimensionality of VectorStateSpace i.e. R^n.
     pub dimension: usize,

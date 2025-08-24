@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Junior Sundar
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 /// Generates a complete PyO3 wrapper for a concrete planner type.
 ///
 /// This macro reduces boilerplate by acting as a template for creating Python
