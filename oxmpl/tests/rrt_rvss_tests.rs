@@ -9,7 +9,7 @@ use oxmpl::base::{
     state::RealVectorState,
     validity::StateValidityChecker,
 };
-use oxmpl::geometric::RRTStar;
+use oxmpl::geometric::RRT;
 
 use rand::Rng;
 
@@ -107,11 +107,16 @@ fn is_path_valid(
 }
 
 #[test]
-fn test_rrt_connect_finds_path_around_obstacle() {
-    let space = Arc::new(
-        RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]))
-            .expect("Failed to create state space for test."),
-    );
+fn test_rrt_finds_path_in_rvss() {
+    let new_rvss_result = RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]));
+
+    let space;
+    match new_rvss_result {
+        Ok(state) => space = Arc::new(state),
+        Err(_) => {
+            panic!("Error creating new RealVectorState!")
+        }
+    }
 
     let start_state = RealVectorState {
         values: vec![1.0, 5.0],
@@ -136,6 +141,7 @@ fn test_rrt_connect_finds_path_around_obstacle() {
         wall_y_max: 8.0,
         wall_thickness: 0.5,
     });
+    // Let's ensure our start/goal are not inside the wall
     assert!(
         validity_checker.is_valid(&start_state),
         "Start state should be valid!"
@@ -145,7 +151,7 @@ fn test_rrt_connect_finds_path_around_obstacle() {
         "Goal target should be valid!"
     );
 
-    let mut planner = RRTStar::new(0.5, 0.0, 0.25);
+    let mut planner = RRT::new(0.5, 0.0);
 
     planner.setup(problem_definition, validity_checker.clone());
 
@@ -178,5 +184,5 @@ fn test_rrt_connect_finds_path_around_obstacle() {
         "The returned path was found to be invalid."
     );
 
-    println!("RRT* planner test passed!");
+    println!("RRT planner test passed!");
 }

@@ -9,7 +9,7 @@ use oxmpl::base::{
     state::RealVectorState,
     validity::StateValidityChecker,
 };
-use oxmpl::geometric::RRT;
+use oxmpl::geometric::PRM;
 
 use rand::Rng;
 
@@ -107,7 +107,7 @@ fn is_path_valid(
 }
 
 #[test]
-fn test_rrt_finds_path_around_obstacle() {
+fn test_prm_finds_path_in_rvss() {
     let new_rvss_result = RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]));
 
     let space;
@@ -151,9 +151,16 @@ fn test_rrt_finds_path_around_obstacle() {
         "Goal target should be valid!"
     );
 
-    let mut planner = RRT::new(0.5, 0.0);
+    let mut planner = PRM::new(5.0, 0.5);
 
     planner.setup(problem_definition, validity_checker.clone());
+    match planner.construct_roadmap() {
+        Err(_) => panic!("Issue constructing roadmap!"),
+        Ok(_) => assert!(
+            !planner.get_roadmap().is_empty(),
+            "Roadmap was not populated."
+        ),
+    };
 
     let timeout = Duration::from_secs(5);
     let result = planner.solve(timeout);
@@ -184,5 +191,5 @@ fn test_rrt_finds_path_around_obstacle() {
         "The returned path was found to be invalid."
     );
 
-    println!("RRT planner test passed!");
+    println!("PRM planner test passed!");
 }

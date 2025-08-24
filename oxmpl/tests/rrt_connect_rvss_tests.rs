@@ -107,7 +107,7 @@ fn is_path_valid(
 }
 
 #[test]
-fn test_rrt_connect_finds_path_around_obstacle() {
+fn test_rrt_connect_finds_path_in_rvss() {
     let space = Arc::new(
         RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]))
             .expect("Failed to create state space for test."),

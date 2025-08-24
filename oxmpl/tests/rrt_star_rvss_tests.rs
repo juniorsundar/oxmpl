@@ -9,7 +9,7 @@ use oxmpl::base::{
     state::RealVectorState,
     validity::StateValidityChecker,
 };
-use oxmpl::geometric::PRM;
+use oxmpl::geometric::RRTStar;
 
 use rand::Rng;
 
@@ -107,16 +107,11 @@ fn is_path_valid(
 }
 
 #[test]
-fn test_rrt_finds_path_around_obstacle() {
-    let new_rvss_result = RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]));
-
-    let space;
-    match new_rvss_result {
-        Ok(state) => space = Arc::new(state),
-        Err(_) => {
-            panic!("Error creating new RealVectorState!")
-        }
-    }
+fn test_rrt_star_finds_path_in_rvss() {
+    let space = Arc::new(
+        RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]))
+            .expect("Failed to create state space for test."),
+    );
 
     let start_state = RealVectorState {
         values: vec![1.0, 5.0],
@@ -141,7 +136,6 @@ fn test_rrt_finds_path_around_obstacle() {
         wall_y_max: 8.0,
         wall_thickness: 0.5,
     });
-    // Let's ensure our start/goal are not inside the wall
     assert!(
         validity_checker.is_valid(&start_state),
         "Start state should be valid!"
@@ -151,16 +145,9 @@ fn test_rrt_finds_path_around_obstacle() {
         "Goal target should be valid!"
     );
 
-    let mut planner = PRM::new(5.0, 0.5);
+    let mut planner = RRTStar::new(0.5, 0.0, 0.25);
 
     planner.setup(problem_definition, validity_checker.clone());
-    match planner.construct_roadmap() {
-        Err(_) => panic!("Issue constructing roadmap!"),
-        Ok(_) => assert!(
-            !planner.get_roadmap().is_empty(),
-            "Roadmap was not populated."
-        ),
-    };
 
     let timeout = Duration::from_secs(5);
     let result = planner.solve(timeout);
@@ -191,5 +178,5 @@ fn test_rrt_finds_path_around_obstacle() {
         "The returned path was found to be invalid."
     );
 
-    println!("PRM planner test passed!");
+    println!("RRT* planner test passed!");
 }
