@@ -7,9 +7,9 @@ use rand::Rng;
 use std::marker::PhantomData;
 
 use oxmpl::base::{
-    state,
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
+    state,
 };
 
 use super::py_state_convert::PyStateConvert;

@@ -13,7 +13,7 @@ use oxmpl::base::state::SO2State as OxmplSO2State;
 ///
 /// Args:
 ///     values (float): A number representing the state's components.
-#[pyclass(name = "SO2", unsendable)]
+#[pyclass(name = "SO2State", unsendable)]
 #[derive(Clone)]
 pub struct PySO2State(pub Arc<OxmplSO2State>);
 
@@ -28,7 +28,7 @@ impl PySO2State {
 
     /// float: The component of the state.
     #[getter]
-    fn get_values(&self) -> f64 {
+    fn get_value(&self) -> f64 {
         self.0.value
     }
 
@@ -36,4 +36,3 @@ impl PySO2State {
         format!("<SO2State value={:?}>", self.0.value)
     }
 }
-

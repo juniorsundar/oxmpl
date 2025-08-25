@@ -161,7 +161,7 @@ space = RealVectorStateSpace(dimension=2, bounds=[(-10.0, 10.0), (-10.0, 10.0)])
 start_state = RealVectorState([-5.0, -5.0])
 goal_region = MyCircularGoal(space, x=5.0, y=5.0, radius=0.5)
 
-problem_def = ProblemDefinition(space, start_state, goal_region)
+problem_def = ProblemDefinition.from_real_vector(space, start_state, goal_region)
 
 planner = RRT(max_distance=0.5, goal_bias=0.05)
 planner.setup(problem_def, is_state_valid)

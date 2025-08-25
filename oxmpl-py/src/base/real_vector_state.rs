@@ -37,4 +37,3 @@ impl PyRealVectorState {
         format!("<RealVectorState values={:?}>", self.0.values)
     }
 }
-

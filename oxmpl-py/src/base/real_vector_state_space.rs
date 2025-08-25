@@ -5,7 +5,7 @@
 use pyo3::{exceptions::PyValueError, prelude::*};
 use std::sync::{Arc, Mutex};
 
-use oxmpl::base::space::{StateSpace as _, RealVectorStateSpace as OxmplRealVectorStateSpace};
+use oxmpl::base::space::{RealVectorStateSpace as OxmplRealVectorStateSpace, StateSpace as _};
 
 use super::real_vector_state::PyRealVectorState;
 
@@ -49,8 +49,9 @@ impl PyRealVectorStateSpace {
 
     /// Sets the fraction used to determine motion checking resolution.
     fn set_longest_valid_segment_fraction(&mut self, fraction: f64) {
-        self.0.lock().unwrap().set_longest_valid_segment_fraction(fraction);
+        self.0
+            .lock()
+            .unwrap()
+            .set_longest_valid_segment_fraction(fraction);
     }
-
 }
-
