@@ -1,6 +1,6 @@
 [package]
 name = "oxmpl"
-version = "0.3.0"
+version.workspace = true
 edition = "2021"
 description = "The Open Motion-Planning Library but Oxidised"
 license = "BSD-3-Clause"

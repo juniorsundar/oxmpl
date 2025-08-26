@@ -1,7 +1,4 @@
 [workspace]
-members = [
-    "oxmpl",
-    "oxmpl-py",
-    "oxmpl-js",
-]
+members = ["oxmpl", "oxmpl-py", "oxmpl-js"]
 resolver = "2"
+package.version = "0.3.0"                   # x-release-please-version
