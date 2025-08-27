@@ -163,8 +163,8 @@ goal_region = MyCircularGoal(space, x=5.0, y=5.0, radius=0.5)
 
 problem_def = ProblemDefinition.from_real_vector(space, start_state, goal_region)
 
-planner = RRT(max_distance=0.5, goal_bias=0.05)
-planner.setup(problem_def, is_state_valid)
+planner = RRT(max_distance=0.5, goal_bias=0.05, problem_definition=problem_def)
+planner.setup(is_state_valid)
 
 try:
     path = planner.solve(timeout_secs=5.0)
