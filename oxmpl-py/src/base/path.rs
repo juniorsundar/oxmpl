@@ -78,7 +78,7 @@ impl PyPath {
             PathVariant::RealVector(path) => (path.0.len(), "RealVectorState"),
             PathVariant::SO2(path) => (path.0.len(), "SO2State"),
         };
-        format!("<Path of {} {}s>", len, type_name)
+        format!("<Path of {len} {type_name}s>")
     }
 }
 

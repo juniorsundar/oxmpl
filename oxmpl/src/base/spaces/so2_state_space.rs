@@ -20,7 +20,7 @@ pub struct SO2StateSpace {
     /// The bounds of the space, as a `(min, max)` tuple.
     pub bounds: (f64, f64),
 
-    longest_valid_segment_fraction: f64
+    longest_valid_segment_fraction: f64,
 }
 
 impl SO2StateSpace {
@@ -68,7 +68,7 @@ impl SO2StateSpace {
 
         Ok(Self {
             bounds: clamped_bounds,
-            longest_valid_segment_fraction: 0.05
+            longest_valid_segment_fraction: 0.05,
         })
     }
 
@@ -87,7 +87,6 @@ impl SO2StateSpace {
             self.longest_valid_segment_fraction = 1.;
         }
     }
-
 }
 
 impl StateSpace for SO2StateSpace {

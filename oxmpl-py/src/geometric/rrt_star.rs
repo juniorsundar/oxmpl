@@ -46,7 +46,8 @@ impl PyRrtStar {
     ) -> PyResult<Self> {
         let (planner, pd) = match &problem_definition.0 {
             ProblemDefinitionVariant::RealVector(pd) => {
-                let planner_instance = RrtStarForRealVector::new(max_distance, goal_bias, search_radius);
+                let planner_instance =
+                    RrtStarForRealVector::new(max_distance, goal_bias, search_radius);
                 (
                     PlannerVariant::RealVector(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::RealVector(pd.clone()),

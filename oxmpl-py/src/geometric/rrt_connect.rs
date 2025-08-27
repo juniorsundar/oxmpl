@@ -17,7 +17,8 @@ use oxmpl::{
     geometric::RRTConnect,
 };
 
-type RrtConnectForRealVector = RRTConnect<RealVectorState, RealVectorStateSpace, PyGoal<RealVectorState>>;
+type RrtConnectForRealVector =
+    RRTConnect<RealVectorState, RealVectorStateSpace, PyGoal<RealVectorState>>;
 type RrtConnectForSO2 = RRTConnect<SO2State, SO2StateSpace, PyGoal<SO2State>>;
 
 enum PlannerVariant {

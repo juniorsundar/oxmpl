@@ -36,4 +36,3 @@ mod tests {
         assert_eq!(state1, state2);
     }
 }
-

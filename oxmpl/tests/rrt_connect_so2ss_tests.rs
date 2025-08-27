@@ -113,8 +113,14 @@ fn test_rrt_connect_finds_path_in_so2ss() {
         invalid_min: -0.5,
         invalid_max: 0.5,
     });
-    assert!(validity_checker.is_valid(&start_state), "Start state should be valid!");
-    assert!(validity_checker.is_valid(&goal_definition.target), "Goal target should be valid!");
+    assert!(
+        validity_checker.is_valid(&start_state),
+        "Start state should be valid!"
+    );
+    assert!(
+        validity_checker.is_valid(&goal_definition.target),
+        "Goal target should be valid!"
+    );
 
     let mut planner = RRTConnect::new(0.2, 0.05);
 
