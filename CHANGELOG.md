@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.4.0](https://github.com/juniorsundar/oxmpl/compare/v0.3.0...v0.4.0) (2025-08-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **oxmpl-py:** Python bindings for Planners modularised
+* **oxmpl-py:** Changed how ProblemDefinition is instantiated to account for multiple State types
+
+### chore
+
+* release 0.4.0 ([733abc3](https://github.com/juniorsundar/oxmpl/commit/733abc3fb8f00f7a3231695be9a83ef2e37589ea))
+
+
+### Features
+
+* add `oxmpl-js` crate with JS/WASM bindings ([9c7e7ec](https://github.com/juniorsundar/oxmpl/commit/9c7e7ec4be3f79e184b04a74550807083b1cb9bc))
+* allow targeting wasm for `oxmpl` crate ([6b0c024](https://github.com/juniorsundar/oxmpl/commit/6b0c02478efb7a46f5835629c7550f6c6d4e6325))
+* Implement SO2StateSpace in Rust w/ Integration tests ([a707ffe](https://github.com/juniorsundar/oxmpl/commit/a707ffefa56fcea1be9ddd27e206499073d08683))
+
+
+### Documentation
+
+* Write up BACKLOG of tasks left ([06d6c17](https://github.com/juniorsundar/oxmpl/commit/06d6c175b6ed959cf7cc7dcfef4c4447ad5afe72))
+
+
+### Code Refactoring
+
+* **oxmpl-py:** Changed how ProblemDefinition is instantiated to account for multiple State types ([39ca2c0](https://github.com/juniorsundar/oxmpl/commit/39ca2c0b630d3ae055bba83e95c19cb698171fc2))
+* **oxmpl-py:** Python bindings for Planners modularised ([be9280e](https://github.com/juniorsundar/oxmpl/commit/be9280eaad09e5fb722591d15e86d7abc86a8006))
+* Python `base` package modularity ([2065ecb](https://github.com/juniorsundar/oxmpl/commit/2065ecb1b06192b8455270f7b57baaf2b5b6b5df))
+
+
+### Continuous Integration
+
+* add js.yml workflow ([ec8bdbb](https://github.com/juniorsundar/oxmpl/commit/ec8bdbbf9d73b3a33924019c9f55623363ffdcf1))
+* add publish job to JS/WASM workflow ([38abf2c](https://github.com/juniorsundar/oxmpl/commit/38abf2cc8ece3e5f67bee213ac5968debf0ba3c3))
+* configure release-please to bump the crate versions ([4f292bf](https://github.com/juniorsundar/oxmpl/commit/4f292bf35b4e5e3a59223993a73ffccdc2f7fdac))
+* pre-commit hooks (add Prettier, ESLint, fix Rust); update nix devshell ([dfbc78f](https://github.com/juniorsundar/oxmpl/commit/dfbc78fd91b4effdcf7d8e2e528fa62f66015e7e))
+
 ## [0.3.0](https://github.com/juniorsundar/oxmpl/compare/v0.2.0...v0.3.0) (2025-08-15)
 
 
