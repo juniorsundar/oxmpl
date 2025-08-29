@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/juniorsundar/oxmpl/compare/v0.4.0...v0.4.1) (2025-08-29)
+
+
+### Continuous Integration
+
+* Publish `oxmpl-js` to crates.io ([7b3e1c4](https://github.com/juniorsundar/oxmpl/commit/7b3e1c467db08360a6b3111cd00bf87950241971))
+
 ## [0.4.0](https://github.com/juniorsundar/oxmpl/compare/v0.3.0...v0.4.0) (2025-08-28)
 
 
