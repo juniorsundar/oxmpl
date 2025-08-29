@@ -4,3 +4,4 @@
 
 pub mod real_vector_state;
 pub mod so2_state;
+pub mod so3_state;

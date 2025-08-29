@@ -6,6 +6,7 @@ use rand::Rng;
 
 pub use crate::base::spaces::{
     real_vector_state_space::RealVectorStateSpace, so2_state_space::SO2StateSpace,
+    so3_state_space::SO3StateSpace,
 };
 use crate::base::{error::StateSamplingError, state::State};
 

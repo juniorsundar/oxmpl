@@ -64,6 +64,7 @@ impl SO2StateSpace {
             });
         }
 
+        // TODO: Do we want to enforce a boundary here if it is above or below +/- PI?
         let clamped_bounds = (bounds.0.max(-PI), bounds.1.min(PI));
 
         Ok(Self {

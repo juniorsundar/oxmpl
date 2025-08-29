@@ -5,74 +5,109 @@ use oxmpl::base::{
     goal::{Goal, GoalRegion, GoalSampleableRegion},
     planner::{Path, Planner},
     problem_definition::ProblemDefinition,
-    space::{RealVectorStateSpace, StateSpace},
-    state::RealVectorState,
+    space::{SO3StateSpace, StateSpace},
+    state::SO3State,
     validity::StateValidityChecker,
 };
 use oxmpl::geometric::PRM;
 
 use rand::Rng;
 
-/// A StateValidityChecker that defines a simple vertical wall obstacle.
-struct WallObstacleChecker {
-    wall_x_pos: f64,
-    wall_y_min: f64,
-    wall_y_max: f64,
-    wall_thickness: f64,
-}
+/// Utility function to create Quaternions
+fn quaternion_from_axis_angle(axis: [f64; 3], angle: f64) -> SO3State {
+    let norm = (axis[0].powi(2) + axis[1].powi(2) + axis[2].powi(2)).sqrt();
 
-impl StateValidityChecker<RealVectorState> for WallObstacleChecker {
-    fn is_valid(&self, state: &RealVectorState) -> bool {
-        let x = state.values[0];
-        let y = state.values[1];
+    if norm < 1e-9 {
+        return SO3State {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            w: 1.0,
+        };
+    }
 
-        let is_in_wall = x >= self.wall_x_pos - self.wall_thickness / 2.0
-            && x <= self.wall_x_pos + self.wall_thickness / 2.0
-            && y >= self.wall_y_min
-            && y <= self.wall_y_max;
+    let ux = axis[0] / norm;
+    let uy = axis[1] / norm;
+    let uz = axis[2] / norm;
 
-        !is_in_wall
+    let half_angle = angle * 0.5;
+    let s = half_angle.sin();
+    let c = half_angle.cos();
+
+    SO3State {
+        x: ux * s,
+        y: uy * s,
+        z: uz * s,
+        w: c,
     }
 }
 
-/// A Goal definition where success is being within a certain radius of a target state.
-struct CircularGoalRegion {
-    target: RealVectorState,
+/// A StateValidityChecker that defines a simple vertical wall obstacle.
+struct ForbiddenConeChecker {
+    center: SO3State,
     radius: f64,
-    space: Arc<RealVectorStateSpace>,
+    space: Arc<SO3StateSpace>,
 }
 
-impl Goal<RealVectorState> for CircularGoalRegion {
-    fn is_satisfied(&self, state: &RealVectorState) -> bool {
+impl StateValidityChecker<SO3State> for ForbiddenConeChecker {
+    fn is_valid(&self, state: &SO3State) -> bool {
+        self.space.distance(&self.center, state) > self.radius
+    }
+}
+
+struct SO3GoalRegion {
+    target: SO3State,
+    radius: f64,
+    space: Arc<SO3StateSpace>,
+}
+
+impl Goal<SO3State> for SO3GoalRegion {
+    fn is_satisfied(&self, state: &SO3State) -> bool {
         self.space.distance(state, &self.target) <= self.radius
     }
 }
 
-impl GoalRegion<RealVectorState> for CircularGoalRegion {
-    fn distance_goal(&self, state: &RealVectorState) -> f64 {
+impl GoalRegion<SO3State> for SO3GoalRegion {
+    fn distance_goal(&self, state: &SO3State) -> f64 {
         let dist_to_center = self.space.distance(state, &self.target);
         (dist_to_center - self.radius).max(0.0)
     }
 }
 
-impl GoalSampleableRegion<RealVectorState> for CircularGoalRegion {
-    fn sample_goal(&self, rng: &mut impl Rng) -> Result<RealVectorState, StateSamplingError> {
-        let angle = rng.random_range(0.0..2.0 * PI);
+impl GoalSampleableRegion<SO3State> for SO3GoalRegion {
+    /// Samples a state uniformly from within the goal's cone of freedom.
+    fn sample_goal(&self, rng: &mut impl Rng) -> Result<SO3State, StateSamplingError> {
+        loop {
+            let x: f64 = rng.random_range(-1.0..1.0);
+            let y: f64 = rng.random_range(-1.0..1.0);
+            let z: f64 = rng.random_range(-1.0..1.0);
+            let w: f64 = rng.random_range(-1.0..1.0);
 
-        let radius = self.radius * rng.random::<f64>().sqrt();
+            let norm_sq = x * x + y * y + z * z + w * w;
 
-        let x = self.target.values[0] + radius * angle.cos();
-        let y = self.target.values[1] + radius * angle.sin();
+            if norm_sq > 1e-9 && norm_sq < 1.0 {
+                let norm = norm_sq.sqrt();
+                let random_quat = SO3State {
+                    x: x / norm,
+                    y: y / norm,
+                    z: z / norm,
+                    w: w / norm,
+                };
 
-        Ok(RealVectorState { values: vec![x, y] })
+                let distance = self.space.distance(&self.target, &random_quat);
+                if distance <= self.radius {
+                    return Ok(random_quat);
+                }
+            }
+        }
     }
 }
 
 /// A helper function to validate the entire solution path.
 fn is_path_valid(
-    path: &Path<RealVectorState>,
-    space: &RealVectorStateSpace,
-    checker: &dyn StateValidityChecker<RealVectorState>,
+    path: &Path<SO3State>,
+    space: &SO3StateSpace,
+    checker: &dyn StateValidityChecker<SO3State>,
 ) -> bool {
     for i in 0..path.0.len() - 1 {
         let state_a = &path.0[i];
@@ -107,25 +142,16 @@ fn is_path_valid(
 }
 
 #[test]
-fn test_prm_finds_path_in_rvss() {
-    let new_rvss_result = RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]));
+fn test_prm_finds_path_in_so3ss() {
+    let space = Arc::new(SO3StateSpace::new(None).unwrap());
 
-    let space;
-    match new_rvss_result {
-        Ok(state) => space = Arc::new(state),
-        Err(_) => {
-            panic!("Error creating new RealVectorState!")
-        }
-    }
+    let start_state = quaternion_from_axis_angle([0.0, 1.0, 0.0], PI / 2.0);
 
-    let start_state = RealVectorState {
-        values: vec![1.0, 5.0],
-    };
-    let goal_definition = Arc::new(CircularGoalRegion {
-        target: RealVectorState {
-            values: vec![9.0, 5.0],
-        },
-        radius: 0.5,
+    let goal_target = quaternion_from_axis_angle([0.0, 1.0, 0.0], -PI / 2.0);
+
+    let goal_definition = Arc::new(SO3GoalRegion {
+        target: goal_target,
+        radius: 10.0f64.to_radians(),
         space: space.clone(),
     });
 
@@ -135,11 +161,10 @@ fn test_prm_finds_path_in_rvss() {
         goal: goal_definition.clone(),
     });
 
-    let validity_checker = Arc::new(WallObstacleChecker {
-        wall_x_pos: 5.0,
-        wall_y_min: 2.0,
-        wall_y_max: 8.0,
-        wall_thickness: 0.5,
+    let validity_checker = Arc::new(ForbiddenConeChecker {
+        center: SO3State::identity(),
+        radius: 44.9f64.to_radians(),
+        space: space.clone(),
     });
     // Let's ensure our start/goal are not inside the wall
     assert!(
@@ -154,6 +179,7 @@ fn test_prm_finds_path_in_rvss() {
     let mut planner = PRM::new(5.0, 0.5);
 
     planner.setup(problem_definition, validity_checker.clone());
+
     match planner.construct_roadmap() {
         Err(_) => panic!("Issue constructing roadmap!"),
         Ok(_) => assert!(

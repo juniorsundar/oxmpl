@@ -5,6 +5,20 @@
 use std::{error, fmt};
 
 #[derive(Debug, PartialEq)]
+pub enum StateError {
+    /// The magnitude/norm of state is 0,
+    ZeroMagnitude,
+}
+impl fmt::Display for StateError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::ZeroMagnitude => write!(f, "Magnitude or Norm of the state is 0."),
+        }
+    }
+}
+impl error::Error for StateError {}
+
+#[derive(Debug, PartialEq)]
 pub enum StateSpaceError {
     /// The length of the provided bounds does not match the dimension.
     DimensionMismatch { expected: usize, found: usize },
@@ -12,6 +26,8 @@ pub enum StateSpaceError {
     InvalidBound { lower: f64, upper: f64 },
     /// A 0-dimensional space was requested without explicit (empty) bounds.
     ZeroDimensionUnbounded,
+    /// Below the least angular bound
+    InvalidAngularDistance { lower: f64 },
 }
 impl fmt::Display for StateSpaceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -28,6 +44,12 @@ impl fmt::Display for StateSpaceError {
             }
             Self::ZeroDimensionUnbounded => {
                 write!(f, "Cannot create 0-dimensional unbounded space.")
+            }
+            Self::InvalidAngularDistance { lower } => {
+                write!(
+                    f,
+                    "Maximum angle cannot be negative or less than zero. Provided: {lower}."
+                )
             }
         }
     }

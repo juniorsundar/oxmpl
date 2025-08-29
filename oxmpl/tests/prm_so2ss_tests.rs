@@ -93,7 +93,7 @@ fn is_so2_path_valid(
 }
 
 #[test]
-fn test_rrt_finds_path_in_so2ss() {
+fn test_prm_finds_path_in_so2ss() {
     let space = Arc::new(SO2StateSpace::new(None).expect("Failed to create state space"));
 
     let start_state = SO2State::new(-PI / 2.0);

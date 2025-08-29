@@ -4,6 +4,7 @@
 
 pub use crate::base::states::real_vector_state::RealVectorState;
 pub use crate::base::states::so2_state::SO2State;
+pub use crate::base::states::so3_state::SO3State;
 
 /// A marker trait for all state types in the planning library.
 ///
@@ -12,6 +13,4 @@ pub use crate::base::states::so2_state::SO2State;
 ///
 /// Supertrait bounds:
 /// - `Clone`: States must be copyable.
-/// - `Send` + `Sync`: States must be safe to share and send between threads.
-/// - `'static`: The state type does not contain any non-static references.
 pub trait State: Clone {}

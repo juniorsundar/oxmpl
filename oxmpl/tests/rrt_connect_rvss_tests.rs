@@ -88,7 +88,7 @@ fn is_path_valid(
         }
 
         let dist = space.distance(state_a, state_b);
-        let num_steps = (dist / 0.1).ceil() as usize;
+        let num_steps = (dist / space.get_longest_valid_segment_length()).ceil() as usize;
         if num_steps > 1 {
             let mut interpolated_state = state_a.clone();
             for j in 1..=num_steps {
