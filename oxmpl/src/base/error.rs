@@ -5,6 +5,24 @@
 use std::{error, fmt};
 
 #[derive(Debug, PartialEq)]
+pub enum StateError {
+    /// The magnitude/norm of state is 0,
+    ZeroMagnitude,
+}
+impl fmt::Display for StateError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::ZeroMagnitude => write!(
+                f,
+                "Magnitude or Norm of the state is 0."
+            ),
+        }
+    }
+}
+impl error::Error for StateError {}
+
+
+#[derive(Debug, PartialEq)]
 pub enum StateSpaceError {
     /// The length of the provided bounds does not match the dimension.
     DimensionMismatch { expected: usize, found: usize },
