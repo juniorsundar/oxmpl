@@ -12,6 +12,8 @@ mod real_vector_state;
 mod real_vector_state_space;
 mod so2_state;
 mod so2_state_space;
+mod so3_state;
+mod so3_state_space;
 mod state_validity_checker;
 
 pub use goal::PyGoal;
@@ -22,6 +24,8 @@ pub use real_vector_state::PyRealVectorState;
 pub use real_vector_state_space::PyRealVectorStateSpace;
 pub use so2_state::PySO2State;
 pub use so2_state_space::PySO2StateSpace;
+pub use so3_state::PySO3State;
+pub use so3_state_space::PySO3StateSpace;
 pub use state_validity_checker::PyStateValidityChecker;
 
 pub fn create_module(_py: Python<'_>) -> PyResult<Bound<'_, PyModule>> {
@@ -30,6 +34,8 @@ pub fn create_module(_py: Python<'_>) -> PyResult<Bound<'_, PyModule>> {
     base_module.add_class::<PyRealVectorStateSpace>()?;
     base_module.add_class::<PySO2State>()?;
     base_module.add_class::<PySO2StateSpace>()?;
+    base_module.add_class::<PySO3State>()?;
+    base_module.add_class::<PySO3StateSpace>()?;
     base_module.add_class::<PyPath>()?;
     base_module.add_class::<PyProblemDefinition>()?;
     Ok(base_module)

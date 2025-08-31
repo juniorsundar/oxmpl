@@ -7,11 +7,12 @@ use std::sync::Arc;
 
 use oxmpl::base::{
     state::RealVectorState as OxmplRealVectorState, state::SO2State as OxmplSO2State,
-    validity::StateValidityChecker,
+    state::SO3State as OxmplSO3State, validity::StateValidityChecker,
 };
 
 use super::real_vector_state::PyRealVectorState;
 use super::so2_state::PySO2State;
+use super::so3_state::PySO3State;
 
 /// An internal Rust struct that implements the `StateValidityChecker` trait by calling a
 /// user-provided Python function.
@@ -51,6 +52,26 @@ impl StateValidityChecker<OxmplSO2State> for PyStateValidityChecker {
         Python::with_gil(|py| {
             let result: PyResult<bool> = (move || {
                 let py_state = Py::new(py, PySO2State(Arc::new(state.clone())))?;
+                let args = (py_state,);
+                let result = self.callback.call1(py, args)?;
+                result.extract(py)
+            })();
+            match result {
+                Ok(is_valid) => is_valid,
+                Err(e) => {
+                    e.print(py);
+                    false
+                }
+            }
+        })
+    }
+}
+
+impl StateValidityChecker<OxmplSO3State> for PyStateValidityChecker {
+    fn is_valid(&self, state: &OxmplSO3State) -> bool {
+        Python::with_gil(|py| {
+            let result: PyResult<bool> = (move || {
+                let py_state = Py::new(py, PySO3State(Arc::new(state.clone())))?;
                 let args = (py_state,);
                 let result = self.callback.call1(py, args)?;
                 result.extract(py)

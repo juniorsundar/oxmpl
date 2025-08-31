@@ -2,8 +2,12 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use crate::base::{real_vector_state::PyRealVectorState, so2_state::PySO2State};
-use oxmpl::base::state::{RealVectorState as OxmplRealVectorState, SO2State as OxmplSO2State};
+use crate::base::{
+    real_vector_state::PyRealVectorState, so2_state::PySO2State, so3_state::PySO3State,
+};
+use oxmpl::base::state::{
+    RealVectorState as OxmplRealVectorState, SO2State as OxmplSO2State, SO3State as OxmplSO3State,
+};
 use pyo3::prelude::*;
 use std::sync::Arc;
 
@@ -33,6 +37,18 @@ impl PyStateConvert for OxmplSO2State {
 
     fn to_py_wrapper(&self) -> Self::Wrapper {
         PySO2State(Arc::new(self.clone()))
+    }
+
+    fn from_py_wrapper(wrapper: Self::Wrapper) -> Self {
+        (*wrapper.0).clone()
+    }
+}
+
+impl PyStateConvert for OxmplSO3State {
+    type Wrapper = PySO3State;
+
+    fn to_py_wrapper(&self) -> Self::Wrapper {
+        PySO3State(Arc::new(self.clone()))
     }
 
     fn from_py_wrapper(wrapper: Self::Wrapper) -> Self {

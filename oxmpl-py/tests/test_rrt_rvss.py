@@ -44,22 +44,17 @@ def is_state_valid(state: RealVectorState) -> bool:
 
 
 def test_rrt_finds_path_in_rvss():
-    # DEFINE THE STATE SPACE
-    # A 10x10 2D world
     space = RealVectorStateSpace(dimension=2, bounds=[(0.0, 10.0), (0.0, 10.0)])
 
-    # DEFINE THE PROBLEM
     start_state = RealVectorState([1.0, 5.0])
     goal_region = CircularGoal(space, x=9.0, y=5.0, radius=0.5)
 
     problem_def = ProblemDefinition.from_real_vector(space, start_state, goal_region)
 
-    # CREATE AND SETUP THE PLANNER
     planner = RRT(max_distance=0.5, goal_bias=0.05, problem_definition=problem_def)
 
     planner.setup(is_state_valid)
 
-    # SOLVE THE PROBLEM
     print("\nAttempting to solve planning problem...")
     try:
         path = planner.solve(timeout_secs=5.0)
@@ -69,7 +64,6 @@ def test_rrt_finds_path_in_rvss():
             f"Planner failed to find a solution when one should exist. Error: {e}"
         )
 
-    # VALIDATE THE SOLUTION PATH
     assert len(path.states) > 1, "Path should contain at least a start and end state."
 
     path_start = path.states[0]

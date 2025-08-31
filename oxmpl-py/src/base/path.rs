@@ -7,15 +7,20 @@ use std::sync::Arc;
 
 use super::real_vector_state::PyRealVectorState;
 use super::so2_state::PySO2State;
+use super::so3_state::PySO3State;
 use oxmpl::base::{
     planner::Path as OxmplPath,
-    state::{RealVectorState as OxmplRealVectorState, SO2State as OxmplSO2State},
+    state::{
+        RealVectorState as OxmplRealVectorState, SO2State as OxmplSO2State,
+        SO3State as OxmplSO3State,
+    },
 };
 
 #[derive(Clone)]
 pub enum PathVariant {
     RealVector(OxmplPath<OxmplRealVectorState>),
     SO2(OxmplPath<OxmplSO2State>),
+    SO3(OxmplPath<OxmplSO3State>),
 }
 
 /// A sequence of states representing a solution path found by a planner.
@@ -61,6 +66,15 @@ impl PyPath {
                 }
                 list
             }
+            PathVariant::SO3(path) => {
+                let list = PyList::empty(py);
+                for s in &path.0 {
+                    let py_state = PySO3State(Arc::new(s.clone()));
+                    let obj = py_state.into_pyobject(py)?;
+                    list.append(obj)?;
+                }
+                list
+            }
         };
         Ok(py_list.into())
     }
@@ -70,6 +84,7 @@ impl PyPath {
         match &self.0 {
             PathVariant::RealVector(path) => path.0.len(),
             PathVariant::SO2(path) => path.0.len(),
+            PathVariant::SO3(path) => path.0.len(),
         }
     }
 
@@ -77,6 +92,7 @@ impl PyPath {
         let (len, type_name) = match &self.0 {
             PathVariant::RealVector(path) => (path.0.len(), "RealVectorState"),
             PathVariant::SO2(path) => (path.0.len(), "SO2State"),
+            PathVariant::SO3(path) => (path.0.len(), "SO3State"),
         };
         format!("<Path of {len} {type_name}s>")
     }
@@ -91,5 +107,11 @@ impl From<OxmplPath<OxmplRealVectorState>> for PyPath {
 impl From<OxmplPath<OxmplSO2State>> for PyPath {
     fn from(path: OxmplPath<OxmplSO2State>) -> Self {
         Self(PathVariant::SO2(path))
+    }
+}
+
+impl From<OxmplPath<OxmplSO3State>> for PyPath {
+    fn from(path: OxmplPath<OxmplSO3State>) -> Self {
+        Self(PathVariant::SO3(path))
     }
 }

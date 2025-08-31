@@ -11,8 +11,8 @@ use crate::base::{
 use oxmpl::{
     base::{
         planner::Planner,
-        space::{RealVectorStateSpace, SO2StateSpace},
-        state::{RealVectorState, SO2State},
+        space::{RealVectorStateSpace, SO2StateSpace, SO3StateSpace},
+        state::{RealVectorState, SO2State, SO3State},
     },
     geometric::RRTConnect,
 };
@@ -20,10 +20,12 @@ use oxmpl::{
 type RrtConnectForRealVector =
     RRTConnect<RealVectorState, RealVectorStateSpace, PyGoal<RealVectorState>>;
 type RrtConnectForSO2 = RRTConnect<SO2State, SO2StateSpace, PyGoal<SO2State>>;
+type RrtConnectForSO3 = RRTConnect<SO3State, SO3StateSpace, PyGoal<SO3State>>;
 
 enum PlannerVariant {
     RealVector(Rc<RefCell<RrtConnectForRealVector>>),
     SO2(Rc<RefCell<RrtConnectForSO2>>),
+    SO3(Rc<RefCell<RrtConnectForSO3>>),
 }
 
 #[pyclass(name = "RRTConnect", unsendable)]
@@ -59,26 +61,47 @@ impl PyRrtConnect {
                     ProblemDefinitionVariant::SO2(pd.clone()),
                 )
             }
+            ProblemDefinitionVariant::SO3(pd) => {
+                let planner_instance = RrtConnectForSO3::new(max_distance, goal_bias);
+                (
+                    PlannerVariant::SO3(Rc::new(RefCell::new(planner_instance))),
+                    ProblemDefinitionVariant::SO3(pd.clone()),
+                )
+            }
         };
         Ok(Self { planner, pd })
     }
 
     fn setup(&mut self, validity_callback: PyObject) -> PyResult<()> {
         match &mut self.planner {
-            PlannerVariant::RealVector(prm_rv) => {
+            PlannerVariant::RealVector(planner_variant) => {
                 let checker = Arc::new(PyStateValidityChecker {
                     callback: validity_callback,
                 });
                 if let ProblemDefinitionVariant::RealVector(problem_def) = &self.pd {
-                    prm_rv.borrow_mut().setup(problem_def.clone(), checker);
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
                 }
             }
-            PlannerVariant::SO2(prm_so2) => {
+            PlannerVariant::SO2(planner_variant) => {
                 let checker = Arc::new(PyStateValidityChecker {
                     callback: validity_callback,
                 });
                 if let ProblemDefinitionVariant::SO2(problem_def) = &self.pd {
-                    prm_so2.borrow_mut().setup(problem_def.clone(), checker);
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
+                }
+            }
+            PlannerVariant::SO3(planner_variant) => {
+                let checker = Arc::new(PyStateValidityChecker {
+                    callback: validity_callback,
+                });
+                if let ProblemDefinitionVariant::SO3(problem_def) = &self.pd {
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
                 }
             }
         }
@@ -96,6 +119,13 @@ impl PyRrtConnect {
                 }
             }
             PlannerVariant::SO2(p) => {
+                let result = p.borrow_mut().solve(timeout);
+                match result {
+                    Ok(path) => Ok(PyPath::from(path)),
+                    Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+                }
+            }
+            PlannerVariant::SO3(p) => {
                 let result = p.borrow_mut().solve(timeout);
                 match result {
                     Ok(path) => Ok(PyPath::from(path)),
