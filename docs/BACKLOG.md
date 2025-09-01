@@ -8,7 +8,7 @@
 - [x] Implmenting basic State Spaces
     - [x] RealVectorStateSpace
     - [x] SO2
-    - [ ] SO3
+    - [x] SO3
     - [ ] CompoundStateSpace
         - [ ] SE2
         - [ ] SE3
