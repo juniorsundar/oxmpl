@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+//! Planners under geometric contraints.
+
 mod planners;
 
 pub use self::planners::prm::PRM;
