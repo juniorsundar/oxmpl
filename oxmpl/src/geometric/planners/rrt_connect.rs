@@ -74,7 +74,7 @@ pub struct RRTConnect<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
 
 impl<S, SP, G> RRTConnect<S, SP, G>
 where
-    S: State,
+    S: State + Clone,
     SP: StateSpace<StateType = S>,
     G: Goal<S> + GoalSampleableRegion<S>,
 {

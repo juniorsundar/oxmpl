@@ -52,7 +52,7 @@ pub struct RRTStar<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
 
 impl<S, SP, G> RRTStar<S, SP, G>
 where
-    S: State,
+    S: State + Clone,
     SP: StateSpace<StateType = S>,
     G: Goal<S> + GoalSampleableRegion<S>,
 {
