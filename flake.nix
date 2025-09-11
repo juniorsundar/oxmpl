@@ -59,7 +59,7 @@
           uv pip install --quiet -r requirements.txt
 
           uv pip install pre-commit
-          # pre-commit install
+          pre-commit install
           zsh
         '';
       };

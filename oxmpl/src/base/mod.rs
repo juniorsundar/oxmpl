@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+//! Base utilities and routines shared by both geometric and differential/control based planners.
+
 mod spaces;
 mod states;
 

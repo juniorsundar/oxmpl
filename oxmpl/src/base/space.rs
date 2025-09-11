@@ -5,9 +5,11 @@
 use rand::Rng;
 
 pub use crate::base::spaces::{
+    any_state_space::AnyStateSpace, compound_state_space::CompoundStateSpace,
     real_vector_state_space::RealVectorStateSpace, so2_state_space::SO2StateSpace,
     so3_state_space::SO3StateSpace,
 };
+
 use crate::base::{error::StateSamplingError, state::State};
 
 /// Defines a space in which planning can be performed.
@@ -69,7 +71,7 @@ use crate::base::{error::StateSamplingError, state::State};
 /// }
 ///
 /// let space = LineSegmentSpace { bounds: (0.0, 10.0) };
-/// let mut rng = rand::thread_rng();
+/// let mut rng = rand::rng();
 /// let random_state = space.sample_uniform(&mut rng).unwrap();
 ///
 /// assert!(space.satisfies_bounds(&random_state));
