@@ -4,9 +4,10 @@
 
 use std::any::Any;
 
-pub use crate::base::states::real_vector_state::RealVectorState;
-pub use crate::base::states::so2_state::SO2State;
-pub use crate::base::states::so3_state::SO3State;
+pub use crate::base::states::{
+    compound_state::CompoundState, real_vector_state::RealVectorState, so2_state::SO2State,
+    so3_state::SO3State,
+};
 
 pub trait DynClone {
     fn clone_box(&self) -> Box<dyn State>;
@@ -38,10 +39,3 @@ impl Clone for Box<dyn State> {
         self.clone_box()
     }
 }
-
-#[derive(Clone)]
-pub struct CompoundState {
-    pub components: Vec<Box<dyn State>>,
-}
-
-impl State for CompoundState {}
