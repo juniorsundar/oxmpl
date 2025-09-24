@@ -5,8 +5,8 @@
 use std::any::Any;
 
 pub use crate::base::states::{
-    compound_state::CompoundState, real_vector_state::RealVectorState, so2_state::SO2State,
-    so3_state::SO3State,
+    compound_state::CompoundState, real_vector_state::RealVectorState, se2_state::SE2State,
+    se3_state::SE3State, so2_state::SO2State, so3_state::SO3State,
 };
 
 pub trait DynClone {
