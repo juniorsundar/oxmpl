@@ -68,7 +68,6 @@ impl GoalSampleableRegion<RealVectorState> for CircularGoalRegion {
     }
 }
 
-/// A helper function to validate the entire solution path.
 fn is_path_valid(
     path: &Path<RealVectorState>,
     space: &RealVectorStateSpace,

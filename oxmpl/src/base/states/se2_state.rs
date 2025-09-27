@@ -11,7 +11,7 @@ use crate::base::state::{CompoundState, RealVectorState, SO2State, State};
 ///
 /// This state is composed of a 2D translation (x, y) and a 2D rotation (yaw). It is internally
 /// represented as a `CompoundState`.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SE2State(pub CompoundState);
 
 impl State for SE2State {}

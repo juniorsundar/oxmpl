@@ -68,7 +68,6 @@ impl GoalSampleableRegion<RealVectorState> for CircularGoalRegion {
     }
 }
 
-/// A helper function to validate the entire solution path.
 fn is_path_valid(
     path: &Path<RealVectorState>,
     space: &RealVectorStateSpace,
@@ -141,7 +140,6 @@ fn test_rrt_finds_path_in_rvss() {
         wall_y_max: 8.0,
         wall_thickness: 0.5,
     });
-    // Let's ensure our start/goal are not inside the wall
     assert!(
         validity_checker.is_valid(&start_state),
         "Start state should be valid!"

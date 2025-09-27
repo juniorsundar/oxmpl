@@ -103,7 +103,6 @@ impl GoalSampleableRegion<SO3State> for SO3GoalRegion {
     }
 }
 
-/// A helper function to validate the entire solution path.
 fn is_path_valid(
     path: &Path<SO3State>,
     space: &SO3StateSpace,
@@ -166,7 +165,6 @@ fn test_rrt_connect_finds_path_in_so3ss() {
         radius: 44.9f64.to_radians(),
         space: space.clone(),
     });
-    // Let's ensure our start/goal are not inside the wall
     assert!(
         validity_checker.is_valid(&start_state),
         "Start state should be valid!"

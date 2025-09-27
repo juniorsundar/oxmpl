@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use std::any::Any;
+use std::{any::Any, fmt::Debug};
 
 pub use crate::base::states::{
     compound_state::CompoundState, real_vector_state::RealVectorState, se2_state::SE2State,
@@ -32,7 +32,7 @@ where
 ///
 /// > [!NOTE] (for self)
 /// > A trait is not dyn-compatible if any of its methods return Self — unless it has a `where Self: Sized` bound.
-pub trait State: DynClone + Any + 'static {}
+pub trait State: DynClone + Debug + Any + 'static {}
 
 impl Clone for Box<dyn State> {
     fn clone(&self) -> Self {

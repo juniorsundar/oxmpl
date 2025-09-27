@@ -5,83 +5,75 @@ use oxmpl::base::{
     goal::{Goal, GoalRegion, GoalSampleableRegion},
     planner::{Path, Planner},
     problem_definition::ProblemDefinition,
-    space::{RealVectorStateSpace, StateSpace},
-    state::RealVectorState,
+    space::{SE2StateSpace, StateSpace},
+    state::SE2State,
     validity::StateValidityChecker,
 };
 use oxmpl::geometric::PRM;
 
 use rand::Rng;
 
-/// A StateValidityChecker that defines a simple vertical wall obstacle.
-struct WallObstacleChecker {
-    wall_x_pos: f64,
-    wall_y_min: f64,
-    wall_y_max: f64,
-    wall_thickness: f64,
+struct ObstacleChecker {
+    x_min: f64,
+    x_max: f64,
+    y_min: f64,
+    y_max: f64,
 }
 
-impl StateValidityChecker<RealVectorState> for WallObstacleChecker {
-    fn is_valid(&self, state: &RealVectorState) -> bool {
-        let x = state.values[0];
-        let y = state.values[1];
-
-        let is_in_wall = x >= self.wall_x_pos - self.wall_thickness / 2.0
-            && x <= self.wall_x_pos + self.wall_thickness / 2.0
-            && y >= self.wall_y_min
-            && y <= self.wall_y_max;
-
-        !is_in_wall
+impl StateValidityChecker<SE2State> for ObstacleChecker {
+    fn is_valid(&self, state: &SE2State) -> bool {
+        let x = state.get_x();
+        let y = state.get_y();
+        !(x >= self.x_min && x <= self.x_max && y >= self.y_min && y <= self.y_max)
     }
 }
 
-struct CircularGoalRegion {
-    target: RealVectorState,
+struct SE2GoalRegion {
+    target: SE2State,
     radius: f64,
-    space: Arc<RealVectorStateSpace>,
+    space: Arc<SE2StateSpace>,
 }
 
-impl Goal<RealVectorState> for CircularGoalRegion {
-    fn is_satisfied(&self, state: &RealVectorState) -> bool {
+impl Goal<SE2State> for SE2GoalRegion {
+    fn is_satisfied(&self, state: &SE2State) -> bool {
         self.space.distance(state, &self.target) <= self.radius
     }
 }
 
-impl GoalRegion<RealVectorState> for CircularGoalRegion {
-    fn distance_goal(&self, state: &RealVectorState) -> f64 {
+impl GoalRegion<SE2State> for SE2GoalRegion {
+    fn distance_goal(&self, state: &SE2State) -> f64 {
         let dist_to_center = self.space.distance(state, &self.target);
         (dist_to_center - self.radius).max(0.0)
     }
 }
 
-impl GoalSampleableRegion<RealVectorState> for CircularGoalRegion {
-    fn sample_goal(&self, rng: &mut impl Rng) -> Result<RealVectorState, StateSamplingError> {
+impl GoalSampleableRegion<SE2State> for SE2GoalRegion {
+    fn sample_goal(&self, rng: &mut impl Rng) -> Result<SE2State, StateSamplingError> {
         let angle = rng.random_range(0.0..2.0 * PI);
-
-        let radius = self.radius * rng.random::<f64>().sqrt();
-
-        let x = self.target.values[0] + radius * angle.cos();
-        let y = self.target.values[1] + radius * angle.sin();
-
-        Ok(RealVectorState { values: vec![x, y] })
+        let r = self.radius * rng.random::<f64>().sqrt();
+        let x = self.target.get_x() + r * angle.cos();
+        let y = self.target.get_y() + r * angle.sin();
+        let yaw = rng.random_range(-PI..PI);
+        Ok(SE2State::new(x, y, yaw))
     }
 }
 
 fn is_path_valid(
-    path: &Path<RealVectorState>,
-    space: &RealVectorStateSpace,
-    checker: &dyn StateValidityChecker<RealVectorState>,
+    path: &Path<SE2State>,
+    space: &SE2StateSpace,
+    checker: &dyn StateValidityChecker<SE2State>,
 ) -> bool {
-    for i in 0..path.0.len() - 1 {
-        let state_a = &path.0[i];
-        let state_b = &path.0[i + 1];
+    for window in path.0.windows(2) {
+        let state_a = &window[0];
+        let state_b = &window[1];
 
         if !checker.is_valid(state_a) {
-            println!("Path invalid: State {state_a:?} is in collision.");
-            return false;
-        }
-        if (i + 1 == path.0.len() - 1) && !checker.is_valid(state_b) {
-            println!("Path invalid: Final state {state_b:?} is in collision.");
+            println!(
+                "Path invalid: State (x: {}, y: {}, yaw: {}) is in collision.",
+                state_a.get_x(),
+                state_a.get_y(),
+                state_a.get_yaw()
+            );
             return false;
         }
 
@@ -94,35 +86,40 @@ fn is_path_valid(
                 space.interpolate(state_a, state_b, t, &mut interpolated_state);
                 if !checker.is_valid(&interpolated_state) {
                     println!(
-                        "Path invalid: Motion between {state_a:?} and {state_b:?} is in collision at {interpolated_state:?}."
+                        "Path invalid: Motion between (x: {}, y: {}, yaw: {}) and (x: {}, y: {}, yaw: {}) is in collision at (x: {}, y: {}, yaw: {}).",
+                        state_a.get_x(), state_a.get_y(), state_a.get_yaw(),
+                        state_b.get_x(), state_b.get_y(), state_b.get_yaw(),
+                        interpolated_state.get_x(), interpolated_state.get_y(), interpolated_state.get_yaw()
                     );
                     return false;
                 }
             }
         }
     }
+    if let Some(last_state) = path.0.last() {
+        if !checker.is_valid(last_state) {
+            println!(
+                "Path invalid: Final state (x: {}, y: {}, yaw: {}) is in collision.",
+                last_state.get_x(),
+                last_state.get_y(),
+                last_state.get_yaw()
+            );
+            return false;
+        }
+    }
     true
 }
 
 #[test]
-fn test_prm_finds_path_in_rvss() {
-    let new_rvss_result = RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]));
+#[allow(clippy::arc_with_non_send_sync)]
+fn test_prm_finds_path_in_se2ss() {
+    let bounds = vec![(-5.0, 5.0), (-5.0, 5.0), (-PI, PI)];
+    let space =
+        Arc::new(SE2StateSpace::new(0.5, Some(bounds)).expect("Failed to create state space"));
 
-    let space;
-    match new_rvss_result {
-        Ok(state) => space = Arc::new(state),
-        Err(_) => {
-            panic!("Error creating new RealVectorState!")
-        }
-    }
-
-    let start_state = RealVectorState {
-        values: vec![1.0, 5.0],
-    };
-    let goal_definition = Arc::new(CircularGoalRegion {
-        target: RealVectorState {
-            values: vec![9.0, 5.0],
-        },
+    let start_state = SE2State::new(-2.0, 0.0, 0.0);
+    let goal_definition = Arc::new(SE2GoalRegion {
+        target: SE2State::new(2.0, 0.0, 0.0),
         radius: 0.5,
         space: space.clone(),
     });
@@ -133,11 +130,11 @@ fn test_prm_finds_path_in_rvss() {
         goal: goal_definition.clone(),
     });
 
-    let validity_checker = Arc::new(WallObstacleChecker {
-        wall_x_pos: 5.0,
-        wall_y_min: 2.0,
-        wall_y_max: 8.0,
-        wall_thickness: 0.5,
+    let validity_checker = Arc::new(ObstacleChecker {
+        x_min: -0.25,
+        x_max: 0.25,
+        y_min: -0.5,
+        y_max: 0.5,
     });
     assert!(
         validity_checker.is_valid(&start_state),
@@ -148,7 +145,7 @@ fn test_prm_finds_path_in_rvss() {
         "Goal target should be valid!"
     );
 
-    let mut planner = PRM::new(5.0, 0.5);
+    let mut planner = PRM::new(40.0, 5.0);
 
     planner.setup(problem_definition, validity_checker.clone());
     match planner.construct_roadmap() {
