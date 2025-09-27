@@ -103,11 +103,8 @@ impl StateSpace for SO3StateSpace {
         let abs_dot =
             (state1.x * state2.x + state1.y * state2.y + state1.z * state2.z + state1.w * state2.w)
                 .abs();
-        if abs_dot > 1.0 - 1e-9 {
-            0.
-        } else {
-            abs_dot.acos()
-        }
+        let clamped_dot = abs_dot.min(1.0);
+        2.0 * clamped_dot.acos()
     }
 
     /// Performs Spherical Linear Interpolation (SLERP) between two states.
