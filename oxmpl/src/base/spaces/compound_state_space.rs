@@ -144,3 +144,74 @@ impl StateSpace for CompoundStateSpace {
         total_longest_valid_segment_length_sq.sqrt()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::base::{
+        space::{RealVectorStateSpace, SO2StateSpace},
+        state::{RealVectorState, SO2State},
+    };
+    use std::f64::consts::PI;
+
+    #[test]
+    fn test_single_subspace() {
+        let rvs = RealVectorStateSpace::new(2, Some(vec![(-5.0, 5.0), (-5.0, 5.0)])).unwrap();
+        let space = CompoundStateSpace::new(vec![Box::new(rvs)], vec![2.0]);
+
+        let state1 = CompoundState {
+            components: vec![Box::new(RealVectorState::new(vec![0.0, 0.0]))],
+        };
+        let state2 = CompoundState {
+            components: vec![Box::new(RealVectorState::new(vec![3.0, 4.0]))],
+        };
+
+        assert!((space.distance(&state1, &state2) - 10.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn test_multiple_subspaces() {
+        let rvs1 = RealVectorStateSpace::new(1, Some(vec![(-10.0, 10.0)])).unwrap();
+        let so2 = SO2StateSpace::new(None).unwrap();
+        let rvs2 = RealVectorStateSpace::new(1, Some(vec![(-10.0, 10.0)])).unwrap();
+
+        let space = CompoundStateSpace::new(
+            vec![Box::new(rvs1), Box::new(so2), Box::new(rvs2)],
+            vec![1.0, 0.5, 1.0],
+        );
+
+        let state1 = CompoundState {
+            components: vec![
+                Box::new(RealVectorState::new(vec![1.0])),
+                Box::new(SO2State::new(0.0)),
+                Box::new(RealVectorState::new(vec![5.0])),
+            ],
+        };
+        let state2 = CompoundState {
+            components: vec![
+                Box::new(RealVectorState::new(vec![2.0])),
+                Box::new(SO2State::new(PI)),
+                Box::new(RealVectorState::new(vec![1.0])),
+            ],
+        };
+
+        let dist1_sq = (1.0f64 * 1.0).powi(2);
+        let dist2_sq = (PI * 0.5).powi(2);
+        let dist3_sq = (4.0f64 * 1.0).powi(2);
+        let expected_dist = (dist1_sq + dist2_sq + dist3_sq).sqrt();
+
+        assert!((space.distance(&state1, &state2) - expected_dist).abs() < 1e-9);
+
+        let mut rng = rand::rng();
+        let sample = space.sample_uniform(&mut rng);
+        assert!(sample.is_ok());
+        assert_eq!(sample.unwrap().components.len(), 3);
+    }
+
+    #[test]
+    #[should_panic(expected = "Number of subspaces must match number of weights.")]
+    fn test_mismatched_subspaces_and_weights() {
+        let rvs = RealVectorStateSpace::new(2, Some(vec![(-1.0, 1.0), (-1.0, 1.0)])).unwrap();
+        CompoundStateSpace::new(vec![Box::new(rvs)], vec![1.0, 1.0]);
+    }
+}
