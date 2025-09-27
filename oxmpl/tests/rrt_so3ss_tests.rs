@@ -75,7 +75,6 @@ impl GoalRegion<SO3State> for SO3GoalRegion {
 }
 
 impl GoalSampleableRegion<SO3State> for SO3GoalRegion {
-    /// Samples a state uniformly from within the goal's cone of freedom.
     fn sample_goal(&self, rng: &mut impl Rng) -> Result<SO3State, StateSamplingError> {
         loop {
             let x: f64 = rng.random_range(-1.0..1.0);
@@ -103,7 +102,6 @@ impl GoalSampleableRegion<SO3State> for SO3GoalRegion {
     }
 }
 
-/// A helper function to validate the entire solution path.
 fn is_path_valid(
     path: &Path<SO3State>,
     space: &SO3StateSpace,
@@ -166,7 +164,6 @@ fn test_rrt_finds_path_in_so3ss() {
         radius: 44.9f64.to_radians(),
         space: space.clone(),
     });
-    // Let's ensure our start/goal are not inside the wall
     assert!(
         validity_checker.is_valid(&start_state),
         "Start state should be valid!"

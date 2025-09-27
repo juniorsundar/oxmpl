@@ -11,7 +11,7 @@ use crate::base::state::{CompoundState, RealVectorState, SO3State, State};
 ///
 /// This state is composed of a 3D translation (x, y, z) and a 3D rotation. It is internally
 /// represented as a `CompoundState`.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SE3State(pub CompoundState);
 
 impl State for SE3State {}

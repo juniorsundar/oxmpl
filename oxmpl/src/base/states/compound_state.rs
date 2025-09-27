@@ -4,7 +4,7 @@
 
 use crate::base::state::State;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompoundState {
     pub components: Vec<Box<dyn State>>,
 }

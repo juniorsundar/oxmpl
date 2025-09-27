@@ -35,7 +35,6 @@ impl StateValidityChecker<RealVectorState> for WallObstacleChecker {
     }
 }
 
-/// A Goal definition where success is being within a certain radius of a target state.
 struct CircularGoalRegion {
     target: RealVectorState,
     radius: f64,
@@ -68,7 +67,6 @@ impl GoalSampleableRegion<RealVectorState> for CircularGoalRegion {
     }
 }
 
-/// A helper function to validate the entire solution path.
 fn is_path_valid(
     path: &Path<RealVectorState>,
     space: &RealVectorStateSpace,
