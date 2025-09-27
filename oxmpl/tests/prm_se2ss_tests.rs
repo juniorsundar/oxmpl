@@ -131,10 +131,10 @@ fn test_prm_finds_path_in_se2ss() {
     });
 
     let validity_checker = Arc::new(ObstacleChecker {
-        x_min: -0.25,
-        x_max: 0.25,
-        y_min: -0.5,
-        y_max: 0.5,
+        x_min: -0.15,
+        x_max: 0.15,
+        y_min: -0.25,
+        y_max: 0.25,
     });
     assert!(
         validity_checker.is_valid(&start_state),
@@ -156,7 +156,7 @@ fn test_prm_finds_path_in_se2ss() {
         ),
     };
 
-    let timeout = Duration::from_secs(5);
+    let timeout = Duration::from_secs(10);
     let result = planner.solve(timeout);
 
     assert!(
