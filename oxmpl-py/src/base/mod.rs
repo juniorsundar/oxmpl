@@ -4,6 +4,7 @@
 
 use pyo3::prelude::*;
 
+mod compound_state;
 mod goal;
 mod path;
 mod problem_definition;
@@ -16,6 +17,7 @@ mod so3_state;
 mod so3_state_space;
 mod state_validity_checker;
 
+pub use compound_state::PyCompoundState;
 pub use goal::PyGoal;
 pub use path::PyPath;
 pub use problem_definition::ProblemDefinitionVariant;
@@ -32,6 +34,7 @@ pub fn create_module(_py: Python<'_>) -> PyResult<Bound<'_, PyModule>> {
     let base_module = PyModule::new(_py, "base")?;
     base_module.add_class::<PyRealVectorState>()?;
     base_module.add_class::<PyRealVectorStateSpace>()?;
+    base_module.add_class::<PyCompoundState>()?;
     base_module.add_class::<PySO2State>()?;
     base_module.add_class::<PySO2StateSpace>()?;
     base_module.add_class::<PySO3State>()?;
