@@ -11,8 +11,8 @@ use crate::base::{
 use oxmpl::{
     base::{
         planner::Planner,
-        space::{RealVectorStateSpace, SO2StateSpace, SO3StateSpace},
-        state::{RealVectorState, SO2State, SO3State},
+        space::{CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, SO3StateSpace},
+        state::{CompoundState, RealVectorState, SO2State, SO3State},
     },
     geometric::PRM,
 };
@@ -20,11 +20,13 @@ use oxmpl::{
 type PrmForRealVector = PRM<RealVectorState, RealVectorStateSpace, PyGoal<RealVectorState>>;
 type PrmForSO2 = PRM<SO2State, SO2StateSpace, PyGoal<SO2State>>;
 type PrmForSO3 = PRM<SO3State, SO3StateSpace, PyGoal<SO3State>>;
+type PrmForCompound = PRM<CompoundState, CompoundStateSpace, PyGoal<CompoundState>>;
 
 enum PlannerVariant {
     RealVector(Rc<RefCell<PrmForRealVector>>),
     SO2(Rc<RefCell<PrmForSO2>>),
     SO3(Rc<RefCell<PrmForSO3>>),
+    Compound(Rc<RefCell<PrmForCompound>>),
 }
 
 #[pyclass(name = "PRM", unsendable)]
@@ -67,6 +69,13 @@ impl PyPrm {
                     ProblemDefinitionVariant::SO3(pd.clone()),
                 )
             }
+            ProblemDefinitionVariant::Compound(pd) => {
+                let planner_instance = PrmForCompound::new(timeout, connection_radius);
+                (
+                    PlannerVariant::Compound(Rc::new(RefCell::new(planner_instance))),
+                    ProblemDefinitionVariant::Compound(pd.clone()),
+                )
+            }
         };
         Ok(Self { planner, pd })
     }
@@ -103,6 +112,16 @@ impl PyPrm {
                         .setup(problem_def.clone(), checker);
                 }
             }
+            PlannerVariant::Compound(planner_variant) => {
+                let checker = Arc::new(PyStateValidityChecker {
+                    callback: validity_callback,
+                });
+                if let ProblemDefinitionVariant::Compound(problem_def) = &self.pd {
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
+                }
+            }
         }
         Ok(())
     }
@@ -131,6 +150,13 @@ impl PyPrm {
                     Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
                 }
             }
+            PlannerVariant::Compound(p) => {
+                let result = p.borrow_mut().solve(timeout);
+                match result {
+                    Ok(path) => Ok(PyPath::from(path)),
+                    Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+                }
+            }
         }
     }
 
@@ -139,6 +165,7 @@ impl PyPrm {
             PlannerVariant::RealVector(p) => p.borrow_mut().construct_roadmap(),
             PlannerVariant::SO2(p) => p.borrow_mut().construct_roadmap(),
             PlannerVariant::SO3(p) => p.borrow_mut().construct_roadmap(),
+            PlannerVariant::Compound(p) => p.borrow_mut().construct_roadmap(),
         };
         match result {
             Ok(_) => Ok(()),

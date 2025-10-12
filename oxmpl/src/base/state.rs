@@ -32,7 +32,7 @@ where
 ///
 /// > [!NOTE] (for self)
 /// > A trait is not dyn-compatible if any of its methods return Self — unless it has a `where Self: Sized` bound.
-pub trait State: DynClone + Debug + Any + 'static {}
+pub trait State: DynClone + Debug + Any + Send + Sync + 'static {}
 
 impl Clone for Box<dyn State> {
     fn clone(&self) -> Self {

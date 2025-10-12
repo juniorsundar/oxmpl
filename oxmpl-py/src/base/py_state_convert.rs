@@ -3,13 +3,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use crate::base::{
-    real_vector_state::PyRealVectorState, so2_state::PySO2State, so3_state::PySO3State,
+    compound_state::PyCompoundState, real_vector_state::PyRealVectorState, so2_state::PySO2State,
+    so3_state::PySO3State,
 };
 use oxmpl::base::state::{
-    RealVectorState as OxmplRealVectorState, SO2State as OxmplSO2State, SO3State as OxmplSO3State,
+    CompoundState as OxmplCompoundState, RealVectorState as OxmplRealVectorState,
+    SO2State as OxmplSO2State, SO3State as OxmplSO3State,
 };
 use pyo3::prelude::*;
-use std::sync::Arc;
+use std::{rc::Rc, sync::Arc};
 
 /// A trait to handle conversions between a core Rust state and its PyO3 wrapper.
 pub trait PyStateConvert: Clone + Send + Sync + 'static {
@@ -49,6 +51,18 @@ impl PyStateConvert for OxmplSO3State {
 
     fn to_py_wrapper(&self) -> Self::Wrapper {
         PySO3State(Arc::new(self.clone()))
+    }
+
+    fn from_py_wrapper(wrapper: Self::Wrapper) -> Self {
+        (*wrapper.0).clone()
+    }
+}
+
+impl PyStateConvert for OxmplCompoundState {
+    type Wrapper = PyCompoundState;
+
+    fn to_py_wrapper(&self) -> Self::Wrapper {
+        PyCompoundState(Rc::new(self.clone()))
     }
 
     fn from_py_wrapper(wrapper: Self::Wrapper) -> Self {

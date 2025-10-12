@@ -3,16 +3,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use pyo3::{prelude::*, types::PyList};
-use std::sync::Arc;
+use std::{rc::Rc, sync::Arc};
 
-use super::real_vector_state::PyRealVectorState;
-use super::so2_state::PySO2State;
-use super::so3_state::PySO3State;
+use super::{
+    compound_state::PyCompoundState, real_vector_state::PyRealVectorState, so2_state::PySO2State,
+    so3_state::PySO3State,
+};
 use oxmpl::base::{
     planner::Path as OxmplPath,
     state::{
-        RealVectorState as OxmplRealVectorState, SO2State as OxmplSO2State,
-        SO3State as OxmplSO3State,
+        CompoundState as OxmplCompoundState, RealVectorState as OxmplRealVectorState,
+        SO2State as OxmplSO2State, SO3State as OxmplSO3State,
     },
 };
 
@@ -21,6 +22,7 @@ pub enum PathVariant {
     RealVector(OxmplPath<OxmplRealVectorState>),
     SO2(OxmplPath<OxmplSO2State>),
     SO3(OxmplPath<OxmplSO3State>),
+    Compound(OxmplPath<OxmplCompoundState>),
 }
 
 /// A sequence of states representing a solution path found by a planner.
@@ -30,7 +32,7 @@ pub struct PyPath(pub PathVariant);
 
 #[pymethods]
 impl PyPath {
-    /// Creates a new Path object from a list of states.
+    /// Creates a new Path object from a list of `RealVectorState` objects.
     #[staticmethod]
     fn from_real_vector_states(states: Vec<PyRealVectorState>) -> Self {
         let rust_states = states.into_iter().map(|s| (*s.0).clone()).collect();
@@ -44,7 +46,21 @@ impl PyPath {
         Self(PathVariant::SO2(OxmplPath(rust_states)))
     }
 
-    /// list[RealVectorState]: The sequence of states that make up the path.
+    /// Creates a new Path from a list of `SO3State` objects.
+    #[staticmethod]
+    fn from_so3_states(states: Vec<PySO3State>) -> Self {
+        let rust_states = states.into_iter().map(|s| (*s.0).clone()).collect();
+        Self(PathVariant::SO3(OxmplPath(rust_states)))
+    }
+
+    /// Creates a new Path from a list of `CompoundState` objects.
+    #[staticmethod]
+    fn from_compound_states(states: Vec<PyCompoundState>) -> Self {
+        let rust_states = states.into_iter().map(|s| (*s.0).clone()).collect();
+        Self(PathVariant::Compound(OxmplPath(rust_states)))
+    }
+
+    /// list[]: The sequence of states that make up the path.
     #[getter]
     fn get_states(&self, py: Python<'_>) -> PyResult<PyObject> {
         let py_list = match &self.0 {
@@ -75,6 +91,15 @@ impl PyPath {
                 }
                 list
             }
+            PathVariant::Compound(path) => {
+                let list = PyList::empty(py);
+                for s in &path.0 {
+                    let py_state = PyCompoundState(Rc::new(s.clone()));
+                    let obj = py_state.into_pyobject(py)?;
+                    list.append(obj)?;
+                }
+                list
+            }
         };
         Ok(py_list.into())
     }
@@ -85,6 +110,7 @@ impl PyPath {
             PathVariant::RealVector(path) => path.0.len(),
             PathVariant::SO2(path) => path.0.len(),
             PathVariant::SO3(path) => path.0.len(),
+            PathVariant::Compound(path) => path.0.len(),
         }
     }
 
@@ -93,6 +119,7 @@ impl PyPath {
             PathVariant::RealVector(path) => (path.0.len(), "RealVectorState"),
             PathVariant::SO2(path) => (path.0.len(), "SO2State"),
             PathVariant::SO3(path) => (path.0.len(), "SO3State"),
+            PathVariant::Compound(path) => (path.0.len(), "CompoundState"),
         };
         format!("<Path of {len} {type_name}s>")
     }
@@ -113,5 +140,11 @@ impl From<OxmplPath<OxmplSO2State>> for PyPath {
 impl From<OxmplPath<OxmplSO3State>> for PyPath {
     fn from(path: OxmplPath<OxmplSO3State>) -> Self {
         Self(PathVariant::SO3(path))
+    }
+}
+
+impl From<OxmplPath<OxmplCompoundState>> for PyPath {
+    fn from(path: OxmplPath<OxmplCompoundState>) -> Self {
+        Self(PathVariant::Compound(path))
     }
 }

@@ -9,19 +9,21 @@ use std::{marker::PhantomData, sync::Arc};
 use oxmpl::base::{
     problem_definition::ProblemDefinition,
     space::{
+        CompoundStateSpace as OxmplCompoundStateSpace,
         RealVectorStateSpace as OxmplRealVectorStateSpace, SO2StateSpace as OxmplSO2StateSpace,
         SO3StateSpace as OxmplSO3StateSpace,
     },
     state::{
-        RealVectorState as OxmplRealVectorState, SO2State as OxmplSO2State,
-        SO3State as OxmplSO3State,
+        CompoundState as OxmplCompoundState, RealVectorState as OxmplRealVectorState,
+        SO2State as OxmplSO2State, SO3State as OxmplSO3State,
     },
 };
 
 use super::{
-    goal::PyGoal, real_vector_state::PyRealVectorState,
-    real_vector_state_space::PyRealVectorStateSpace, so2_state::PySO2State,
-    so2_state_space::PySO2StateSpace, so3_state::PySO3State, so3_state_space::PySO3StateSpace,
+    compound_state::PyCompoundState, compound_state_space::PyCompoundStateSpace, goal::PyGoal,
+    real_vector_state::PyRealVectorState, real_vector_state_space::PyRealVectorStateSpace,
+    so2_state::PySO2State, so2_state_space::PySO2StateSpace, so3_state::PySO3State,
+    so3_state_space::PySO3StateSpace,
 };
 
 #[derive(Clone)]
@@ -37,6 +39,15 @@ pub enum ProblemDefinitionVariant {
     ),
     SO2(Arc<ProblemDefinition<OxmplSO2State, OxmplSO2StateSpace, PyGoal<OxmplSO2State>>>),
     SO3(Arc<ProblemDefinition<OxmplSO3State, OxmplSO3StateSpace, PyGoal<OxmplSO3State>>>),
+    Compound(
+        Arc<
+            ProblemDefinition<
+                OxmplCompoundState,
+                OxmplCompoundStateSpace,
+                PyGoal<OxmplCompoundState>,
+            >,
+        >,
+    ),
 }
 
 /// Encapsulates all the components of a motion planning problem.
@@ -128,5 +139,34 @@ impl PyProblemDefinition {
 
         // Wrap the result in the correct enum variant
         Self(ProblemDefinitionVariant::SO3(Arc::new(pd)))
+    }
+
+    /// Creates a ProblemDefinition for an CompoundStateSpace.
+    #[allow(clippy::arc_with_non_send_sync)]
+    #[classmethod]
+    #[pyo3(signature = (space, start_state, goal))]
+    fn from_compound(
+        _cls: &Bound<'_, PyType>,
+        space: &PyCompoundStateSpace,
+        start_state: &PyCompoundState,
+        goal: PyObject,
+    ) -> Self {
+        // Instantiate the correct generic version of PyGoal
+        let goal_wrapper = PyGoal::<OxmplCompoundState> {
+            instance: goal,
+            _phantom: PhantomData,
+        };
+
+        // Create a snapshot of the space's configuration
+        let cloned_inner_space = (*space.0.borrow()).clone();
+
+        let pd = ProblemDefinition {
+            space: Arc::new(cloned_inner_space),
+            start_states: vec![(*start_state.0).clone()],
+            goal: Arc::new(goal_wrapper),
+        };
+
+        // Wrap the result in the correct enum variant
+        Self(ProblemDefinitionVariant::Compound(Arc::new(pd)))
     }
 }

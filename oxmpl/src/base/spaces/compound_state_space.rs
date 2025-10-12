@@ -47,6 +47,7 @@ use crate::base::{
 ///
 /// assert!(se2_space.satisfies_bounds(&state));
 /// ```
+#[derive(Clone)]
 pub struct CompoundStateSpace {
     /// The component state spaces, as Box-dyn StateSpaces.
     pub subspaces: Vec<Box<dyn AnyStateSpace>>,
