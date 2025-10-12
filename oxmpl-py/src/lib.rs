@@ -4,8 +4,6 @@
 
 use pyo3::{prelude::*, types::PyDict};
 
-#[macro_use]
-mod macros;
 mod base;
 mod geometric;
 

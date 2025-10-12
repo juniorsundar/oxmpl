@@ -3,9 +3,28 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use rand::RngCore;
-use std::any::Any;
+use std::{any::Any, clone::Clone};
 
 use crate::base::{error::StateSamplingError, space::StateSpace, state::State};
+
+pub trait DynCloneAnyStateSpace {
+    fn clone_box(&self) -> Box<dyn AnyStateSpace>;
+}
+
+impl<T> DynCloneAnyStateSpace for T
+where
+    T: AnyStateSpace + Clone + 'static,
+{
+    fn clone_box(&self) -> Box<dyn AnyStateSpace> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn AnyStateSpace> {
+    fn clone(&self) -> Self {
+        self.clone_box()
+    }
+}
 
 /// A helper trait for dynamic dispatch on `StateSpace` objects.
 ///
@@ -19,7 +38,7 @@ use crate::base::{error::StateSamplingError, space::StateSpace, state::State};
 /// State`.
 ///
 /// This is an internal implementation detail and is not typically used directly by end-users.
-pub trait AnyStateSpace {
+pub trait AnyStateSpace: DynCloneAnyStateSpace {
     /// A dynamically-dispatchable version of `StateSpace::distance`.
     ///
     /// # Panics
@@ -63,7 +82,7 @@ pub trait AnyStateSpace {
 /// Provides a blanket implementation of `AnyStateSpace` for any type that implements `StateSpace`.
 /// It works by downcasting the generic `&dyn State` trait objects back to their concrete types at
 /// runtime.
-impl<T: StateSpace> AnyStateSpace for T
+impl<T: StateSpace + Clone + 'static> AnyStateSpace for T
 where
     T::StateType: 'static,
 {

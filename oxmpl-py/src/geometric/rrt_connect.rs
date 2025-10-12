@@ -11,8 +11,8 @@ use crate::base::{
 use oxmpl::{
     base::{
         planner::Planner,
-        space::{RealVectorStateSpace, SO2StateSpace, SO3StateSpace},
-        state::{RealVectorState, SO2State, SO3State},
+        space::{CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, SO3StateSpace},
+        state::{CompoundState, RealVectorState, SO2State, SO3State},
     },
     geometric::RRTConnect,
 };
@@ -21,11 +21,13 @@ type RrtConnectForRealVector =
     RRTConnect<RealVectorState, RealVectorStateSpace, PyGoal<RealVectorState>>;
 type RrtConnectForSO2 = RRTConnect<SO2State, SO2StateSpace, PyGoal<SO2State>>;
 type RrtConnectForSO3 = RRTConnect<SO3State, SO3StateSpace, PyGoal<SO3State>>;
+type RrtConnectForCompound = RRTConnect<CompoundState, CompoundStateSpace, PyGoal<CompoundState>>;
 
 enum PlannerVariant {
     RealVector(Rc<RefCell<RrtConnectForRealVector>>),
     SO2(Rc<RefCell<RrtConnectForSO2>>),
     SO3(Rc<RefCell<RrtConnectForSO3>>),
+    Compound(Rc<RefCell<RrtConnectForCompound>>),
 }
 
 #[pyclass(name = "RRTConnect", unsendable)]
@@ -68,6 +70,13 @@ impl PyRrtConnect {
                     ProblemDefinitionVariant::SO3(pd.clone()),
                 )
             }
+            ProblemDefinitionVariant::Compound(pd) => {
+                let planner_instance = RrtConnectForCompound::new(max_distance, goal_bias);
+                (
+                    PlannerVariant::Compound(Rc::new(RefCell::new(planner_instance))),
+                    ProblemDefinitionVariant::Compound(pd.clone()),
+                )
+            }
         };
         Ok(Self { planner, pd })
     }
@@ -104,6 +113,16 @@ impl PyRrtConnect {
                         .setup(problem_def.clone(), checker);
                 }
             }
+            PlannerVariant::Compound(planner_variant) => {
+                let checker = Arc::new(PyStateValidityChecker {
+                    callback: validity_callback,
+                });
+                if let ProblemDefinitionVariant::Compound(problem_def) = &self.pd {
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
+                }
+            }
         }
         Ok(())
     }
@@ -126,6 +145,13 @@ impl PyRrtConnect {
                 }
             }
             PlannerVariant::SO3(p) => {
+                let result = p.borrow_mut().solve(timeout);
+                match result {
+                    Ok(path) => Ok(PyPath::from(path)),
+                    Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+                }
+            }
+            PlannerVariant::Compound(p) => {
                 let result = p.borrow_mut().solve(timeout);
                 match result {
                     Ok(path) => Ok(PyPath::from(path)),
