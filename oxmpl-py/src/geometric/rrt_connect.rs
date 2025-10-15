@@ -11,8 +11,11 @@ use crate::base::{
 use oxmpl::{
     base::{
         planner::Planner,
-        space::{CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, SO3StateSpace},
-        state::{CompoundState, RealVectorState, SO2State, SO3State},
+        space::{
+            CompoundStateSpace, RealVectorStateSpace, SE2StateSpace, SE3StateSpace, SO2StateSpace,
+            SO3StateSpace,
+        },
+        state::{CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State},
     },
     geometric::RRTConnect,
 };
@@ -22,12 +25,16 @@ type RrtConnectForRealVector =
 type RrtConnectForSO2 = RRTConnect<SO2State, SO2StateSpace, PyGoal<SO2State>>;
 type RrtConnectForSO3 = RRTConnect<SO3State, SO3StateSpace, PyGoal<SO3State>>;
 type RrtConnectForCompound = RRTConnect<CompoundState, CompoundStateSpace, PyGoal<CompoundState>>;
+type RrtConnectForSE2 = RRTConnect<SE2State, SE2StateSpace, PyGoal<SE2State>>;
+type RrtConnectForSE3 = RRTConnect<SE3State, SE3StateSpace, PyGoal<SE3State>>;
 
 enum PlannerVariant {
     RealVector(Rc<RefCell<RrtConnectForRealVector>>),
     SO2(Rc<RefCell<RrtConnectForSO2>>),
     SO3(Rc<RefCell<RrtConnectForSO3>>),
     Compound(Rc<RefCell<RrtConnectForCompound>>),
+    SE2(Rc<RefCell<RrtConnectForSE2>>),
+    SE3(Rc<RefCell<RrtConnectForSE3>>),
 }
 
 #[pyclass(name = "RRTConnect", unsendable)]
@@ -77,6 +84,20 @@ impl PyRrtConnect {
                     ProblemDefinitionVariant::Compound(pd.clone()),
                 )
             }
+            ProblemDefinitionVariant::SE2(pd) => {
+                let planner_instance = RrtConnectForSE2::new(max_distance, goal_bias);
+                (
+                    PlannerVariant::SE2(Rc::new(RefCell::new(planner_instance))),
+                    ProblemDefinitionVariant::SE2(pd.clone()),
+                )
+            }
+            ProblemDefinitionVariant::SE3(pd) => {
+                let planner_instance = RrtConnectForSE3::new(max_distance, goal_bias);
+                (
+                    PlannerVariant::SE3(Rc::new(RefCell::new(planner_instance))),
+                    ProblemDefinitionVariant::SE3(pd.clone()),
+                )
+            }
         };
         Ok(Self { planner, pd })
     }
@@ -123,6 +144,26 @@ impl PyRrtConnect {
                         .setup(problem_def.clone(), checker);
                 }
             }
+            PlannerVariant::SE2(planner_variant) => {
+                let checker = Arc::new(PyStateValidityChecker {
+                    callback: validity_callback,
+                });
+                if let ProblemDefinitionVariant::SE2(problem_def) = &self.pd {
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
+                }
+            }
+            PlannerVariant::SE3(planner_variant) => {
+                let checker = Arc::new(PyStateValidityChecker {
+                    callback: validity_callback,
+                });
+                if let ProblemDefinitionVariant::SE3(problem_def) = &self.pd {
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
+                }
+            }
         }
         Ok(())
     }
@@ -152,6 +193,20 @@ impl PyRrtConnect {
                 }
             }
             PlannerVariant::Compound(p) => {
+                let result = p.borrow_mut().solve(timeout);
+                match result {
+                    Ok(path) => Ok(PyPath::from(path)),
+                    Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+                }
+            }
+            PlannerVariant::SE2(p) => {
+                let result = p.borrow_mut().solve(timeout);
+                match result {
+                    Ok(path) => Ok(PyPath::from(path)),
+                    Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+                }
+            }
+            PlannerVariant::SE3(p) => {
                 let result = p.borrow_mut().solve(timeout);
                 match result {
                     Ok(path) => Ok(PyPath::from(path)),

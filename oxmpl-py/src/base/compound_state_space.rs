@@ -13,12 +13,26 @@ use crate::base::{PyRealVectorStateSpace, PySO2StateSpace, PySO3StateSpace};
 
 use super::compound_state::PyCompoundState;
 
+/// Defines a space composed of multiple, weighted subspaces.
+///
+/// This is used for planning in complex configuration spaces where different components (e.g.,
+/// position and orientation) have different units or importance. The distance between two
+/// `CompoundState` objects is the weighted sum of the distances in each subspace.
 #[pyclass(name = "CompoundStateSpace", unsendable)]
 #[derive(Clone)]
 pub struct PyCompoundStateSpace(pub Rc<RefCell<OxmplCompoundStateSpace>>);
 
 #[pymethods]
 impl PyCompoundStateSpace {
+    /// Creates a new `CompoundStateSpace`.
+    ///
+    /// Args:
+    ///     subspaces (List[StateSpace]): A list of state space objects.
+    ///     weights (List[float]): A list of weights, one for each subspace.
+    ///
+    /// Raises:
+    ///     ValueError: If the number of subspaces does not match the number of weights,
+    ///         or if an invalid object is passed as a subspace.
     #[new]
     #[pyo3(signature = (subspaces, weights))]
     fn new(subspaces: Vec<PyObject>, weights: Vec<f64>) -> PyResult<Self> {
@@ -55,6 +69,7 @@ impl PyCompoundStateSpace {
         Ok(Self(Rc::new(RefCell::new(space))))
     }
 
+    /// Computes the weighted distance between two compound states.
     fn distance(&self, state1: &PyCompoundState, state2: &PyCompoundState) -> f64 {
         self.0.borrow().distance(&state1.0, &state2.0)
     }

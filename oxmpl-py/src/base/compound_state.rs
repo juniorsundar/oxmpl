@@ -12,6 +12,13 @@ use oxmpl::base::state::{
 
 use crate::base::{PyRealVectorState, PySO2State, PySO3State};
 
+/// A state that is composed of one or more other states.
+///
+/// This is useful for representing complex states, such as the state of a robot with multiple
+/// joints, or a rigid body in space (which is composed of a translation and a rotation).
+///
+/// Args:
+///     components (List[State]): A list of state objects (e.g., `RealVectorState`, `SO2State`).
 #[pyclass(name = "CompoundState", unsendable)]
 #[derive(Clone)]
 pub struct PyCompoundState(pub Rc<OxmplCompoundState>);
@@ -46,6 +53,7 @@ impl PyCompoundState {
         Ok(Self(Rc::new(compound_state)))
     }
 
+    /// list[State]: The list of component states.
     #[getter]
     fn get_components(&self, py: Python<'_>) -> PyResult<PyObject> {
         let list = PyList::empty(py);
@@ -69,6 +77,7 @@ impl PyCompoundState {
         Ok(list.into())
     }
 
+    /// The number of component states.
     fn __len__(&self) -> usize {
         self.0.components.len()
     }
