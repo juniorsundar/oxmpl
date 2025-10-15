@@ -14,6 +14,7 @@ use crate::base::{
 /// rotational space (`SO3StateSpace`). It allows for defining bounds for both translation (x, y,
 /// z) and rotation (a maximum angle from a center rotation), and calculating weighted distances
 /// between states.
+#[derive(Clone)]
 pub struct SE3StateSpace(pub CompoundStateSpace);
 
 impl SE3StateSpace {

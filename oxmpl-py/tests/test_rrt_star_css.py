@@ -3,7 +3,7 @@ import math
 import random
 
 from oxmpl_py.base import CompoundState, CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, ProblemDefinition, RealVectorState, SO2State
-from oxmpl_py.geometric import RRT
+from oxmpl_py.geometric import RRTStar
 
 
 class CompoundCircularGoal:
@@ -14,7 +14,14 @@ class CompoundCircularGoal:
         self.rng = random.Random(123)
 
     def is_satisfied(self, state: CompoundState) -> bool:
-        return self.space.distance(self.target, state) <= self.radius
+        target_rv_state = self.target.components[0]
+        state_rv_state = state.components[0]
+
+        dist_sq = sum(
+            (a - b) ** 2
+            for a, b in zip(target_rv_state.values, state_rv_state.values)
+        )
+        return math.sqrt(dist_sq) <= self.radius
 
     def sample_goal(self) -> CompoundState:
         angle = self.rng.uniform(0, 2 * math.pi)
@@ -48,7 +55,7 @@ def is_state_valid(state: CompoundState) -> bool:
     return not is_in_wall
 
 
-def test_rrt_finds_path_in_css():
+def test_rrt_star_finds_path_in_css():
     rv_space = RealVectorStateSpace(dimension=2, bounds=[(0.0, 10.0), (0.0, 10.0)])
     so2_space = SO2StateSpace()
     space = CompoundStateSpace([rv_space, so2_space], weights=[1.0, 0.5])
@@ -58,7 +65,7 @@ def test_rrt_finds_path_in_css():
 
     problem_def = ProblemDefinition.from_compound(space, start_state, goal_region)
 
-    planner = RRT(max_distance=0.5, goal_bias=0.05, problem_definition=problem_def)
+    planner = RRTStar(max_distance=0.5, goal_bias=0.05, search_radius=1.0, problem_definition=problem_def)
 
     planner.setup(is_state_valid)
 

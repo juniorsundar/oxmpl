@@ -13,6 +13,7 @@ use crate::base::{
 /// This space combines a 2D translational space (`RealVectorStateSpace` of dimension 2) and a 2D
 /// rotational space (`SO2StateSpace`). It allows for defining bounds for x, y, and yaw, and
 /// calculating weighted distances between states.
+#[derive(Clone)]
 pub struct SE2StateSpace(pub CompoundStateSpace);
 
 impl SE2StateSpace {

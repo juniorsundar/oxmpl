@@ -11,8 +11,11 @@ use crate::base::{
 use oxmpl::{
     base::{
         planner::Planner,
-        space::{CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, SO3StateSpace},
-        state::{CompoundState, RealVectorState, SO2State, SO3State},
+        space::{
+            CompoundStateSpace, RealVectorStateSpace, SE2StateSpace, SE3StateSpace, SO2StateSpace,
+            SO3StateSpace,
+        },
+        state::{CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State},
     },
     geometric::RRTStar,
 };
@@ -21,12 +24,16 @@ type RrtStarForRealVector = RRTStar<RealVectorState, RealVectorStateSpace, PyGoa
 type RrtStarForSO2 = RRTStar<SO2State, SO2StateSpace, PyGoal<SO2State>>;
 type RrtStarForSO3 = RRTStar<SO3State, SO3StateSpace, PyGoal<SO3State>>;
 type RrtStarForCompound = RRTStar<CompoundState, CompoundStateSpace, PyGoal<CompoundState>>;
+type RrtStarForSE2 = RRTStar<SE2State, SE2StateSpace, PyGoal<SE2State>>;
+type RrtStarForSE3 = RRTStar<SE3State, SE3StateSpace, PyGoal<SE3State>>;
 
 enum PlannerVariant {
     RealVector(Rc<RefCell<RrtStarForRealVector>>),
     SO2(Rc<RefCell<RrtStarForSO2>>),
     SO3(Rc<RefCell<RrtStarForSO3>>),
     Compound(Rc<RefCell<RrtStarForCompound>>),
+    SE2(Rc<RefCell<RrtStarForSE2>>),
+    SE3(Rc<RefCell<RrtStarForSE3>>),
 }
 
 #[pyclass(name = "RRTStar", unsendable)]
@@ -79,6 +86,20 @@ impl PyRrtStar {
                     ProblemDefinitionVariant::Compound(pd.clone()),
                 )
             }
+            ProblemDefinitionVariant::SE2(pd) => {
+                let planner_instance = RrtStarForSE2::new(max_distance, goal_bias, search_radius);
+                (
+                    PlannerVariant::SE2(Rc::new(RefCell::new(planner_instance))),
+                    ProblemDefinitionVariant::SE2(pd.clone()),
+                )
+            }
+            ProblemDefinitionVariant::SE3(pd) => {
+                let planner_instance = RrtStarForSE3::new(max_distance, goal_bias, search_radius);
+                (
+                    PlannerVariant::SE3(Rc::new(RefCell::new(planner_instance))),
+                    ProblemDefinitionVariant::SE3(pd.clone()),
+                )
+            }
         };
         Ok(Self { planner, pd })
     }
@@ -125,6 +146,26 @@ impl PyRrtStar {
                         .setup(problem_def.clone(), checker);
                 }
             }
+            PlannerVariant::SE2(planner_variant) => {
+                let checker = Arc::new(PyStateValidityChecker {
+                    callback: validity_callback,
+                });
+                if let ProblemDefinitionVariant::SE2(problem_def) = &self.pd {
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
+                }
+            }
+            PlannerVariant::SE3(planner_variant) => {
+                let checker = Arc::new(PyStateValidityChecker {
+                    callback: validity_callback,
+                });
+                if let ProblemDefinitionVariant::SE3(problem_def) = &self.pd {
+                    planner_variant
+                        .borrow_mut()
+                        .setup(problem_def.clone(), checker);
+                }
+            }
         }
         Ok(())
     }
@@ -154,6 +195,20 @@ impl PyRrtStar {
                 }
             }
             PlannerVariant::Compound(p) => {
+                let result = p.borrow_mut().solve(timeout);
+                match result {
+                    Ok(path) => Ok(PyPath::from(path)),
+                    Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+                }
+            }
+            PlannerVariant::SE2(p) => {
+                let result = p.borrow_mut().solve(timeout);
+                match result {
+                    Ok(path) => Ok(PyPath::from(path)),
+                    Err(e) => Err(pyo3::exceptions::PyException::new_err(e.to_string())),
+                }
+            }
+            PlannerVariant::SE3(p) => {
                 let result = p.borrow_mut().solve(timeout);
                 match result {
                     Ok(path) => Ok(PyPath::from(path)),

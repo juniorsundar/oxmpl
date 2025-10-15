@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use crate::base::state::State;
-use std::f64::consts::PI;
+use std::{f64::consts::PI, fmt};
 
 /// A state representing a 2D rotation, an element of the Special Orthogonal group SO(2).
 ///
@@ -59,6 +59,12 @@ impl SO2State {
     }
 }
 impl State for SO2State {}
+
+impl fmt::Display for SO2State {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Angle: {}", self.value)
+    }
+}
 
 #[cfg(test)]
 mod tests {

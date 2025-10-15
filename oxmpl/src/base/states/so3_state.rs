@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+use std::fmt;
+
 use crate::base::{error::StateError, state::State};
 
 /// A state representing a 3D rotation, an element of the Special Orthogonal group SO(3).
@@ -81,6 +83,16 @@ impl SO3State {
     }
 }
 impl State for SO3State {}
+
+impl fmt::Display for SO3State {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Quaternion: [x: {}, y: {}, z: {}, w: {}]",
+            self.x, self.y, self.z, self.w
+        )
+    }
+}
 
 #[cfg(test)]
 mod tests {
