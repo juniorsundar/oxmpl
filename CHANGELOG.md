@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.5.0](https://github.com/juniorsundar/oxmpl/compare/v0.4.1...v0.5.0) (2025-10-20)
+
+
+### Features
+
+* Added SO3State/SO3StateSpace Python Bindings ([e2d8128](https://github.com/juniorsundar/oxmpl/commit/e2d8128fc4e2efaa21291d94fb2126a1fd3c1025))
+* CompoundState Python bindings ([07627fd](https://github.com/juniorsundar/oxmpl/commit/07627fd25518174d995d3b8b245223024603ece4))
+* CompoundState/CompoundStateSpace integration Python bindings ([96a5253](https://github.com/juniorsundar/oxmpl/commit/96a5253cee659bde0e0ce7064323c2cf9c7ad625))
+* CompoundStateSpace Python Bindings ([3bf7865](https://github.com/juniorsundar/oxmpl/commit/3bf7865338da6841a0fd098713b5b7ac93073518))
+* Implement CompoundState ([221659a](https://github.com/juniorsundar/oxmpl/commit/221659add7eb731e39c303d1109c9a3fe587e9f1))
+* Implement CompoundStateSpace ([b9e8c55](https://github.com/juniorsundar/oxmpl/commit/b9e8c5558c72120868451bec9450342b07b7efc6))
+* Implement SO3StateSpace in Rust w/ Integration tests ([485fc95](https://github.com/juniorsundar/oxmpl/commit/485fc95d98bd234253d0cad44396a652e9f758df))
+* Implemented SE2 and SE3States + Spaces ([554def3](https://github.com/juniorsundar/oxmpl/commit/554def3d234be6673d27b01dd89d68f1f602667e))
+* SE3/SE2 State(Space) Python Bindings + Tests ([68add61](https://github.com/juniorsundar/oxmpl/commit/68add61203f46bfae24a27ceef7f19dd4d7cf5cf))
+
+
+### Bug Fixes
+
+* Calculating distance in SO3StateSpace ([6ce7c07](https://github.com/juniorsundar/oxmpl/commit/6ce7c07a2095992ed70161014392106271790ee9))
+
+
+### Tests
+
+* Integration tests for SE3StateSpace w/ all planners ([d39ee3d](https://github.com/juniorsundar/oxmpl/commit/d39ee3d9dbed0938ab4cd9923f4ccc7f0230978c))
+* Unit tests for CompoundStateSpace ([463bcaa](https://github.com/juniorsundar/oxmpl/commit/463bcaae8d3469c67d3f2031ab90721e7e215e9e))
+
+
+### Continuous Integration
+
+* Added the fmt and clippy components explicitly ([ed753c6](https://github.com/juniorsundar/oxmpl/commit/ed753c6ac64cd96c86457940eeb0ca4e76db5cb4))
+* Update PyO3 version to support Python 3.14 ([766f498](https://github.com/juniorsundar/oxmpl/commit/766f4984acc5276c825e7ba0cc8c7b8cf1636b1d))
+
 ## [0.4.1](https://github.com/juniorsundar/oxmpl/compare/v0.4.0...v0.4.1) (2025-08-29)
 
 
