@@ -2,8 +2,9 @@ import pytest
 import math
 import random
 
-from oxmpl_py.base import SO2State, SO2StateSpace, ProblemDefinition
+from oxmpl_py.base import SO2State, SO2StateSpace, ProblemDefinition, PlannerConfig
 from oxmpl_py.geometric import RRTStar
+
 
 class AngleGoalRegion:
     def __init__(self, space: SO2StateSpace, target_angle: float, radius: float):
@@ -39,12 +40,14 @@ def test_rrt_star_finds_path_in_so2ss():
     goal_region = AngleGoalRegion(space, target_angle=math.pi / 2.0, radius=0.1)
 
     problem_def = ProblemDefinition.from_so2(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=1)
 
     planner = RRTStar(
         max_distance=0.5,
         goal_bias=0.05,
         search_radius=0.25,
         problem_definition=problem_def,
+        planner_config=planner_config,
     )
 
     planner.setup(is_angle_valid)

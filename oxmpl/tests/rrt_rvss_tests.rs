@@ -3,7 +3,7 @@ use std::{f64::consts::PI, sync::Arc, time::Duration};
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner},
+    planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{RealVectorStateSpace, StateSpace},
     state::RealVectorState,
@@ -149,7 +149,7 @@ fn test_rrt_finds_path_in_rvss() {
         "Goal target should be valid!"
     );
 
-    let mut planner = RRT::new(0.5, 0.0);
+    let mut planner = RRT::new(0.5, 0.0, &PlannerConfig { seed: Some(0) });
 
     planner.setup(problem_definition, validity_checker.clone());
 

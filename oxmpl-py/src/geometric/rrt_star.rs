@@ -6,7 +6,8 @@ use pyo3::prelude::*;
 use std::{cell::RefCell, rc::Rc, sync::Arc, time::Duration};
 
 use crate::base::{
-    ProblemDefinitionVariant, PyGoal, PyPath, PyProblemDefinition, PyStateValidityChecker,
+    ProblemDefinitionVariant, PyGoal, PyPath, PyPlannerConfig, PyProblemDefinition,
+    PyStateValidityChecker,
 };
 use oxmpl::{
     base::{
@@ -46,6 +47,14 @@ pub struct PyRrtStar {
 impl PyRrtStar {
     /// Creates a new RRTStar planner instance.
     ///
+    /// Args:
+    ///     max_distance (float): The maximum length of a single branch in the tree.
+    ///     goal_bias (float): The probability (0.0 to 1.0) of sampling the goal.
+    ///     search_radius (float): The radius for finding neighbors to optimize connections.
+    ///     problem_definition (ProblemDefinition): The problem definition.
+    ///     planner_config (PlannerConfig): The planner configuration with planner specific
+    ///         parameters.
+    ///
     /// The constructor inspects the `problem_definition` to determine which
     /// underlying state space to use (e.g., RealVectorStateSpace, SO2StateSpace).
     #[new]
@@ -54,47 +63,60 @@ impl PyRrtStar {
         goal_bias: f64,
         search_radius: f64,
         problem_definition: &PyProblemDefinition,
+        planner_config: &PyPlannerConfig,
     ) -> PyResult<Self> {
         let (planner, pd) = match &problem_definition.0 {
             ProblemDefinitionVariant::RealVector(pd) => {
-                let planner_instance =
-                    RrtStarForRealVector::new(max_distance, goal_bias, search_radius);
+                let planner_instance = RrtStarForRealVector::new(
+                    max_distance,
+                    goal_bias,
+                    search_radius,
+                    &planner_config.0,
+                );
                 (
                     PlannerVariant::RealVector(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::RealVector(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SO2(pd) => {
-                let planner_instance = RrtStarForSO2::new(max_distance, goal_bias, search_radius);
+                let planner_instance =
+                    RrtStarForSO2::new(max_distance, goal_bias, search_radius, &planner_config.0);
                 (
                     PlannerVariant::SO2(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SO2(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SO3(pd) => {
-                let planner_instance = RrtStarForSO3::new(max_distance, goal_bias, search_radius);
+                let planner_instance =
+                    RrtStarForSO3::new(max_distance, goal_bias, search_radius, &planner_config.0);
                 (
                     PlannerVariant::SO3(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SO3(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::Compound(pd) => {
-                let planner_instance =
-                    RrtStarForCompound::new(max_distance, goal_bias, search_radius);
+                let planner_instance = RrtStarForCompound::new(
+                    max_distance,
+                    goal_bias,
+                    search_radius,
+                    &planner_config.0,
+                );
                 (
                     PlannerVariant::Compound(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::Compound(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SE2(pd) => {
-                let planner_instance = RrtStarForSE2::new(max_distance, goal_bias, search_radius);
+                let planner_instance =
+                    RrtStarForSE2::new(max_distance, goal_bias, search_radius, &planner_config.0);
                 (
                     PlannerVariant::SE2(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SE2(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SE3(pd) => {
-                let planner_instance = RrtStarForSE3::new(max_distance, goal_bias, search_radius);
+                let planner_instance =
+                    RrtStarForSE3::new(max_distance, goal_bias, search_radius, &planner_config.0);
                 (
                     PlannerVariant::SE3(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SE3(pd.clone()),

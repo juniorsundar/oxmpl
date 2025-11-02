@@ -2,7 +2,16 @@ import pytest
 import math
 import random
 
-from oxmpl_py.base import CompoundState, CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, ProblemDefinition, RealVectorState, SO2State
+from oxmpl_py.base import (
+    CompoundState,
+    CompoundStateSpace,
+    RealVectorStateSpace,
+    SO2StateSpace,
+    ProblemDefinition,
+    RealVectorState,
+    SO2State,
+    PlannerConfig,
+)
 from oxmpl_py.geometric import RRT
 
 
@@ -57,8 +66,14 @@ def test_rrt_finds_path_in_css():
     goal_region = CompoundCircularGoal(space, x=9.0, y=5.0, radius=0.5)
 
     problem_def = ProblemDefinition.from_compound(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=1)
 
-    planner = RRT(max_distance=0.5, goal_bias=0.05, problem_definition=problem_def)
+    planner = RRT(
+        max_distance=0.5,
+        goal_bias=0.05,
+        problem_definition=problem_def,
+        planner_config=planner_config,
+    )
 
     planner.setup(is_state_valid)
 

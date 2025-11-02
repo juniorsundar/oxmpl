@@ -8,7 +8,7 @@ use js_sys::Float64Array;
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner},
+    planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{RealVectorStateSpace, StateSpace},
     state::RealVectorState,
@@ -305,6 +305,19 @@ impl JsPath {
     }
 }
 
+#[wasm_bindgen(js_name = PlannerConfig)]
+pub struct JsPlannerConfig {
+    seed: Option<u64>,
+}
+
+impl From<&JsPlannerConfig> for PlannerConfig {
+    fn from(js_planner_config: &JsPlannerConfig) -> Self {
+        PlannerConfig {
+            seed: (js_planner_config.seed),
+        }
+    }
+}
+
 #[wasm_bindgen(js_name = RRT)]
 pub struct JsRRT {
     planner: RRT<RealVectorState, RealVectorStateSpace, JsGoal>,
@@ -312,10 +325,15 @@ pub struct JsRRT {
 
 #[wasm_bindgen(js_class = RRT)]
 impl JsRRT {
+    /**
+     * @param {number} max_distance
+     * @param {number} goal_bias
+     * @param {JsPlannerConfig} config
+     */
     #[wasm_bindgen(constructor)]
-    pub fn new(max_distance: f32, goal_bias: f32) -> Self {
+    pub fn new(max_distance: f32, goal_bias: f32, config: &JsPlannerConfig) -> Self {
         Self {
-            planner: RRT::new(max_distance as f64, goal_bias as f64),
+            planner: RRT::new(max_distance as f64, goal_bias as f64, &config.into()),
         }
     }
 
@@ -345,10 +363,15 @@ pub struct JsRRTConnect {
 
 #[wasm_bindgen(js_class = RRTConnect)]
 impl JsRRTConnect {
+    /**
+     * @param {number} max_distance
+     * @param {number} goal_bias
+     * @param {JsPlannerConfig} config
+     */
     #[wasm_bindgen(constructor)]
-    pub fn new(max_distance: f32, goal_bias: f32) -> Self {
+    pub fn new(max_distance: f32, goal_bias: f32, config: &JsPlannerConfig) -> Self {
         Self {
-            planner: RRTConnect::new(max_distance as f64, goal_bias as f64),
+            planner: RRTConnect::new(max_distance as f64, goal_bias as f64, &config.into()),
         }
     }
 
@@ -378,10 +401,26 @@ pub struct JsRRTStar {
 
 #[wasm_bindgen(js_class = RRTStar)]
 impl JsRRTStar {
+    /**
+     * @param {number} max_distance
+     * @param {number} goal_bias
+     * @param {number} search_radius
+     * @param {JsPlannerConfig} config
+     */
     #[wasm_bindgen(constructor)]
-    pub fn new(max_distance: f32, goal_bias: f32, search_radius: f32) -> Self {
+    pub fn new(
+        max_distance: f32,
+        goal_bias: f32,
+        search_radius: f32,
+        config: &JsPlannerConfig,
+    ) -> Self {
         Self {
-            planner: RRTStar::new(max_distance as f64, goal_bias as f64, search_radius as f64),
+            planner: RRTStar::new(
+                max_distance as f64,
+                goal_bias as f64,
+                search_radius as f64,
+                &config.into(),
+            ),
         }
     }
 
@@ -411,10 +450,19 @@ pub struct JsPRM {
 
 #[wasm_bindgen(js_class = PRM)]
 impl JsPRM {
+    /**
+     * @param {number} timeout_secs
+     * @param {number} connection_radius
+     * @param {JsPlannerConfig} config
+     */
     #[wasm_bindgen(constructor)]
-    pub fn new(timeout_secs: f32, connection_radius: f32) -> Self {
+    pub fn new(timeout_secs: f32, connection_radius: f32, config: &JsPlannerConfig) -> Self {
         Self {
-            planner: PRM::new(timeout_secs.into(), connection_radius as f64),
+            planner: PRM::new(
+                timeout_secs.into(),
+                connection_radius as f64,
+                &config.into(),
+            ),
         }
     }
 

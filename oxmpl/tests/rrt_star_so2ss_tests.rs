@@ -3,7 +3,7 @@ use std::{f64::consts::PI, sync::Arc, time::Duration};
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner},
+    planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{SO2StateSpace, StateSpace},
     state::SO2State,
@@ -119,7 +119,7 @@ fn test_rrt_star_finds_path_in_so2ss() {
         "Goal target should be valid!"
     );
 
-    let mut planner = RRTStar::new(0.2, 0.05, 0.25);
+    let mut planner = RRTStar::new(0.2, 0.05, 0.25, &PlannerConfig { seed: Some(0) });
 
     planner.setup(problem_definition, validity_checker.clone());
 

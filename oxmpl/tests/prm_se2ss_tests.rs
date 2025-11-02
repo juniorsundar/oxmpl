@@ -3,7 +3,7 @@ use std::{f64::consts::PI, sync::Arc, time::Duration};
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner},
+    planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{SE2StateSpace, StateSpace},
     state::SE2State,
@@ -145,7 +145,7 @@ fn test_prm_finds_path_in_se2ss() {
         "Goal target should be valid!"
     );
 
-    let mut planner = PRM::new(40.0, 5.0);
+    let mut planner = PRM::new(40.0, 5.0, &PlannerConfig { seed: Some(0) });
 
     planner.setup(problem_definition, validity_checker.clone());
     match planner.construct_roadmap() {
@@ -156,7 +156,7 @@ fn test_prm_finds_path_in_se2ss() {
         ),
     };
 
-    let timeout = Duration::from_secs(10);
+    let timeout = Duration::from_secs(5);
     let result = planner.solve(timeout);
 
     assert!(

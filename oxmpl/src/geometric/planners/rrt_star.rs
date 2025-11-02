@@ -4,9 +4,12 @@
 
 use std::sync::Arc;
 
-use crate::time::{Duration, Instant};
+use crate::{
+    base::planner::PlannerConfig,
+    time::{Duration, Instant},
+};
 
-use rand::Rng;
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::base::{
     error::PlanningError,
@@ -48,6 +51,7 @@ pub struct RRTStar<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
     problem_def: Option<Arc<ProblemDefinition<S, SP, G>>>,
     validity_checker: Option<Arc<dyn StateValidityChecker<S>>>,
     tree: Vec<Node<S>>,
+    rng: Option<Box<StdRng>>,
 }
 
 impl<S, SP, G> RRTStar<S, SP, G>
@@ -62,7 +66,14 @@ where
     /// * `max_distance` - The maximum length of a single branch in the tree.
     /// * `goal_bias` - The probability (0.0 to 1.0) of sampling the goal.
     /// * `search_radius` - The radius for finding neighbors to optimize connections.
-    pub fn new(max_distance: f64, goal_bias: f64, search_radius: f64) -> Self {
+    /// * `config` - The planner configuration, for planner-specific parameters.
+    pub fn new(
+        max_distance: f64,
+        goal_bias: f64,
+        search_radius: f64,
+        config: &PlannerConfig,
+    ) -> Self {
+        let rng = config.seed.map(|s| Box::new(StdRng::seed_from_u64(s)));
         RRTStar {
             max_distance,
             goal_bias,
@@ -70,6 +81,7 @@ where
             problem_def: None,
             validity_checker: None,
             tree: Vec::new(),
+            rng,
         }
     }
 
@@ -176,7 +188,10 @@ where
         let goal = &pd.goal;
 
         let start_time = Instant::now();
-        let mut rng = rand::rng();
+        let mut rng = self
+            .rng
+            .take()
+            .unwrap_or_else(|| Box::new(StdRng::from_os_rng()));
 
         // Main Loop
         loop {

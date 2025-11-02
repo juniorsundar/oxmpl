@@ -4,18 +4,19 @@
 
 use std::sync::Arc;
 
-use crate::time::{Duration, Instant};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
-use rand::Rng;
-
-use crate::base::{
-    error::PlanningError,
-    goal::{Goal, GoalSampleableRegion},
-    planner::{Path, Planner},
-    problem_definition::ProblemDefinition,
-    space::StateSpace,
-    state::State,
-    validity::StateValidityChecker,
+use crate::{
+    base::{
+        error::PlanningError,
+        goal::{Goal, GoalSampleableRegion},
+        planner::{Path, Planner, PlannerConfig},
+        problem_definition::ProblemDefinition,
+        space::StateSpace,
+        state::State,
+        validity::StateValidityChecker,
+    },
+    time::{Duration, Instant},
 };
 
 // A helper struct to build the tree. Each node stores its state and the index of its parent in the
@@ -70,6 +71,7 @@ pub struct RRTConnect<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
     validity_checker: Option<Arc<dyn StateValidityChecker<S>>>,
     start_tree: Vec<Node<S>>,
     goal_tree: Vec<Node<S>>,
+    rng: Option<Box<StdRng>>,
 }
 
 impl<S, SP, G> RRTConnect<S, SP, G>
@@ -83,7 +85,9 @@ where
     /// # Parameters
     /// * `max_distance` - The maximum length of a single branch in the tree.
     /// * `goal_bias` - The probability (0.0 to 1.0) of sampling the goal.
-    pub fn new(max_distance: f64, goal_bias: f64) -> Self {
+    /// * `config` - The planner configuration, for planner-specific parameters.
+    pub fn new(max_distance: f64, goal_bias: f64, config: &PlannerConfig) -> Self {
+        let rng = config.seed.map(|s| Box::new(StdRng::seed_from_u64(s)));
         RRTConnect {
             max_distance,
             goal_bias,
@@ -91,6 +95,7 @@ where
             validity_checker: None,
             start_tree: Vec::new(),
             goal_tree: Vec::new(),
+            rng,
         }
     }
 
@@ -225,8 +230,11 @@ where
     }
 
     fn solve(&mut self, timeout: Duration) -> Result<Path<S>, PlanningError> {
+        let mut rng = self
+            .rng
+            .take()
+            .unwrap_or_else(|| Box::new(StdRng::from_os_rng()));
         let start_time = Instant::now();
-        let mut rng = rand::rng();
         let pd = self
             .problem_def
             .as_ref()
