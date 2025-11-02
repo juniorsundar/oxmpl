@@ -2,7 +2,7 @@ import pytest
 import math
 import random
 
-from oxmpl_py.base import SO3State, SO3StateSpace, ProblemDefinition
+from oxmpl_py.base import SO3State, SO3StateSpace, ProblemDefinition, PlannerConfig
 from oxmpl_py.geometric import PRM
 
 
@@ -62,8 +62,14 @@ def test_prm_finds_path_in_so3ss():
     )
 
     problem_def = ProblemDefinition.from_so3(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=1)
 
-    planner = PRM(timeout=5.0, connection_radius=0.5, problem_definition=problem_def)
+    planner = PRM(
+        timeout=5.0,
+        connection_radius=0.5,
+        problem_definition=problem_def,
+        planner_config=planner_config,
+    )
     planner.setup(is_rotation_valid)
     planner.construct_roadmap()
 

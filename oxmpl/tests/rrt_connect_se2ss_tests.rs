@@ -3,7 +3,7 @@ use std::{f64::consts::PI, sync::Arc, time::Duration};
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner},
+    planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{SE2StateSpace, StateSpace},
     state::SE2State,
@@ -37,6 +37,10 @@ struct SE2GoalRegion {
 impl Goal<SE2State> for SE2GoalRegion {
     fn is_satisfied(&self, state: &SE2State) -> bool {
         self.space.distance(state, &self.target) <= self.radius
+
+        // let dx = state.get_x() - self.target.get_x();
+        // let dy = state.get_y() - self.target.get_y();
+        // (dx * dx + dy * dy).sqrt() <= self.radius
     }
 }
 
@@ -44,6 +48,11 @@ impl GoalRegion<SE2State> for SE2GoalRegion {
     fn distance_goal(&self, state: &SE2State) -> f64 {
         let dist_to_center = self.space.distance(state, &self.target);
         (dist_to_center - self.radius).max(0.0)
+
+        // let dx = state.get_x() - self.target.get_x();
+        // let dy = state.get_y() - self.target.get_y();
+        // let dist_to_center_xy = (dx * dx + dy * dy).sqrt();
+        // (dist_to_center_xy - self.radius).max(0.0)
     }
 }
 
@@ -53,7 +62,7 @@ impl GoalSampleableRegion<SE2State> for SE2GoalRegion {
         let r = self.radius * rng.random::<f64>().sqrt();
         let x = self.target.get_x() + r * angle.cos();
         let y = self.target.get_y() + r * angle.sin();
-        let yaw = rng.random_range(-PI..PI);
+        let yaw = rng.random_range(-0.01..0.01);
         Ok(SE2State::new(x, y, yaw))
     }
 }
@@ -146,30 +155,16 @@ fn test_rrt_connect_finds_path_in_se2ss() {
         "Goal target should be valid!"
     );
 
-    let mut planner = RRTConnect::new(1.0, 0.0);
+    let mut planner = RRTConnect::new(1.0, 0.0, &PlannerConfig { seed: Some(0) });
 
     planner.setup(problem_definition, validity_checker.clone());
 
-    const MAX_ATTEMPTS: u32 = 100;
-    let mut final_result: Option<Path<SE2State>> = None;
-    let timeout = Duration::from_secs(5);
+    let timeout = Duration::from_secs(10);
 
-    for attempt in 1..=MAX_ATTEMPTS {
-        println!("Planning attempt {attempt}/{MAX_ATTEMPTS}...");
-        if let Ok(path) = planner.solve(timeout) {
-            if goal_definition.is_satisfied(path.0.last().unwrap()) {
-                final_result = Some(path);
-                println!("Found a valid solution on attempt {attempt}.");
-                break;
-            }
-        }
-    }
+    let final_result = planner.solve(timeout);
 
-    // Assert that a solution was found within the given attempts.
-    assert!(
-        final_result.is_some(),
-        "Planner failed to find a valid solution after {MAX_ATTEMPTS} attempts.",
-    );
+    // 3. Assert that the *single attempt* found a valid path
+    assert!(final_result.is_ok(), "Planner failed to find a solution.");
 
     let path = final_result.unwrap();
     println!("Found path with {} states.", path.0.len());

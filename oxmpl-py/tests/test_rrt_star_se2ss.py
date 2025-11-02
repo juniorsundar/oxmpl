@@ -2,7 +2,7 @@ import pytest
 import math
 import random
 
-from oxmpl_py.base import SE2State, SE2StateSpace, ProblemDefinition
+from oxmpl_py.base import SE2State, SE2StateSpace, ProblemDefinition, PlannerConfig
 from oxmpl_py.geometric import RRTStar
 
 
@@ -46,13 +46,22 @@ def is_state_valid(state: SE2State) -> bool:
 
 
 def test_rrt_star_finds_path_in_se2ss():
-    space = SE2StateSpace(weight=1.0, bounds=[(0.0, 10.0), (0.0, 10.0), (-math.pi, math.pi)])
+    space = SE2StateSpace(
+        weight=1.0, bounds=[(0.0, 10.0), (0.0, 10.0), (-math.pi, math.pi)]
+    )
     start_state = SE2State(1.0, 1.0, 0.0)
     goal_region = SE2GoalRegion(space, x=9.0, y=9.0, radius=0.5)
 
     problem_def = ProblemDefinition.from_se2(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=1)
 
-    planner = RRTStar(problem_definition=problem_def, goal_bias=0.1, max_distance=0.5, search_radius=1.0)
+    planner = RRTStar(
+        problem_definition=problem_def,
+        goal_bias=0.1,
+        max_distance=0.5,
+        search_radius=1.0,
+        planner_config=planner_config,
+    )
     planner.setup(is_state_valid)
 
     print("\nAttempting to solve SE(2) planning problem with RRT*")
@@ -75,8 +84,8 @@ def test_rrt_star_finds_path_in_se2ss():
     assert goal_region.is_satisfied(path_end), "Path must end inside the goal region."
 
     for i, state in enumerate(path.states):
-        assert is_state_valid(
-            state
-        ), f"Path contains an invalid state at index {i}: ({state.x}, {state.y}, {state.yaw})"
+        assert is_state_valid(state), (
+            f"Path contains an invalid state at index {i}: ({state.x}, {state.y}, {state.yaw})"
+        )
 
     print("Path validation successful!")

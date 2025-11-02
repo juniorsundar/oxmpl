@@ -2,7 +2,12 @@ import pytest
 import math
 import random
 
-from oxmpl_py.base import RealVectorState, RealVectorStateSpace, ProblemDefinition
+from oxmpl_py.base import (
+    RealVectorState,
+    RealVectorStateSpace,
+    ProblemDefinition,
+    PlannerConfig,
+)
 from oxmpl_py.geometric import PRM
 
 
@@ -50,8 +55,14 @@ def test_prm_finds_path_in_rvss():
     goal_region = CircularGoal(space, x=9.0, y=5.0, radius=0.5)
 
     problem_def = ProblemDefinition.from_real_vector(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=0)
 
-    planner = PRM(timeout=5.0, connection_radius=0.5, problem_definition=problem_def)
+    planner = PRM(
+        timeout=5.0,
+        connection_radius=0.5,
+        problem_definition=problem_def,
+        planner_config=planner_config,
+    )
 
     planner.setup(is_state_valid)
     planner.construct_roadmap()

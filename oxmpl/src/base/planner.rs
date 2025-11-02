@@ -58,3 +58,10 @@ pub trait Planner<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
     ///   occurs.
     fn solve(&mut self, timeout: Duration) -> Result<Path<S>, PlanningError>;
 }
+
+/// Configuration for a planner.
+#[derive(Default)]
+pub struct PlannerConfig {
+    /// The seed for the random number generator.
+    pub seed: Option<u64>,
+}

@@ -7,12 +7,14 @@ use std::{
     sync::Arc,
 };
 
+use rand::{rngs::StdRng, SeedableRng};
+
 use crate::time::{Duration, Instant};
 
 use crate::base::{
     error::PlanningError,
     goal::{Goal, GoalSampleableRegion},
-    planner::{Path, Planner},
+    planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::StateSpace,
     state::State,
@@ -54,6 +56,7 @@ pub struct PRM<S: State, SP: StateSpace<StateType = S>, G: Goal<S>> {
     problem_def: Option<Arc<ProblemDefinition<S, SP, G>>>,
     validity_checker: Option<Arc<dyn StateValidityChecker<S>>>,
     roadmap: Vec<Node<S>>,
+    rng: Option<Box<StdRng>>,
 }
 
 impl<S, SP, G> PRM<S, SP, G>
@@ -67,13 +70,16 @@ where
     /// # Parameters
     /// * `timeout` - The time in seconds to spend building the roadmap.
     /// * `connection_radius` - The radius for connecting new nodes to the roadmap.
-    pub fn new(timeout: f64, connection_radius: f64) -> Self {
+    /// * `config` - The planner configuration, for planner-specific parameters.
+    pub fn new(timeout: f64, connection_radius: f64, config: &PlannerConfig) -> Self {
+        let rng = config.seed.map(|s| Box::new(StdRng::seed_from_u64(s)));
         PRM {
             timeout,
             connection_radius,
             problem_def: None,
             validity_checker: None,
             roadmap: Vec::new(),
+            rng,
         }
     }
 
@@ -112,14 +118,17 @@ where
             return Ok(());
         }
 
-        let mut rng = rand::rng();
+        let mut rng = self
+            .rng
+            .take()
+            .unwrap_or_else(|| Box::new(StdRng::from_os_rng()));
         let start_time = Instant::now();
         loop {
             if start_time.elapsed().as_secs_f64() > self.timeout {
                 break;
             }
 
-            let q_rand = pd.space.sample_uniform(&mut rng).unwrap();
+            let q_rand = pd.space.sample_uniform(&mut *rng).unwrap();
             if vc.is_valid(&q_rand) {
                 let mut new_node = Node {
                     state: q_rand.clone(),

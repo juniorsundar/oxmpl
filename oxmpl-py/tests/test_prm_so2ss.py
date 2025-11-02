@@ -2,7 +2,7 @@ import pytest
 import math
 import random
 
-from oxmpl_py.base import SO2State, SO2StateSpace, ProblemDefinition
+from oxmpl_py.base import SO2State, SO2StateSpace, ProblemDefinition, PlannerConfig
 from oxmpl_py.geometric import PRM
 
 
@@ -39,8 +39,14 @@ def test_prm_finds_path_in_so2ss():
     goal_region = AngleGoalRegion(space, target_angle=math.pi / 2.0, radius=0.1)
 
     problem_def = ProblemDefinition.from_so2(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=0)
 
-    planner = PRM(timeout=5.0, connection_radius=0.5, problem_definition=problem_def)
+    planner = PRM(
+        timeout=5.0,
+        connection_radius=0.5,
+        problem_definition=problem_def,
+        planner_config=planner_config,
+    )
 
     planner.setup(is_angle_valid)
     planner.construct_roadmap()

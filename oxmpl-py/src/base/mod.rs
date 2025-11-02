@@ -8,6 +8,7 @@ mod compound_state;
 mod compound_state_space;
 mod goal;
 mod path;
+mod planner;
 mod problem_definition;
 mod py_state_convert;
 mod real_vector_state;
@@ -26,6 +27,7 @@ pub use compound_state::PyCompoundState;
 pub use compound_state_space::PyCompoundStateSpace;
 pub use goal::PyGoal;
 pub use path::PyPath;
+pub use planner::PyPlannerConfig;
 pub use problem_definition::ProblemDefinitionVariant;
 pub use problem_definition::PyProblemDefinition;
 pub use real_vector_state::PyRealVectorState;
@@ -55,6 +57,7 @@ pub fn create_module(_py: Python<'_>) -> PyResult<Bound<'_, PyModule>> {
     base_module.add_class::<PySO3State>()?;
     base_module.add_class::<PySO3StateSpace>()?;
     base_module.add_class::<PyPath>()?;
+    base_module.add_class::<PyPlannerConfig>()?;
     base_module.add_class::<PyProblemDefinition>()?;
     Ok(base_module)
 }

@@ -6,7 +6,8 @@ use pyo3::prelude::*;
 use std::{cell::RefCell, rc::Rc, sync::Arc, time::Duration};
 
 use crate::base::{
-    ProblemDefinitionVariant, PyGoal, PyPath, PyProblemDefinition, PyStateValidityChecker,
+    ProblemDefinitionVariant, PyGoal, PyPath, PyPlannerConfig, PyProblemDefinition,
+    PyStateValidityChecker,
 };
 use oxmpl::{
     base::{
@@ -46,6 +47,13 @@ pub struct PyPrm {
 impl PyPrm {
     /// Creates a new PRM planner instance.
     ///
+    /// Args:
+    ///     timeout (float): The time in seconds to spend building the roadmap.
+    ///     connection_radius (float): The radius for connecting new nodes to the roadmap.
+    ///     problem_definition (ProblemDefinition): The problem definition.
+    ///     planner_config (PlannerConfig): The planner configuration with planner specific
+    ///         parameters.
+    ///
     /// The constructor inspects the `problem_definition` to determine which
     /// underlying state space to use (e.g., RealVectorStateSpace, SO2StateSpace).
     #[new]
@@ -53,45 +61,52 @@ impl PyPrm {
         timeout: f64,
         connection_radius: f64,
         problem_definition: &PyProblemDefinition,
+        planner_config: &PyPlannerConfig,
     ) -> PyResult<Self> {
         let (planner, pd) = match &problem_definition.0 {
             ProblemDefinitionVariant::RealVector(pd) => {
-                let planner_instance = PrmForRealVector::new(timeout, connection_radius);
+                let planner_instance =
+                    PrmForRealVector::new(timeout, connection_radius, &planner_config.0);
                 (
                     PlannerVariant::RealVector(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::RealVector(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SO2(pd) => {
-                let planner_instance = PrmForSO2::new(timeout, connection_radius);
+                let planner_instance =
+                    PrmForSO2::new(timeout, connection_radius, &planner_config.0);
                 (
                     PlannerVariant::SO2(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SO2(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SO3(pd) => {
-                let planner_instance = PrmForSO3::new(timeout, connection_radius);
+                let planner_instance =
+                    PrmForSO3::new(timeout, connection_radius, &planner_config.0);
                 (
                     PlannerVariant::SO3(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SO3(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::Compound(pd) => {
-                let planner_instance = PrmForCompound::new(timeout, connection_radius);
+                let planner_instance =
+                    PrmForCompound::new(timeout, connection_radius, &planner_config.0);
                 (
                     PlannerVariant::Compound(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::Compound(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SE2(pd) => {
-                let planner_instance = PrmForSE2::new(timeout, connection_radius);
+                let planner_instance =
+                    PrmForSE2::new(timeout, connection_radius, &planner_config.0);
                 (
                     PlannerVariant::SE2(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SE2(pd.clone()),
                 )
             }
             ProblemDefinitionVariant::SE3(pd) => {
-                let planner_instance = PrmForSE3::new(timeout, connection_radius);
+                let planner_instance =
+                    PrmForSE3::new(timeout, connection_radius, &planner_config.0);
                 (
                     PlannerVariant::SE3(Rc::new(RefCell::new(planner_instance))),
                     ProblemDefinitionVariant::SE3(pd.clone()),

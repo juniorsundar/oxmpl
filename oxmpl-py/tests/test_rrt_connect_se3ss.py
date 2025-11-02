@@ -2,12 +2,20 @@ import pytest
 import math
 import random
 
-from oxmpl_py.base import SE3State, SO3State, SE3StateSpace, ProblemDefinition
+from oxmpl_py.base import (
+    SE3State,
+    SO3State,
+    SE3StateSpace,
+    ProblemDefinition,
+    PlannerConfig,
+)
 from oxmpl_py.geometric import RRTConnect
 
 
 class SE3GoalRegion:
-    def __init__(self, space: SE3StateSpace, x: float, y: float, z: float, radius: float):
+    def __init__(
+        self, space: SE3StateSpace, x: float, y: float, z: float, radius: float
+    ):
         self.space = space
         self.target_x = x
         self.target_y = y
@@ -37,7 +45,9 @@ class SE3GoalRegion:
         quat_y = self.rng.uniform(-1.0, 1.0)
         quat_z = self.rng.uniform(-1.0, 1.0)
         norm = math.sqrt(quat_w**2 + quat_x**2 + quat_y**2 + quat_z**2)
-        rotation = SO3State(w=quat_w/norm, x=quat_x/norm, y=quat_y/norm, z=quat_z/norm)
+        rotation = SO3State(
+            w=quat_w / norm, x=quat_x / norm, y=quat_y / norm, z=quat_z / norm
+        )
 
         return SE3State(x, y, z, rotation)
 
@@ -54,9 +64,11 @@ def is_state_valid(state: SE3State) -> bool:
     obs2_x_min, obs2_x_max = 6.0, 8.0
     obs2_y_min, obs2_y_max = 1.0, 4.0
     obs2_z_min, obs2_z_max = 2.0, 5.0
-    if (obs2_x_min <= x <= obs2_x_max and
-        obs2_y_min <= y <= obs2_y_max and
-        obs2_z_min <= z <= obs2_z_max):
+    if (
+        obs2_x_min <= x <= obs2_x_max
+        and obs2_y_min <= y <= obs2_y_max
+        and obs2_z_min <= z <= obs2_z_max
+    ):
         return False
 
     return True
@@ -68,8 +80,14 @@ def test_rrt_connect_finds_path_in_se3ss():
     goal_region = SE3GoalRegion(space, x=9.0, y=9.0, z=9.0, radius=0.5)
 
     problem_def = ProblemDefinition.from_se3(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=1)
 
-    planner = RRTConnect(problem_definition=problem_def, goal_bias=0.1, max_distance=0.5)
+    planner = RRTConnect(
+        problem_definition=problem_def,
+        goal_bias=0.1,
+        max_distance=0.5,
+        planner_config=planner_config,
+    )
     planner.setup(is_state_valid)
 
     print("\nAttempting to solve SE(3) planning problem with RRT-Connect...")
@@ -92,8 +110,8 @@ def test_rrt_connect_finds_path_in_se3ss():
     assert goal_region.is_satisfied(path_end), "Path must end inside the goal region."
 
     for i, state in enumerate(path.states):
-        assert is_state_valid(
-            state
-        ), f"Path contains an invalid state at index {i}: ({state.x}, {state.y}, {state.z})"
+        assert is_state_valid(state), (
+            f"Path contains an invalid state at index {i}: ({state.x}, {state.y}, {state.z})"
+        )
 
     print("Path validation successful!")
