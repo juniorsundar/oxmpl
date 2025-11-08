@@ -72,7 +72,8 @@ describe('PRM Integration Tests', () => {
     // CREATE AND SETUP THE PLANNER
     const timeout = 5.0;
     const connectionRadius = 0.5;
-    const planner = new oxmpl.PRM(timeout, connectionRadius);
+    const planner_config = new oxmpl.PlannerConfig(0);
+    const planner = new oxmpl.PRM(timeout, connectionRadius, planner_config);
 
     planner.setup(problemDef, validityChecker);
     planner.constructRoadmap();
