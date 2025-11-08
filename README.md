@@ -119,8 +119,9 @@ const goal = new oxmpl.Goal(
 // Create problem and run planner
 const problem = new oxmpl.ProblemDefinition(space, start, goal);
 const validityChecker = new oxmpl.StateValidityChecker(isStateValid);
+const planner_config = new oxmpl.PlannerConfig(123);
 
-const planner = new oxmpl.RRT(0.5, 0.05);
+const planner = new oxmpl.RRT(0.5, 0.05, planner_config);
 planner.setup(problem, validityChecker);
 
 try {
@@ -141,7 +142,7 @@ Here is a complete example of solving a 2D planning problem with a custom collis
 
 ```python
 import math
-from oxmpl_py.base import RealVectorState, RealVectorStateSpace, ProblemDefinition
+from oxmpl_py.base import RealVectorState, RealVectorStateSpace, ProblemDefinition, PlannerConfig
 from oxmpl_py.geometric.planners import RRT
 
 def is_state_valid(state: RealVectorState) -> bool:
@@ -167,8 +168,12 @@ start_state = RealVectorState([-5.0, -5.0])
 goal_region = MyCircularGoal(space, x=5.0, y=5.0, radius=0.5)
 
 problem_def = ProblemDefinition.from_real_vector(space, start_state, goal_region)
+planner_config = PlannerConfig(seed=123)
 
-planner = RRT(max_distance=0.5, goal_bias=0.05, problem_definition=problem_def)
+planner = RRT(max_distance=0.5,
+        goal_bias=0.05,
+        problem_definition=problem_def,
+        planner_config=planner_config)
 planner.setup(is_state_valid)
 
 try:
@@ -188,7 +193,7 @@ use std::{f64::consts::PI, sync::Arc, time::Duration};
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner},
+    planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{RealVectorStateSpace, StateSpace},
     state::RealVectorState,
@@ -288,7 +293,7 @@ fn main() {
         wall_thickness: 0.5,
     });
 
-    let mut planner = RRT::new(0.5, 0.0);
+    let mut planner = RRT::new(0.5, 0.0, &PlannerConfig{ seed: Some(123) });
 
     planner.setup(problem_definition, validity_checker.clone());
 
