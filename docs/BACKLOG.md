@@ -9,9 +9,9 @@
     - [x] RealVectorStateSpace
     - [x] SO2
     - [x] SO3
-    - [/] CompoundStateSpace
-        - [ ] SE2
-        - [ ] SE3
+    - [x] CompoundStateSpace
+        - [x] SE2
+        - [x] SE3
 - [x] Refactor Python Bindings module: `oxmpl-py`:
     - ~Its a mess right now...~
     - May revisit this later
