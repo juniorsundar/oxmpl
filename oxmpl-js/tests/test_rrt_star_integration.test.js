@@ -73,7 +73,8 @@ describe('RRT* Integration Tests', () => {
     const maxDistance = 0.5;
     const goalBias = 0.05;
     const searchRadius = 0.25;
-    const planner = new oxmpl.RRTStar(maxDistance, goalBias, searchRadius);
+    const planner_config = new oxmpl.PlannerConfig(0);
+    const planner = new oxmpl.RRTStar(maxDistance, goalBias, searchRadius, planner_config);
 
     planner.setup(problemDef, validityChecker);
 

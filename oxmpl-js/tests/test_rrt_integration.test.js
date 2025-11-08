@@ -72,7 +72,8 @@ describe('RRT Integration Tests', () => {
     // CREATE AND SETUP THE PLANNER
     const maxDistance = 0.5;
     const goalBias = 0.05;
-    const planner = new oxmpl.RRT(maxDistance, goalBias);
+    const planner_config = new oxmpl.PlannerConfig(0);
+    const planner = new oxmpl.RRT(maxDistance, goalBias, planner_config);
 
     planner.setup(problemDef, validityChecker);
 

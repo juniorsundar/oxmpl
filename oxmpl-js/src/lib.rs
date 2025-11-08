@@ -310,6 +310,16 @@ pub struct JsPlannerConfig {
     seed: Option<u64>,
 }
 
+#[wasm_bindgen(js_class = PlannerConfig)]
+impl JsPlannerConfig {
+    #[wasm_bindgen(constructor)]
+    pub fn new(seed: Option<f64>) -> Self {
+        Self {
+            seed: seed.map(|s| s as u64),
+        }
+    }
+}
+
 impl From<&JsPlannerConfig> for PlannerConfig {
     fn from(js_planner_config: &JsPlannerConfig) -> Self {
         PlannerConfig {
