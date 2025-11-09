@@ -15,7 +15,7 @@ keywords = ["robotics", "motion-planning", "wasm", "javascript"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "0.2"
+wasm-bindgen = "0.2.105"
 js-sys = "0.3"
 oxmpl = { path = "../oxmpl" }
 rand = "0.9"
