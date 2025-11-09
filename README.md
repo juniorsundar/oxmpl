@@ -143,7 +143,7 @@ Here is a complete example of solving a 2D planning problem with a custom collis
 ```python
 import math
 from oxmpl_py.base import RealVectorState, RealVectorStateSpace, ProblemDefinition, PlannerConfig
-from oxmpl_py.geometric.planners import RRT
+from oxmpl_py.geometric import RRT
 
 def is_state_valid(state: RealVectorState) -> bool:
     """A state is invalid if it's inside a circular obstacle at the origin."""
