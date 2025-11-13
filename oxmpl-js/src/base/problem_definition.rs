@@ -20,7 +20,7 @@ impl JsProblemDefinition {
     pub fn new(space: &JsRealVectorStateSpace, start: Vec<f64>, goal: JsGoal) -> Self {
         let start_state = RealVectorState::new(start);
         let problem_def = ProblemDefinition {
-            space: space.inner.clone(),
+            space: Arc::new(space.inner.lock().unwrap().clone()),
             start_states: vec![start_state],
             goal: Arc::new(goal),
         };
