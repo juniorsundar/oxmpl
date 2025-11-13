@@ -3,17 +3,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use oxmpl::base::{
-    space::{RealVectorStateSpace, StateSpace},
+    space::{RealVectorStateSpace as OxmplRealVectorStateSpace, StateSpace},
     state::RealVectorState,
 };
 use rand::rng;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use wasm_bindgen::prelude::*;
+
+use crate::base::JsRealVectorState;
 
 #[wasm_bindgen(js_name = RealVectorStateSpace)]
 pub struct JsRealVectorStateSpace {
     #[wasm_bindgen(skip)]
-    pub inner: Arc<RealVectorStateSpace>,
+    pub inner: Arc<Mutex<OxmplRealVectorStateSpace>>,
 }
 
 #[wasm_bindgen(js_class = RealVectorStateSpace)]
@@ -39,30 +41,40 @@ impl JsRealVectorStateSpace {
             None
         };
 
-        match RealVectorStateSpace::new(dimension, bounds_vec) {
+        match OxmplRealVectorStateSpace::new(dimension, bounds_vec) {
             Ok(space) => Ok(Self {
-                inner: Arc::new(space),
+                inner: Arc::new(Mutex::new(space)),
             }),
             Err(e) => Err(e.to_string()),
         }
     }
 
-    pub fn sample(&self) -> Result<Vec<f64>, String> {
+    #[wasm_bindgen(js_name = sample)]
+    pub fn sample(&self) -> Result<JsRealVectorState, String> {
         let mut rng = rng();
-        match self.inner.sample_uniform(&mut rng) {
-            Ok(state) => Ok(state.values),
+        match self.inner.lock().unwrap().sample_uniform(&mut rng) {
+            Ok(state) => Ok(JsRealVectorState::new(state.values)),
             Err(e) => Err(e.to_string()),
         }
     }
 
-    pub fn distance(&self, state1: Vec<f64>, state2: Vec<f64>) -> f64 {
-        let s1 = RealVectorState::new(state1);
-        let s2 = RealVectorState::new(state2);
-        self.inner.distance(&s1, &s2)
+    #[wasm_bindgen(js_name = distance)]
+    pub fn distance(&self, state1: &JsRealVectorState, state2: &JsRealVectorState) -> f64 {
+        let s1 = RealVectorState::new(state1.inner.values.clone());
+        let s2 = RealVectorState::new(state2.inner.values.clone());
+        self.inner.lock().unwrap().distance(&s1, &s2)
     }
 
     #[wasm_bindgen(js_name = getDimension)]
     pub fn get_dimension(&self) -> usize {
-        self.inner.dimension
+        self.inner.lock().unwrap().dimension
+    }
+
+    #[wasm_bindgen(js_name = setLongestValidLineSegmentFraction)]
+    pub fn set_longest_valid_segment_fraction(&mut self, fraction: f64) {
+        self.inner
+            .lock()
+            .unwrap()
+            .set_longest_valid_segment_fraction(fraction);
     }
 }

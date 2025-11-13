@@ -84,21 +84,22 @@ describe('RRT Integration Tests', () => {
     let path;
     try {
       path = planner.solve(timeoutSecs);
-      console.log(`Solution found with ${path.length()} states.`);
+      console.log(`Solution found with ${path.getLength()} states.`);
     } catch (error) {
       throw new Error(`Planner failed to find a solution when one should exist. Error: ${error}`);
     }
 
     // VALIDATE THE SOLUTION PATH
     const states = path.getStates();
-    const pathLength = path.length();
+    const pathLength = path.getLength();
 
     expect(pathLength).toBeGreaterThan(1);
     expect(states.length).toBe(pathLength);
 
     // Check start position
-    const pathStart = states[0];
-    const startDistance = space.distance(pathStart, startState);
+    const pathStart = new oxmpl.RealVectorState(states[0]);
+    const startStateObj = new oxmpl.RealVectorState(startState);
+    const startDistance = space.distance(pathStart, startStateObj);
     expect(startDistance).toBeLessThan(1e-9);
 
     // Check goal is reached
