@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.6.0](https://github.com/juniorsundar/oxmpl/compare/v0.5.0...v0.6.0) (2025-11-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* Implementing RealVectorState in JS/WASM
+* Modularised the JavaScript/WASM bindings
+* **PlannerConfig:** Implement PlannerConfig to carry planner specific params
+
+### chore
+
+* release 0.6.0 ([c1c86f1](https://github.com/juniorsundar/oxmpl/commit/c1c86f1bf6aca10f8653bd15c4ebfe0ddc6f8892))
+
+
+### Features
+
+* **PlannerConfig:** Implement PlannerConfig to carry planner specific params ([bbb9363](https://github.com/juniorsundar/oxmpl/commit/bbb936377a021ebc5438a8fe695e780ac04a9e32))
+
+
+### Bug Fixes
+
+* Needed constructor for PlannerConfig in JS bindings ([5e4d7cc](https://github.com/juniorsundar/oxmpl/commit/5e4d7cc0f80dba211aa9d762130918bad14986c1))
+* **README:** Examples updated with PlannerConfig ([d946e8e](https://github.com/juniorsundar/oxmpl/commit/d946e8e09d75878d4f756aefc749074de8ef2ba3))
+
+
+### Code Refactoring
+
+* Implementing RealVectorState in JS/WASM ([438c9a9](https://github.com/juniorsundar/oxmpl/commit/438c9a98a02badf4f10403a40fe451cfa4e02972))
+* Modularised the JavaScript/WASM bindings ([92f2c8a](https://github.com/juniorsundar/oxmpl/commit/92f2c8a998b2f1224328bb413411f5c733d72748))
+
 ## [0.5.0](https://github.com/juniorsundar/oxmpl/compare/v0.4.1...v0.5.0) (2025-10-20)
 
 
