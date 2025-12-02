@@ -1,47 +1,40 @@
-// Copyright (c) 2025 Ross Gardiner, Junior Sundar
+// Copyright (c) 2025 Junior Sundar
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
 use oxmpl::base::{
-    space::{RealVectorStateSpace as OxmplRealVectorStateSpace, StateSpace},
-    state::RealVectorState as OxmplRealVectorState,
+    space::{SO2StateSpace as OxmplSO2StateSpace, StateSpace},
+    state::SO2State as OxmplSO2State,
 };
 use rand::rng;
 use std::sync::{Arc, Mutex};
 use wasm_bindgen::prelude::*;
 
-use crate::base::JsRealVectorState;
+use crate::base::JsSO2State;
 
-#[wasm_bindgen(js_name = RealVectorStateSpace)]
-pub struct JsRealVectorStateSpace {
+#[wasm_bindgen(js_name = SO2StateSpace)]
+pub struct JsSO2StateSpace {
     #[wasm_bindgen(skip)]
-    pub inner: Arc<Mutex<OxmplRealVectorStateSpace>>,
+    pub inner: Arc<Mutex<OxmplSO2StateSpace>>,
 }
 
-#[wasm_bindgen(js_class = RealVectorStateSpace)]
-impl JsRealVectorStateSpace {
+#[wasm_bindgen(js_class = SO2StateSpace)]
+impl JsSO2StateSpace {
     #[wasm_bindgen(constructor)]
-    pub fn new(
-        dimension: usize,
-        bounds: Option<Vec<f64>>,
-    ) -> Result<JsRealVectorStateSpace, String> {
-        let bounds_vec = if let Some(b) = bounds {
-            if b.len() != dimension * 2 {
+    pub fn new(bounds_option: Option<Box<[f64]>>) -> Result<JsSO2StateSpace, String> {
+        let bounds_tuple = if let Some(arr) = bounds_option {
+            if arr.len() != 2 {
                 return Err(format!(
-                    "Bounds array must have {} elements (2 per dimension)",
-                    dimension * 2
+                    "Invalid bounds: expected an array of length 2, but received length {}.",
+                    arr.len()
                 ));
             }
-            let mut bounds_tuples = Vec::new();
-            for i in 0..dimension {
-                bounds_tuples.push((b[i * 2], b[i * 2 + 1]));
-            }
-            Some(bounds_tuples)
+            Some((arr[0], arr[1]))
         } else {
             None
         };
 
-        match OxmplRealVectorStateSpace::new(dimension, bounds_vec) {
+        match OxmplSO2StateSpace::new(bounds_tuple) {
             Ok(space) => Ok(Self {
                 inner: Arc::new(Mutex::new(space)),
             }),
@@ -50,16 +43,16 @@ impl JsRealVectorStateSpace {
     }
 
     #[wasm_bindgen(js_name = sample)]
-    pub fn sample(&self) -> Result<JsRealVectorState, String> {
+    pub fn sample(&self) -> Result<JsSO2State, String> {
         let mut rng = rng();
         match self.inner.lock().unwrap().sample_uniform(&mut rng) {
-            Ok(state) => Ok(JsRealVectorState::new(state.values)),
+            Ok(state) => Ok(JsSO2State::new(state.value)),
             Err(e) => Err(e.to_string()),
         }
     }
 
     #[wasm_bindgen(js_name = distance)]
-    pub fn distance(&self, state1: &JsRealVectorState, state2: &JsRealVectorState) -> f64 {
+    pub fn distance(&self, state1: &JsSO2State, state2: &JsSO2State) -> f64 {
         self.inner
             .lock()
             .unwrap()
@@ -67,39 +60,29 @@ impl JsRealVectorStateSpace {
     }
 
     #[wasm_bindgen(js_name = satisfiesBounds)]
-    pub fn satisfies_bounds(&self, state: &JsRealVectorState) -> bool {
+    pub fn satisfies_bounds(&self, state: &JsSO2State) -> bool {
         self.inner.lock().unwrap().satisfies_bounds(&state.inner)
     }
 
     #[wasm_bindgen(js_name = enforceBounds)]
-    pub fn enforce_bounds(&self, state: &JsRealVectorState) -> JsRealVectorState {
+    pub fn enforce_bounds(&self, state: &JsSO2State) -> JsSO2State {
         let mut new_state = (*state.inner).clone();
         self.inner.lock().unwrap().enforce_bounds(&mut new_state);
-        JsRealVectorState {
+        JsSO2State {
             inner: Arc::new(new_state),
         }
     }
 
     #[wasm_bindgen(js_name = interpolate)]
-    pub fn interpolate(
-        &self,
-        from: &JsRealVectorState,
-        to: &JsRealVectorState,
-        t: f64,
-    ) -> JsRealVectorState {
-        let mut result_state = OxmplRealVectorState::new(vec![0.0; from.inner.values.len()]);
+    pub fn interpolate(&self, from: &JsSO2State, to: &JsSO2State, t: f64) -> JsSO2State {
+        let mut result_state = OxmplSO2State::new(0.0);
         self.inner
             .lock()
             .unwrap()
             .interpolate(&from.inner, &to.inner, t, &mut result_state);
-        JsRealVectorState {
+        JsSO2State {
             inner: Arc::new(result_state),
         }
-    }
-
-    #[wasm_bindgen(js_name = getDimension)]
-    pub fn get_dimension(&self) -> usize {
-        self.inner.lock().unwrap().dimension
     }
 
     #[wasm_bindgen(js_name = getMaximumExtent)]
