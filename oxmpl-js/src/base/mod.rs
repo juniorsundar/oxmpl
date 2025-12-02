@@ -9,6 +9,8 @@ pub mod planner;
 pub mod problem_definition;
 pub mod real_vector_state;
 pub mod real_vector_state_space;
+pub mod so2_state;
+pub mod so2_state_space;
 pub mod state_validity_checker;
 
 pub use goal::JsGoal;
@@ -17,4 +19,5 @@ pub use planner::JsPlannerConfig;
 pub use problem_definition::JsProblemDefinition;
 pub use real_vector_state::JsRealVectorState;
 pub use real_vector_state_space::JsRealVectorStateSpace;
+pub use so2_state::JsSO2State;
 pub use state_validity_checker::JsStateValidityChecker;

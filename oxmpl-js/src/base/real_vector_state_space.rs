@@ -70,6 +70,11 @@ impl JsRealVectorStateSpace {
         self.inner.lock().unwrap().dimension
     }
 
+    #[wasm_bindgen(js_name = getMaximumExtent)]
+    pub fn get_maximum_extent(&self) {
+        self.inner.lock().unwrap().get_maximum_extent();
+    }
+
     #[wasm_bindgen(js_name = setLongestValidLineSegmentFraction)]
     pub fn set_longest_valid_segment_fraction(&mut self, fraction: f64) {
         self.inner
