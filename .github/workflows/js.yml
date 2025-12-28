@@ -96,8 +96,8 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Build WASM package
-        run: npm run build
+      - name: Build and Prepare WASM package
+        run: node scripts/build-package.js
 
       - name: Update version in generated package.json
         run: |

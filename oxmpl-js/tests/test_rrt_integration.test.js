@@ -1,4 +1,4 @@
-import * as oxmpl from 'oxmpl';
+import oxmpl from 'oxmpl-js';
 import { describe, expect, test } from 'vitest';
 
 class CircularGoal {
@@ -54,26 +54,26 @@ describe('RRT Integration Tests', () => {
   test('RRT problem with wall', () => {
     // DEFINE THE STATE SPACE
     // A 10x10 2D world
-    const space = new oxmpl.RealVectorStateSpace(2, [0.0, 10.0, 0.0, 10.0]);
+    const space = new oxmpl.base.RealVectorStateSpace(2, [0.0, 10.0, 0.0, 10.0]);
 
     // DEFINE THE PROBLEM
     const startState = [1.0, 5.0];
     const goalRegion = new CircularGoal(space, 9.0, 5.0, 0.5);
 
-    const goal = new oxmpl.Goal(
+    const goal = new oxmpl.base.Goal(
       goalRegion.isSatisfied.bind(goalRegion),
       goalRegion.distanceToGoal.bind(goalRegion),
       goalRegion.sampleGoal.bind(goalRegion)
     );
 
-    const problemDef = new oxmpl.ProblemDefinition(space, startState, goal);
-    const validityChecker = new oxmpl.StateValidityChecker(isStateValid);
+    const problemDef = new oxmpl.base.ProblemDefinition(space, startState, goal);
+    const validityChecker = new oxmpl.base.StateValidityChecker(isStateValid);
 
     // CREATE AND SETUP THE PLANNER
     const maxDistance = 0.5;
     const goalBias = 0.05;
-    const planner_config = new oxmpl.PlannerConfig(0);
-    const planner = new oxmpl.RRT(maxDistance, goalBias, planner_config);
+    const planner_config = new oxmpl.base.PlannerConfig(0);
+    const planner = new oxmpl.geometric.RRT(maxDistance, goalBias, planner_config);
 
     planner.setup(problemDef, validityChecker);
 
@@ -97,8 +97,8 @@ describe('RRT Integration Tests', () => {
     expect(states.length).toBe(pathLength);
 
     // Check start position
-    const pathStart = new oxmpl.RealVectorState(states[0]);
-    const startStateObj = new oxmpl.RealVectorState(startState);
+    const pathStart = new oxmpl.base.RealVectorState(states[0]);
+    const startStateObj = new oxmpl.base.RealVectorState(startState);
     const startDistance = space.distance(pathStart, startStateObj);
     expect(startDistance).toBeLessThan(1e-9);
 
