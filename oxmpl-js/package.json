@@ -2,11 +2,12 @@
   "name": "oxmpl-js-dev",
   "private": true,
   "type": "module",
+  "main": "index.js",
   "scripts": {
     "build": "wasm-pack build --target bundler --out-dir pkg-bundler",
     "postinstall": "npm run build",
     "test": "npm run build && vitest run",
-    "pack": "npm run build && cd pkg-bundler && npm pack",
+    "pack": "node scripts/build-package.js && cd pkg-bundler && npm pack",
     "publish": "npm run build && cd pkg-bundler && npm publish",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -15,7 +16,7 @@
     "example": "node --experimental-wasm-modules examples/simple_2d_planning.js"
   },
   "dependencies": {
-    "oxmpl": "file:pkg-bundler/"
+    "oxmpl-js": "file:."
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

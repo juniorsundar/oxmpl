@@ -44,6 +44,8 @@
           pkgs.python3
           pkgs.wasm-pack
           pkgs.nodejs
+          pkgs.typescript-language-server
+          pkgs.eslint
         ];
 
         shellHook = ''

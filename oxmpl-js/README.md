@@ -41,29 +41,30 @@ The build process uses `wasm-pack` to:
 This example assumes that you've installed the package as a dependency called `oxmpl-js`.
 
 ```javascript
-import * as oxmpl from 'oxmpl-js';
+import oxmpl from 'oxmpl-js';
 
 // Create a 2D state space
-const space = new oxmpl.RealVectorStateSpace(2, [0.0, 10.0, 0.0, 10.0]);
+const space = new oxmpl.base.RealVectorStateSpace(2, [0.0, 10.0, 0.0, 10.0]);
 
 // Define start and goal
 const start = [1.0, 1.0];
-const goal = new oxmpl.Goal(
+const goal = new oxmpl.base.Goal(
   (state) => /* goal satisfaction check */,
   (state) => /* distance to goal */,
   () => /* sample goal state */
 );
 
 // Create problem definition
-const problem = new oxmpl.ProblemDefinition(space, start, goal);
+const problem = new oxmpl.base.ProblemDefinition(space, start, goal);
 
 // Define validity checker
-const validityChecker = new oxmpl.StateValidityChecker(
+const validityChecker = new oxmpl.base.StateValidityChecker(
   (state) => /* return true if state is collision-free */
 );
 
 // Create and run planner
-const planner = new oxmpl.RRT(0.5, 0.05);
+const plannerConfig = new oxmpl.base.PlannerConfig(0);
+const planner = new oxmpl.geometric.RRT(0.5, 0.05, plannerConfig);
 planner.setup(problem, validityChecker);
 const path = planner.solve(5.0);
 ```
