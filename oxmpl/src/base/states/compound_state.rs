@@ -21,7 +21,11 @@ impl CompoundState {
     }
 }
 
-impl State for CompoundState {}
+impl State for CompoundState {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
 
 #[cfg(test)]
 mod tests {

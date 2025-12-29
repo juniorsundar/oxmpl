@@ -58,7 +58,11 @@ impl SO2State {
         }
     }
 }
-impl State for SO2State {}
+impl State for SO2State {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
 
 impl fmt::Display for SO2State {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -13,7 +13,11 @@ impl RealVectorState {
     }
 }
 /// Implements the `State` marker trait for `RealVectorState`.
-impl State for RealVectorState {}
+impl State for RealVectorState {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
 
 #[cfg(test)]
 mod tests {
