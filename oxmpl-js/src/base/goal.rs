@@ -3,11 +3,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use crate::base::js_state_convert::*;
-use js_sys::Float64Array;
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    state::RealVectorState,
+    state::{CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State, State},
 };
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -15,93 +14,176 @@ use web_sys::console;
 #[wasm_bindgen(js_name = Goal)]
 #[derive(Clone)]
 pub struct JsGoal {
-    is_satisfied_fn: js_sys::Function,
-    distance_goal_fn: js_sys::Function,
-    sample_goal_fn: js_sys::Function,
-}
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(typescript_type = "(state: Float64Array) => boolean")]
-    pub type GoalSatisfactionCallback;
-
-    #[wasm_bindgen(typescript_type = "(state: Float64Array) => number")]
-    pub type GoalDistanceCallback;
-
-    #[wasm_bindgen(typescript_type = "() => Float64Array")]
-    pub type GoalSampleCallback;
+    pub(crate) instance: JsValue,
 }
 
 #[wasm_bindgen(js_class = Goal)]
 impl JsGoal {
     #[wasm_bindgen(constructor)]
-    pub fn new(
-        is_satisfied_fn: GoalSatisfactionCallback,
-        distance_goal_fn: GoalDistanceCallback,
-        sample_goal_fn: GoalSampleCallback,
-    ) -> Self {
-        Self {
-            is_satisfied_fn: JsValue::from(is_satisfied_fn).into(),
-            distance_goal_fn: JsValue::from(distance_goal_fn).into(),
-            sample_goal_fn: JsValue::from(sample_goal_fn).into(),
-        }
+    pub fn new(instance: JsValue) -> Self {
+        Self { instance }
     }
 }
 
-impl Goal<RealVectorState> for JsGoal {
-    fn is_satisfied(&self, state: &RealVectorState) -> bool {
-        let array = state_to_js_array(state);
-
-        match self.is_satisfied_fn.call1(&JsValue::NULL, &array) {
-            Ok(result) => match result.as_bool() {
-                Some(satisfied) => satisfied,
-                None => {
-                    console::warn_1(&"Goal satisfaction checker returned non-boolean value".into());
+// Helper for calling JS methods
+impl JsGoal {
+    fn call_is_satisfied<S: JsStateConvert + State>(&self, state: &S) -> bool {
+        let js_state = state.to_js_value();
+        match js_sys::Reflect::get(&self.instance, &JsValue::from_str("isSatisfied")) {
+            Ok(func_val) => {
+                if let Ok(func) = func_val.dyn_into::<js_sys::Function>() {
+                    match func.call1(&self.instance, &js_state) {
+                        Ok(result) => result.as_bool().unwrap_or(false),
+                        Err(e) => {
+                            console::error_2(&"Goal.isSatisfied failed:".into(), &e);
+                            false
+                        }
+                    }
+                } else {
                     false
                 }
-            },
-            Err(e) => {
-                console::error_2(&"Goal satisfaction checker callback failed:".into(), &e);
-                false
             }
+            Err(_) => false,
         }
     }
-}
 
-impl GoalRegion<RealVectorState> for JsGoal {
-    fn distance_goal(&self, state: &RealVectorState) -> f64 {
-        let array = state_to_js_array(state);
-
-        match self.distance_goal_fn.call1(&JsValue::NULL, &array) {
-            Ok(result) => match result.as_f64() {
-                Some(distance) => distance,
-                None => {
-                    console::warn_1(&"Goal distance function returned non-numeric value".into());
+    fn call_distance_goal<S: JsStateConvert + State>(&self, state: &S) -> f64 {
+        let js_state = state.to_js_value();
+        match js_sys::Reflect::get(&self.instance, &JsValue::from_str("distanceGoal")) {
+            Ok(func_val) => {
+                if let Ok(func) = func_val.dyn_into::<js_sys::Function>() {
+                    match func.call1(&self.instance, &js_state) {
+                        Ok(result) => result.as_f64().unwrap_or(f64::INFINITY),
+                        Err(e) => {
+                            console::error_2(&"Goal.distanceGoal failed:".into(), &e);
+                            f64::INFINITY
+                        }
+                    }
+                } else {
                     f64::INFINITY
                 }
-            },
-            Err(e) => {
-                console::error_2(&"Goal distance function callback failed:".into(), &e);
-                f64::INFINITY
             }
+            Err(_) => f64::INFINITY,
         }
     }
-}
 
-impl GoalSampleableRegion<RealVectorState> for JsGoal {
-    fn sample_goal(
-        &self,
-        _rng: &mut impl rand::Rng,
-    ) -> Result<RealVectorState, StateSamplingError> {
-        match self.sample_goal_fn.call0(&JsValue::NULL) {
-            Ok(result) => {
-                if let Ok(array) = result.dyn_into::<Float64Array>() {
-                    Ok(js_array_to_state(&array))
+    fn call_sample_goal<S: JsStateConvert + State>(&self) -> Result<S, StateSamplingError> {
+        match js_sys::Reflect::get(&self.instance, &JsValue::from_str("sampleGoal")) {
+            Ok(func_val) => {
+                if let Ok(func) = func_val.dyn_into::<js_sys::Function>() {
+                    match func.call0(&self.instance) {
+                        Ok(result) => S::from_js_value(result)
+                            .map_err(|_| StateSamplingError::GoalRegionUnsatisfiable),
+                        Err(e) => {
+                            console::error_2(&"Goal.sampleGoal failed:".into(), &e);
+                            Err(StateSamplingError::GoalRegionUnsatisfiable)
+                        }
+                    }
                 } else {
                     Err(StateSamplingError::GoalRegionUnsatisfiable)
                 }
             }
             Err(_) => Err(StateSamplingError::GoalRegionUnsatisfiable),
         }
+    }
+}
+
+// Implementations for each state type
+impl Goal<RealVectorState> for JsGoal {
+    fn is_satisfied(&self, state: &RealVectorState) -> bool {
+        self.call_is_satisfied(state)
+    }
+}
+impl GoalRegion<RealVectorState> for JsGoal {
+    fn distance_goal(&self, state: &RealVectorState) -> f64 {
+        self.call_distance_goal(state)
+    }
+}
+impl GoalSampleableRegion<RealVectorState> for JsGoal {
+    fn sample_goal(
+        &self,
+        _rng: &mut impl rand::Rng,
+    ) -> Result<RealVectorState, StateSamplingError> {
+        self.call_sample_goal()
+    }
+}
+
+impl Goal<SO2State> for JsGoal {
+    fn is_satisfied(&self, state: &SO2State) -> bool {
+        self.call_is_satisfied(state)
+    }
+}
+impl GoalRegion<SO2State> for JsGoal {
+    fn distance_goal(&self, state: &SO2State) -> f64 {
+        self.call_distance_goal(state)
+    }
+}
+impl GoalSampleableRegion<SO2State> for JsGoal {
+    fn sample_goal(&self, _rng: &mut impl rand::Rng) -> Result<SO2State, StateSamplingError> {
+        self.call_sample_goal()
+    }
+}
+
+impl Goal<SO3State> for JsGoal {
+    fn is_satisfied(&self, state: &SO3State) -> bool {
+        self.call_is_satisfied(state)
+    }
+}
+impl GoalRegion<SO3State> for JsGoal {
+    fn distance_goal(&self, state: &SO3State) -> f64 {
+        self.call_distance_goal(state)
+    }
+}
+impl GoalSampleableRegion<SO3State> for JsGoal {
+    fn sample_goal(&self, _rng: &mut impl rand::Rng) -> Result<SO3State, StateSamplingError> {
+        self.call_sample_goal()
+    }
+}
+
+impl Goal<SE2State> for JsGoal {
+    fn is_satisfied(&self, state: &SE2State) -> bool {
+        self.call_is_satisfied(state)
+    }
+}
+impl GoalRegion<SE2State> for JsGoal {
+    fn distance_goal(&self, state: &SE2State) -> f64 {
+        self.call_distance_goal(state)
+    }
+}
+impl GoalSampleableRegion<SE2State> for JsGoal {
+    fn sample_goal(&self, _rng: &mut impl rand::Rng) -> Result<SE2State, StateSamplingError> {
+        self.call_sample_goal()
+    }
+}
+
+impl Goal<SE3State> for JsGoal {
+    fn is_satisfied(&self, state: &SE3State) -> bool {
+        self.call_is_satisfied(state)
+    }
+}
+impl GoalRegion<SE3State> for JsGoal {
+    fn distance_goal(&self, state: &SE3State) -> f64 {
+        self.call_distance_goal(state)
+    }
+}
+impl GoalSampleableRegion<SE3State> for JsGoal {
+    fn sample_goal(&self, _rng: &mut impl rand::Rng) -> Result<SE3State, StateSamplingError> {
+        self.call_sample_goal()
+    }
+}
+
+impl Goal<CompoundState> for JsGoal {
+    fn is_satisfied(&self, state: &CompoundState) -> bool {
+        self.call_is_satisfied(state)
+    }
+}
+impl GoalRegion<CompoundState> for JsGoal {
+    fn distance_goal(&self, state: &CompoundState) -> f64 {
+        self.call_distance_goal(state)
+    }
+}
+impl GoalSampleableRegion<CompoundState> for JsGoal {
+    fn sample_goal(&self, _rng: &mut impl rand::Rng) -> Result<CompoundState, StateSamplingError> {
+        self.call_sample_goal()
     }
 }

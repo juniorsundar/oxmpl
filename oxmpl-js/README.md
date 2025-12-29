@@ -47,15 +47,15 @@ import oxmpl from 'oxmpl-js';
 const space = new oxmpl.base.RealVectorStateSpace(2, [0.0, 10.0, 0.0, 10.0]);
 
 // Define start and goal
-const start = [1.0, 1.0];
-const goal = new oxmpl.base.Goal(
-  (state) => /* goal satisfaction check */,
-  (state) => /* distance to goal */,
-  () => /* sample goal state */
-);
+const start = new oxmpl.base.RealVectorState([1.0, 1.0]);
+const goal = new oxmpl.base.Goal({
+  isSatisfied: (state) => { /* goal satisfaction check */ },
+  distanceGoal: (state) => { /* distance to goal */ },
+  sampleGoal: () => { /* sample goal state */ return new oxmpl.base.RealVectorState([5.0, 5.0]); }
+});
 
 // Create problem definition
-const problem = new oxmpl.base.ProblemDefinition(space, start, goal);
+const problem = oxmpl.base.ProblemDefinition.fromRealVectorState(space, start, goal);
 
 // Define validity checker
 const validityChecker = new oxmpl.base.StateValidityChecker(
@@ -64,8 +64,8 @@ const validityChecker = new oxmpl.base.StateValidityChecker(
 
 // Create and run planner
 const plannerConfig = new oxmpl.base.PlannerConfig(0);
-const planner = new oxmpl.geometric.RRT(0.5, 0.05, plannerConfig);
-planner.setup(problem, validityChecker);
+const planner = new oxmpl.geometric.RRT(0.5, 0.05, problem, plannerConfig);
+planner.setup(validityChecker);
 const path = planner.solve(5.0);
 ```
 

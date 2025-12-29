@@ -10,15 +10,17 @@ class CircularGoal {
   }
 
   isSatisfied(state) {
-    const dx = state[0] - this.target[0];
-    const dy = state[1] - this.target[1];
+    const [sx, sy] = state.values;
+    const dx = sx - this.target[0];
+    const dy = sy - this.target[1];
     const distance = Math.sqrt(dx * dx + dy * dy);
     return distance <= this.radius;
   }
 
-  distanceToGoal(state) {
-    const dx = state[0] - this.target[0];
-    const dy = state[1] - this.target[1];
+  distanceGoal(state) {
+    const [sx, sy] = state.values;
+    const dx = sx - this.target[0];
+    const dy = sy - this.target[1];
     const distance = Math.sqrt(dx * dx + dy * dy);
     return Math.max(0, distance - this.radius);
   }
@@ -29,12 +31,12 @@ class CircularGoal {
 
     const x = this.target[0] + radius * Math.cos(angle);
     const y = this.target[1] + radius * Math.sin(angle);
-    return new Float64Array([x, y]);
+    return new oxmpl.base.RealVectorState([x, y]);
   }
 }
 
 function isStateValid(state) {
-  const [x, y] = state;
+  const [x, y] = state.values;
 
   const wallXPos = 5.0;
   const wallYMin = 2.0;
@@ -57,25 +59,26 @@ describe('RRT Connect Integration Tests', () => {
     const space = new oxmpl.base.RealVectorStateSpace(2, [0.0, 10.0, 0.0, 10.0]);
 
     // DEFINE THE PROBLEM
-    const startState = [1.0, 5.0];
+    const startState = new oxmpl.base.RealVectorState([1.0, 5.0]);
     const goalRegion = new CircularGoal(space, 9.0, 5.0, 0.5);
 
-    const goal = new oxmpl.base.Goal(
-      goalRegion.isSatisfied.bind(goalRegion),
-      goalRegion.distanceToGoal.bind(goalRegion),
-      goalRegion.sampleGoal.bind(goalRegion)
-    );
+    const goal = new oxmpl.base.Goal(goalRegion);
 
-    const problemDef = new oxmpl.base.ProblemDefinition(space, startState, goal);
+    const problemDef = oxmpl.base.ProblemDefinition.fromRealVectorState(space, startState, goal);
     const validityChecker = new oxmpl.base.StateValidityChecker(isStateValid);
 
     // CREATE AND SETUP THE PLANNER
     const maxDistance = 0.5;
     const goalBias = 0.05;
     const planner_config = new oxmpl.base.PlannerConfig(0);
-    const planner = new oxmpl.geometric.RRTConnect(maxDistance, goalBias, planner_config);
+    const planner = new oxmpl.geometric.RRTConnect(
+      maxDistance,
+      goalBias,
+      problemDef,
+      planner_config
+    );
 
-    planner.setup(problemDef, validityChecker);
+    planner.setup(validityChecker);
 
     // SOLVE THE PROBLEM
     console.log('\nAttempting to solve planning problem...');
@@ -97,9 +100,8 @@ describe('RRT Connect Integration Tests', () => {
     expect(states.length).toBe(pathLength);
 
     // Check start position
-    const pathStart = new oxmpl.base.RealVectorState(states[0]);
-    const startStateObj = new oxmpl.base.RealVectorState(startState);
-    const startDistance = space.distance(pathStart, startStateObj);
+    const pathStart = states[0];
+    const startDistance = space.distance(pathStart, startState);
     expect(startDistance).toBeLessThan(1e-9);
 
     // Check goal is reached

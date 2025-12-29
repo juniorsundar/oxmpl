@@ -82,7 +82,11 @@ impl SO3State {
         }
     }
 }
-impl State for SO3State {}
+impl State for SO3State {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
 
 impl fmt::Display for SO3State {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

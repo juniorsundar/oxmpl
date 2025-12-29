@@ -26,7 +26,7 @@ use crate::base::{error::StateSamplingError, state::State};
 /// # Examples
 ///
 /// ```
-/// use std::f64;
+/// use std::{any::Any, f64};
 /// use oxmpl::base::state::State;
 /// use oxmpl::base::space::StateSpace;
 /// use oxmpl::base::error::StateSamplingError;
@@ -36,7 +36,11 @@ use crate::base::{error::StateSamplingError, state::State};
 /// struct Point1D {
 ///     x: f64,
 /// }
-/// impl State for Point1D {}
+/// impl State for Point1D {
+///     fn as_any(&self) -> &dyn std::any::Any {
+///         self
+///     }
+/// }
 ///
 /// struct LineSegmentSpace {
 ///     bounds: (f64, f64),
@@ -62,7 +66,7 @@ use crate::base::{error::StateSamplingError, state::State};
 ///     }
 ///
 ///     fn sample_uniform(&self, rng: &mut impl Rng) -> Result<Self::StateType, StateSamplingError> {
-///         Ok(Point1D { x: rng.gen_range(self.bounds.0..self.bounds.1) })
+///         Ok(Point1D { x: rng.random_range(self.bounds.0..self.bounds.1) })
 ///     }
 ///
 ///     fn get_longest_valid_segment_length(&self) -> f64 {

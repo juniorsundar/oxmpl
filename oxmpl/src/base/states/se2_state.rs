@@ -14,7 +14,11 @@ use crate::base::state::{CompoundState, RealVectorState, SO2State, State};
 #[derive(Clone, Debug)]
 pub struct SE2State(pub CompoundState);
 
-impl State for SE2State {}
+impl State for SE2State {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
 
 impl SE2State {
     /// Creates a new `SE2State` from x, y, and yaw components.

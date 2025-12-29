@@ -14,7 +14,11 @@ use crate::base::state::{CompoundState, RealVectorState, SO3State, State};
 #[derive(Clone, Debug)]
 pub struct SE3State(pub CompoundState);
 
-impl State for SE3State {}
+impl State for SE3State {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
 
 impl SE3State {
     /// Creates a new `SE3State` from x, y, z, and an `SO3State` for rotation.
