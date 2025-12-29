@@ -11,18 +11,16 @@ repos:
     -   id: rustfmt
         name: rustfmt
         description: Format Rust files using rustfmt.
-        # This hook should be 'entry: cargo' and 'args: [...]' too
         entry: cargo
-        args: ['fmt', '--', '--check']
+        args: ['fmt', '--all']
         language: rust
         types: [rust]
+        pass_filenames: false
 
     -   id: clippy
         name: clippy
         description: Check for lints using clippy.
-        # Ensure 'entry' is ONLY 'cargo'
         entry: cargo
-        # Ensure the command is in 'args'
         args: ['clippy', '--workspace', '--', '-D', 'warnings']
         language: rust
         types: [rust]
@@ -31,9 +29,7 @@ repos:
     -   id: check
         name: cargo-check
         description: Check the package for errors with cargo check.
-        # Ensure 'entry' is ONLY 'cargo'
         entry: cargo
-        # Ensure the command is in 'args'
         args: ['check', '--workspace']
         language: rust
         types: [rust]
