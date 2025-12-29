@@ -5,6 +5,10 @@
 import * as oxmpl from './pkg-bundler/oxmpl_js';
 
 export namespace base {
+  export import CompoundState = oxmpl.CompoundState;
+  export import CompoundStateBuilder = oxmpl.CompoundStateBuilder;
+  export import CompoundStateSpace = oxmpl.CompoundStateSpace;
+  export import CompoundStateSpaceBuilder = oxmpl.CompoundStateSpaceBuilder;
   export import Goal = oxmpl.Goal;
   export import Path = oxmpl.Path;
   export import PlannerConfig = oxmpl.PlannerConfig;

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+pub mod compound_state;
+pub mod compound_state_space;
 pub mod goal;
 pub mod js_state_convert;
 pub mod path;
@@ -19,6 +21,8 @@ pub mod so3_state;
 pub mod so3_state_space;
 pub mod state_validity_checker;
 
+pub use compound_state::{JsCompoundState, JsCompoundStateBuilder};
+pub use compound_state_space::{JsCompoundStateSpace, JsCompoundStateSpaceBuilder};
 pub use goal::JsGoal;
 pub use path::JsPath;
 pub use planner::JsPlannerConfig;
