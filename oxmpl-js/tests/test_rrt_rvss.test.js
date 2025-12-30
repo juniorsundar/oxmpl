@@ -52,13 +52,10 @@ function isStateValid(state) {
   return !isInWall;
 }
 
-describe('RRT* Integration Tests', () => {
-  test('RRT* problem with wall', () => {
-    // DEFINE THE STATE SPACE
-    // A 10x10 2D world
+describe('RRT Integration Tests', () => {
+  test('RRT problem with wall', () => {
     const space = new oxmpl.base.RealVectorStateSpace(2, [0.0, 10.0, 0.0, 10.0]);
 
-    // DEFINE THE PROBLEM
     const startState = new oxmpl.base.RealVectorState([1.0, 5.0]);
     const goalRegion = new CircularGoal(space, 9.0, 5.0, 0.5);
 
@@ -67,22 +64,13 @@ describe('RRT* Integration Tests', () => {
     const problemDef = oxmpl.base.ProblemDefinition.fromRealVectorState(space, startState, goal);
     const validityChecker = new oxmpl.base.StateValidityChecker(isStateValid);
 
-    // CREATE AND SETUP THE PLANNER
     const maxDistance = 0.5;
     const goalBias = 0.05;
-    const searchRadius = 1.0;
     const planner_config = new oxmpl.base.PlannerConfig(0);
-    const planner = new oxmpl.geometric.RRTStar(
-      maxDistance,
-      goalBias,
-      searchRadius,
-      problemDef,
-      planner_config
-    );
+    const planner = new oxmpl.geometric.RRT(maxDistance, goalBias, problemDef, planner_config);
 
     planner.setup(validityChecker);
 
-    // SOLVE THE PROBLEM
     console.log('\nAttempting to solve planning problem...');
     const timeoutSecs = 5.0;
 
@@ -94,23 +82,19 @@ describe('RRT* Integration Tests', () => {
       throw new Error(`Planner failed to find a solution when one should exist. Error: ${error}`);
     }
 
-    // VALIDATE THE SOLUTION PATH
     const states = path.getStates();
     const pathLength = path.getLength();
 
     expect(pathLength).toBeGreaterThan(1);
     expect(states.length).toBe(pathLength);
 
-    // Check start position
     const pathStart = states[0];
     const startDistance = space.distance(pathStart, startState);
     expect(startDistance).toBeLessThan(1e-9);
 
-    // Check goal is reached
     const pathEnd = states[states.length - 1];
     expect(goalRegion.isSatisfied(pathEnd)).toBe(true);
 
-    // Validate all states in path are valid
     for (let i = 0; i < states.length; i++) {
       const state = states[i];
       expect(isStateValid(state)).toBe(true);

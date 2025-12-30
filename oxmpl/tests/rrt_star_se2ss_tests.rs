@@ -130,7 +130,6 @@ fn test_rrt_star_finds_path_in_se2ss() {
         goal: goal_definition.clone(),
     });
 
-    // An obstacle that blocks the direct path from start to goal
     let validity_checker = Arc::new(ObstacleChecker {
         x_min: -0.25,
         x_max: 0.25,

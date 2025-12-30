@@ -13,7 +13,6 @@ use oxmpl::geometric::RRTStar;
 
 use rand::Rng;
 
-/// A StateValidityChecker that defines a forbidden range of angles.
 struct ForbiddenAngleChecker {
     invalid_min: f64,
     invalid_max: f64,

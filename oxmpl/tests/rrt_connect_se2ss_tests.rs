@@ -37,10 +37,6 @@ struct SE2GoalRegion {
 impl Goal<SE2State> for SE2GoalRegion {
     fn is_satisfied(&self, state: &SE2State) -> bool {
         self.space.distance(state, &self.target) <= self.radius
-
-        // let dx = state.get_x() - self.target.get_x();
-        // let dy = state.get_y() - self.target.get_y();
-        // (dx * dx + dy * dy).sqrt() <= self.radius
     }
 }
 
@@ -48,11 +44,6 @@ impl GoalRegion<SE2State> for SE2GoalRegion {
     fn distance_goal(&self, state: &SE2State) -> f64 {
         let dist_to_center = self.space.distance(state, &self.target);
         (dist_to_center - self.radius).max(0.0)
-
-        // let dx = state.get_x() - self.target.get_x();
-        // let dy = state.get_y() - self.target.get_y();
-        // let dist_to_center_xy = (dx * dx + dy * dy).sqrt();
-        // (dist_to_center_xy - self.radius).max(0.0)
     }
 }
 
@@ -139,7 +130,6 @@ fn test_rrt_connect_finds_path_in_se2ss() {
         goal: goal_definition.clone(),
     });
 
-    // An obstacle that blocks the direct path from start to goal
     let validity_checker = Arc::new(ObstacleChecker {
         x_min: -0.25,
         x_max: 0.25,
@@ -163,7 +153,6 @@ fn test_rrt_connect_finds_path_in_se2ss() {
 
     let final_result = planner.solve(timeout);
 
-    // 3. Assert that the *single attempt* found a valid path
     assert!(final_result.is_ok(), "Planner failed to find a solution.");
 
     let path = final_result.unwrap();

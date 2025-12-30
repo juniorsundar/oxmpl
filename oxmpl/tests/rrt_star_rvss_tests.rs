@@ -13,7 +13,6 @@ use oxmpl::geometric::RRTStar;
 
 use rand::Rng;
 
-/// A StateValidityChecker that defines a simple vertical wall obstacle.
 struct WallObstacleChecker {
     wall_x_pos: f64,
     wall_y_min: f64,

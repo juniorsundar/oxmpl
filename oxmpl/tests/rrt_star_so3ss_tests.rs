@@ -13,7 +13,6 @@ use oxmpl::geometric::RRTStar;
 
 use rand::Rng;
 
-/// Utility function to create Quaternions
 fn quaternion_from_axis_angle(axis: [f64; 3], angle: f64) -> SO3State {
     let norm = (axis[0].powi(2) + axis[1].powi(2) + axis[2].powi(2)).sqrt();
 
@@ -42,7 +41,6 @@ fn quaternion_from_axis_angle(axis: [f64; 3], angle: f64) -> SO3State {
     }
 }
 
-/// A StateValidityChecker that defines a simple vertical wall obstacle.
 struct ForbiddenConeChecker {
     center: SO3State,
     radius: f64,
@@ -75,7 +73,6 @@ impl GoalRegion<SO3State> for SO3GoalRegion {
 }
 
 impl GoalSampleableRegion<SO3State> for SO3GoalRegion {
-    /// Samples a state uniformly from within the goal's cone of freedom.
     fn sample_goal(&self, rng: &mut impl Rng) -> Result<SO3State, StateSamplingError> {
         loop {
             let x: f64 = rng.random_range(-1.0..1.0);
