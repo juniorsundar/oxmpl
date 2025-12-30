@@ -13,7 +13,6 @@ use oxmpl::geometric::RRTConnect;
 
 use rand::Rng;
 
-/// A StateValidityChecker that defines a forbidden range of angles.
 struct ForbiddenAngleChecker {
     invalid_min: f64,
     invalid_max: f64,
@@ -52,7 +51,6 @@ impl GoalSampleableRegion<SO2State> for AngleGoalRegion {
     }
 }
 
-/// A helper function to validate the entire solution path in SO(2).
 fn is_so2_path_valid(
     path: &Path<SO2State>,
     space: &SO2StateSpace,

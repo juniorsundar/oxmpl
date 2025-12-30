@@ -143,12 +143,88 @@ impl JsStateConvert for CompoundState {
             inner: Arc::new(self.clone()),
         })
     }
-    fn from_js_value(_val: JsValue) -> Result<Self, String> {
-        Err("CompoundState from_js_value not implemented".to_string())
+    fn from_js_value(val: JsValue) -> Result<Self, String> {
+        let count_res = js_sys::Reflect::get(&val, &JsValue::from_str("componentCount"));
+        if let Ok(c) = count_res {
+            if let Some(count) = c.as_f64() {
+                let count = count as usize;
+                let mut components = Vec::with_capacity(count);
+
+                // Get getComponent function
+                let get_comp_fn_val =
+                    js_sys::Reflect::get(&val, &JsValue::from_str("getComponent"))
+                        .map_err(|_| "Missing getComponent")?;
+                let get_comp_fn = get_comp_fn_val
+                    .dyn_into::<js_sys::Function>()
+                    .map_err(|_| "getComponent is not a function")?;
+
+                for i in 0..count {
+                    let idx = JsValue::from(i as u32);
+                    let comp_val = get_comp_fn
+                        .call1(&val, &idx)
+                        .map_err(|e| format!("getComponent failed: {:?}", e))?;
+
+                    // Infer type of comp_val
+                    let comp = infer_and_convert_state(comp_val)?;
+                    components.push(comp);
+                }
+                return Ok(CompoundState::new(components));
+            }
+        }
+        Err("Expected CompoundState or object with componentCount".to_string())
     }
 }
 
-// Helper functions for converting between Rust states and JavaScript arrays
+fn infer_and_convert_state(val: JsValue) -> Result<Box<dyn State>, String> {
+    // Try SE3 (has rotation)
+    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("rotation")) {
+        if !v.is_undefined() {
+            let s = SE3State::from_js_value(val)?;
+            return Ok(Box::new(s));
+        }
+    }
+    // Try SE2 (has yaw)
+    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("yaw")) {
+        if !v.is_undefined() {
+            let s = SE2State::from_js_value(val)?;
+            return Ok(Box::new(s));
+        }
+    }
+    // Try SO3 (has w)
+    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("w")) {
+        if !v.is_undefined() {
+            let s = SO3State::from_js_value(val)?;
+            return Ok(Box::new(s));
+        }
+    }
+    // Try RealVector (has values)
+    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("values")) {
+        if !v.is_undefined() {
+            let s = RealVectorState::from_js_value(val)?;
+            return Ok(Box::new(s));
+        }
+    }
+    // Try SO2 (has value) or is number
+    if val.as_f64().is_some() {
+        let s = SO2State::from_js_value(val)?;
+        return Ok(Box::new(s));
+    }
+    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("value")) {
+        if !v.is_undefined() {
+            let s = SO2State::from_js_value(val)?;
+            return Ok(Box::new(s));
+        }
+    }
+    // Try Compound (recursive)
+    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("componentCount")) {
+        if !v.is_undefined() {
+            let s = CompoundState::from_js_value(val)?;
+            return Ok(Box::new(s));
+        }
+    }
+
+    Err("Could not infer state type from JS object".to_string())
+}
 
 pub fn real_vector_state_to_js_array(state: &RealVectorState) -> Float64Array {
     let array = Float64Array::new_with_length(state.values.len() as u32);
@@ -336,7 +412,6 @@ pub fn compound_state_to_js_array(state: &CompoundState) -> Float64Array {
     array
 }
 
-// Re-export old names for compatibility if needed (but we will update goal.rs)
 pub fn state_to_js_array(state: &RealVectorState) -> Float64Array {
     real_vector_state_to_js_array(state)
 }
@@ -345,7 +420,6 @@ pub fn js_array_to_state(array: &Float64Array) -> RealVectorState {
     js_array_to_real_vector_state(array)
 }
 
-// Set panic hook to get better error messages
 #[wasm_bindgen(start)]
 pub fn set_panic_hook() {
     console_error_panic_hook::set_once();

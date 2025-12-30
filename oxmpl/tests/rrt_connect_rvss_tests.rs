@@ -13,7 +13,6 @@ use oxmpl::geometric::RRTConnect;
 
 use rand::Rng;
 
-/// A StateValidityChecker that defines a simple vertical wall obstacle.
 struct WallObstacleChecker {
     wall_x_pos: f64,
     wall_y_min: f64,
@@ -35,7 +34,6 @@ impl StateValidityChecker<RealVectorState> for WallObstacleChecker {
     }
 }
 
-/// A Goal definition where success is being within a certain radius of a target state.
 struct CircularGoalRegion {
     target: RealVectorState,
     radius: f64,

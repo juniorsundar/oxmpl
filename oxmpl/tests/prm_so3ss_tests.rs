@@ -42,7 +42,6 @@ fn quaternion_from_axis_angle(axis: [f64; 3], angle: f64) -> SO3State {
     }
 }
 
-/// A StateValidityChecker that defines a simple vertical wall obstacle.
 struct ForbiddenConeChecker {
     center: SO3State,
     radius: f64,
