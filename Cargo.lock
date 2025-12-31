@@ -95,7 +95,7 @@ checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 
 [[package]]
 name = "oxmpl"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "getrandom",
  "rand",
@@ -105,11 +105,11 @@ dependencies = [
 
 [[package]]
 name = "oxmpl-docs"
-version = "0.5.0"
+version = "0.6.0"
 
 [[package]]
 name = "oxmpl-js"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "console_error_panic_hook",
  "getrandom",
@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "oxmpl-py"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "oxmpl",
  "pyo3",
