@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.6.0](https://github.com/juniorsundar/oxmpl/compare/v0.5.0...v0.6.0) (2025-12-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* Expand JS/WASM bindings for full featureset
+* Changed JS bundling to namespace out object
+* Implementing RealVectorState in JS/WASM
+* Modularised the JavaScript/WASM bindings
+* **PlannerConfig:** Implement PlannerConfig to carry planner specific params
+
+### chore
+
+* release 0.6.0 ([c1c86f1](https://github.com/juniorsundar/oxmpl/commit/c1c86f1bf6aca10f8653bd15c4ebfe0ddc6f8892))
+
+
+### Features
+
+* Changed JS bundling to namespace out object ([eb3dce8](https://github.com/juniorsundar/oxmpl/commit/eb3dce8ce430d91875c1063313e89d5d60185c32))
+* Expand JS/WASM bindings for full featureset ([9b4d8df](https://github.com/juniorsundar/oxmpl/commit/9b4d8df991e91526bac94f7809f7beb7adabee9d))
+* Implemented CompoundState and CompoundStateSpace in JS/WASM ([14a24d1](https://github.com/juniorsundar/oxmpl/commit/14a24d10a08a08a3e4276483b5bdbc854bf0b82c))
+* JS/WASM bindings for basic states and spaces ([986cec5](https://github.com/juniorsundar/oxmpl/commit/986cec529e9f2abbc8ec4a1d5df0ada92f0e5717))
+* **PlannerConfig:** Implement PlannerConfig to carry planner specific params ([bbb9363](https://github.com/juniorsundar/oxmpl/commit/bbb936377a021ebc5438a8fe695e780ac04a9e32))
+
+
+### Bug Fixes
+
+* Needed constructor for PlannerConfig in JS bindings ([5e4d7cc](https://github.com/juniorsundar/oxmpl/commit/5e4d7cc0f80dba211aa9d762130918bad14986c1))
+* **README:** Examples updated with PlannerConfig ([d946e8e](https://github.com/juniorsundar/oxmpl/commit/d946e8e09d75878d4f756aefc749074de8ef2ba3))
+
+
+### Code Refactoring
+
+* Implementing RealVectorState in JS/WASM ([438c9a9](https://github.com/juniorsundar/oxmpl/commit/438c9a98a02badf4f10403a40fe451cfa4e02972))
+* Modularised the JavaScript/WASM bindings ([92f2c8a](https://github.com/juniorsundar/oxmpl/commit/92f2c8a998b2f1224328bb413411f5c733d72748))
+
+
+### Tests
+
+* Integration tests for all States/Planner combos in JS/WASM ([db576cd](https://github.com/juniorsundar/oxmpl/commit/db576cdc70ccd683c236050df4f0706c6b9436d2))
+
+
+### Continuous Integration
+
+* Migrate to macos-15 for x86 Python build ([b99f318](https://github.com/juniorsundar/oxmpl/commit/b99f318acdc9f6e95dc3240db9748b08c70f7284))
+
 ## [0.5.0](https://github.com/juniorsundar/oxmpl/compare/v0.4.1...v0.5.0) (2025-10-20)
 
 

@@ -1,7 +1,7 @@
 [workspace]
 members = ["oxmpl", "oxmpl-py", "oxmpl-js", "docs"]
 resolver = "2"
-package.version = "0.5.0"                   # x-release-please-version
+package.version = "0.6.0"                   # x-release-please-version
 
 [profile.release]
 opt-level = "s"
