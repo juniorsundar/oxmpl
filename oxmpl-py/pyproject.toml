@@ -4,6 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "oxmpl_py"
+readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",

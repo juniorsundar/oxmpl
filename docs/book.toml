@@ -1,0 +1,11 @@
+[book]
+authors = ["Junior Sundar"]
+language = "en"
+multilingual = false
+src = "src"
+title = "OxMPL Documentation"
+
+[output.html]
+git-repository-url = "https://github.com/juniorsundar/oxmpl"
+edit-url-template = "https://github.com/juniorsundar/oxmpl/edit/main/docs/{path}"
+mathjax-support = true

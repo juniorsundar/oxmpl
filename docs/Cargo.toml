@@ -1,0 +1,9 @@
+[package]
+name = "oxmpl-docs"
+version.workspace = true
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "oxmpl-docs"
+path = "main.rs"
