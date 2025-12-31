@@ -67,6 +67,9 @@ jobs:
     defaults:
       run:
         working-directory: oxmpl-js
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -89,7 +92,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
           cache-dependency-path: oxmpl-js/package-lock.json
 
@@ -112,6 +114,4 @@ jobs:
       - name: Publish to npm
         run: |
           cd pkg-bundler
-          npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm publish --access public --provenance
