@@ -11,3 +11,5 @@
 - [API Reference]()
     - [Python Bindings](python_api.md)
     - [JavaScript Bindings](js_api.md)
+
+- [Contributors](contributors.md)
