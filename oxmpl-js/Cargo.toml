@@ -9,7 +9,7 @@ authors = [
 description = "JavaScript/WASM Bindings for the OxMPL Library"
 license = "BSD-3-Clause"
 repository = "git+https://github.com/juniorsundar/oxmpl.git"
-readme = "../README.md"
+readme = "README.md"
 keywords = ["robotics", "motion-planning", "wasm", "javascript"]
 [lib]
 crate-type = ["cdylib"]
