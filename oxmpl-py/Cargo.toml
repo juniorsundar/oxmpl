@@ -6,7 +6,7 @@ authors = ["Junior Sundar <juniorsundar@gmail.com>"]
 description = "Python Bindings for the OxMPL Library"
 license = "BSD-3-Clause"
 repository = "https://github.com/juniorsundar/oxmpl"
-readme = "../README.md"
+readme = "README.md"
 keywords = ["robotics", "motion-planning"]
 
 [lib]
