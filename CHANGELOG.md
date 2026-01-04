@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.1](https://github.com/juniorsundar/oxmpl/compare/v0.6.0...v0.6.1) (2026-01-04)
+
+
+### Documentation
+
+* Write up contribution guide ([e6fd25c](https://github.com/juniorsundar/oxmpl/commit/e6fd25c3f6416e526426a437ed0dabc990a5bc3c))
+
+
+### Continuous Integration
+
+* **js.yml:** Update to use the OpenIDC ([8d38823](https://github.com/juniorsundar/oxmpl/commit/8d388233d7aa1f0bbc428811fdffac215cee4cbe))
+
 ## [0.6.0](https://github.com/juniorsundar/oxmpl/compare/v0.5.0...v0.6.0) (2025-12-31)
 
 
