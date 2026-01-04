@@ -94,6 +94,7 @@ impl GoalSampleableRegion<CompoundState> for CompoundGoalRegion {
     }
 }
 
+#[allow(clippy::arc_with_non_send_sync)]
 fn main() {
     // 1. Define the state space: R^2 x SO(2)
     // R^2 for position (x, y)
