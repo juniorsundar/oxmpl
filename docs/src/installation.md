@@ -1,9 +1,7 @@
 # Installation
-
 You can use `oxmpl` in Rust, Python, or JavaScript projects.
 
 ## Rust
-
 The core library is available on crates.io and can be added to your project's `Cargo.toml`:
 
 ```toml
@@ -12,7 +10,6 @@ oxmpl = "0.4.0" # Replace with the latest version
 ```
 
 ## Python
-
 The library is available on PyPI and can be installed with `pip`:
 
 ```bash
@@ -20,7 +17,6 @@ pip install oxmpl-py
 ```
 
 ## JavaScript / WASM
-
 JavaScript/WASM bindings are available:
 
 ```bash
@@ -28,11 +24,9 @@ npm install oxmpl-js
 ```
 
 # Building from Source
-
 If you want to use the latest features or contribute to the project, you can build the libraries from source.
 
 ## Rust
-
 To build the core Rust library:
 
 ```bash
@@ -45,7 +39,6 @@ cargo build --release
 ```
 
 ## Python
-
 To build the Python bindings (`oxmpl-py`):
 
 ### Prerequisites
@@ -53,14 +46,12 @@ To build the Python bindings (`oxmpl-py`):
 - `maturin` (install via `pip install maturin`)
 
 ### Commands
-
 ```bash
 # Build and install in the current environment
 maturin develop -m oxmpl-py/Cargo.toml
 ```
 
 ## JavaScript / WASM
-
 If you need to build the JavaScript bindings from source:
 
 ### Prerequisites

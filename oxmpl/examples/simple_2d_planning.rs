@@ -1,20 +1,15 @@
-# Quick Start: Rust
-
-Here is a complete example of solving a 2D planning problem with a custom collision checker and goal region.
-
-```rust,ignore
 use std::{f64::consts::PI, sync::Arc, time::Duration};
 
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner, PlannerConfig},
+    planner::{Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{RealVectorStateSpace, StateSpace},
     state::RealVectorState,
     validity::StateValidityChecker,
 };
-use oxmpl::geometric::planners::rrt::RRT;
+use oxmpl::geometric::RRT;
 
 use rand::Rng;
 
@@ -102,7 +97,7 @@ fn main() {
         wall_thickness: 0.5,
     });
 
-    let mut planner = RRT::new(0.5, 0.0, &PlannerConfig{ seed: Some(123) });
+    let mut planner = RRT::new(0.5, 0.0, &PlannerConfig { seed: Some(123) });
 
     planner.setup(problem_definition, validity_checker.clone());
 
@@ -112,4 +107,3 @@ fn main() {
     let path = result.expect("Planner failed to find a solution");
     println!("Found path with {} states.", path.0.len());
 }
-```

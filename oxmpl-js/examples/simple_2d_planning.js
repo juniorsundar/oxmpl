@@ -1,7 +1,3 @@
-// Simple 2D motion planning example using oxmpl-js
-// This example demonstrates planning a path around a circular obstacle
-
-import console from 'node:console';
 import oxmpl from 'oxmpl-js';
 
 // A state is invalid if it's inside a circular obstacle at the origin
@@ -30,14 +26,14 @@ const goal = new oxmpl.base.Goal({
     const dist = Math.sqrt((x - target[0]) ** 2 + (y - target[1]) ** 2);
     return Math.max(0, dist - radius);
   },
-  sampleGoal: () => new oxmpl.base.RealVectorState(target), // Sample goal center
+  sampleGoal: () => new oxmpl.base.RealVectorState(target),
 });
 
 // Create problem and run planner
 const problem = oxmpl.base.ProblemDefinition.fromRealVectorState(space, start, goal);
 const validityChecker = new oxmpl.base.StateValidityChecker(isStateValid);
+const plannerConfig = new oxmpl.base.PlannerConfig(123);
 
-const plannerConfig = new oxmpl.base.PlannerConfig(0);
 const planner = new oxmpl.geometric.RRT(0.5, 0.05, problem, plannerConfig);
 planner.setup(validityChecker);
 

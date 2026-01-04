@@ -99,11 +99,11 @@ pub enum PlanningError {
     Timeout,
     /// No solution found.
     NoSolutionFound,
-    // Planner was not setup first.
+    /// Planner was not setup first.
     PlannerUninitialised,
-    // Start state is not valid.
+    /// Start state is not valid.
     InvalidStartState,
-    // State space hasn't been sampled.
+    /// State space hasn't been sampled.
     UnsampledStateSpace,
 }
 impl fmt::Display for PlanningError {

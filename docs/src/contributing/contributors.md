@@ -1,5 +1,4 @@
 # Contributors
-
 We would like to thank the following individuals for their contributions to the OxMPL project:
 
 *   **Junior Sundar**: [First Commit](https://github.com/juniorsundar/oxmpl/commit/510596a062bd8c9831700b384cf4f4db3d454241)
