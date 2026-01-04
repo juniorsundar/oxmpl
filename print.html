@@ -46,10 +46,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-42d4528e.js";
+            window.path_to_searchindex_js = "searchindex-fdf3f3cd.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-e9bad5c2.js"></script>
+        <script src="toc-58cf20b0.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -291,20 +291,20 @@ npm run pack
 <h2 id="planner-planner"><a class="header" href="#planner-planner">Planner (<code>Planner</code>)</a></h2>
 <p>The algorithm used to find a path from the start to the goal. Examples include <code>RRT</code>, <code>RRT*</code>, <code>PRM</code>, and <code>RRTConnect</code>.</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="quick-start-rust"><a class="header" href="#quick-start-rust">Quick Start: Rust</a></h1>
-<p>Here is a complete example of solving a 2D planning problem with a custom collision checker and goal region.</p>
+<h1 id="simple-2d-planning-rust"><a class="header" href="#simple-2d-planning-rust">Simple 2D Planning: Rust</a></h1>
+<p>This is a basic example of solving a 2D planning problem with a custom collision checker and goal region.</p>
 <pre><code class="language-rust ignore">use std::{f64::consts::PI, sync::Arc, time::Duration};
 
 use oxmpl::base::{
     error::StateSamplingError,
     goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner, PlannerConfig},
+    planner::{Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
     space::{RealVectorStateSpace, StateSpace},
     state::RealVectorState,
     validity::StateValidityChecker,
 };
-use oxmpl::geometric::planners::rrt::RRT;
+use oxmpl::geometric::RRT;
 
 use rand::Rng;
 
@@ -392,7 +392,7 @@ fn main() {
         wall_thickness: 0.5,
     });
 
-    let mut planner = RRT::new(0.5, 0.0, &amp;PlannerConfig{ seed: Some(123) });
+    let mut planner = RRT::new(0.5, 0.0, &amp;PlannerConfig { seed: Some(123) });
 
     planner.setup(problem_definition, validity_checker.clone());
 
@@ -403,8 +403,8 @@ fn main() {
     println!("Found path with {} states.", path.0.len());
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="quick-start-python"><a class="header" href="#quick-start-python">Quick Start: Python</a></h1>
-<p>Here is a complete example of solving a 2D planning problem with a custom collision checker written in Python.</p>
+<h1 id="simple-2d-planning-python"><a class="header" href="#simple-2d-planning-python">Simple 2D Planning: Python</a></h1>
+<p>This is a basic example of solving a 2D planning problem with a custom collision checker written in Python.</p>
 <pre><code class="language-python">import math
 from oxmpl_py.base import RealVectorState, RealVectorStateSpace, ProblemDefinition, PlannerConfig
 from oxmpl_py.geometric import RRT
@@ -446,8 +446,8 @@ except Exception as e:
     print(f"Planning failed: {e}")
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="quick-start-javascript"><a class="header" href="#quick-start-javascript">Quick Start: JavaScript</a></h1>
-<p>Here is a complete example of solving a 2D planning problem with a custom collision checker written in JavaScript.</p>
+<h1 id="simple-2d-planning-javascript"><a class="header" href="#simple-2d-planning-javascript">Simple 2D Planning: JavaScript</a></h1>
+<p>This is a basic example of solving a 2D planning problem with a custom collision checker written in JavaScript.</p>
 <pre><code class="language-javascript">import oxmpl from 'oxmpl-js';
 
 // A state is invalid if it's inside a circular obstacle at the origin
@@ -499,6 +499,620 @@ try {
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="compound-state-planning-rust"><a class="header" href="#compound-state-planning-rust">Compound State Planning: Rust</a></h1>
+<p>This example demonstrates how to use <code>CompoundStateSpace</code> to combine multiple state spaces (in this case, <code>RealVectorStateSpace</code> for position and <code>SO2StateSpace</code> for orientation) into a single planning problem.</p>
+<pre><code class="language-rust ignore">use std::{f64::consts::PI, sync::Arc, time::Duration};
+
+use oxmpl::base::{
+    error::StateSamplingError,
+    goal::{Goal, GoalRegion, GoalSampleableRegion},
+    planner::{Planner, PlannerConfig},
+    problem_definition::ProblemDefinition,
+    space::{CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, StateSpace},
+    state::{CompoundState, RealVectorState, SO2State},
+    validity::StateValidityChecker,
+};
+use oxmpl::geometric::RRT;
+
+use rand::Rng;
+
+/// A StateValidityChecker that checks for collision with a box obstacle.
+/// The robot is considered a point with orientation, but we check if the point
+/// is inside the box.
+struct BoxObstacleChecker {
+    x_min: f64,
+    x_max: f64,
+    y_min: f64,
+    y_max: f64,
+}
+
+impl StateValidityChecker&lt;CompoundState&gt; for BoxObstacleChecker {
+    fn is_valid(&amp;self, state: &amp;CompoundState) -&gt; bool {
+        // Extract the RealVector component (index 0)
+        if let Some(rv_state) = state.components[0]
+            .as_any()
+            .downcast_ref::&lt;RealVectorState&gt;()
+        {
+            let x = rv_state.values[0];
+            let y = rv_state.values[1];
+
+            // Check if inside the box
+            let inside_box =
+                x &gt;= self.x_min &amp;&amp; x &lt;= self.x_max &amp;&amp; y &gt;= self.y_min &amp;&amp; y &lt;= self.y_max;
+
+            !inside_box
+        } else {
+            // Should not happen if constructed correctly
+            false
+        }
+    }
+}
+
+/// A Goal definition for a CompoundState (Position + Orientation).
+/// Success is being within a radius of the target position.
+struct CompoundGoalRegion {
+    target: CompoundState,
+    radius: f64,
+    space: Arc&lt;CompoundStateSpace&gt;,
+}
+
+impl Goal&lt;CompoundState&gt; for CompoundGoalRegion {
+    fn is_satisfied(&amp;self, state: &amp;CompoundState) -&gt; bool {
+        self.space.distance(state, &amp;self.target) &lt;= self.radius
+    }
+}
+
+impl GoalRegion&lt;CompoundState&gt; for CompoundGoalRegion {
+    fn distance_goal(&amp;self, state: &amp;CompoundState) -&gt; f64 {
+        let dist = self.space.distance(state, &amp;self.target);
+        (dist - self.radius).max(0.0)
+    }
+}
+
+impl GoalSampleableRegion&lt;CompoundState&gt; for CompoundGoalRegion {
+    fn sample_goal(&amp;self, rng: &amp;mut impl Rng) -&gt; Result&lt;CompoundState, StateSamplingError&gt; {
+        // Get target components
+        let target_rv = self.target.components[0]
+            .as_any()
+            .downcast_ref::&lt;RealVectorState&gt;()
+            .unwrap();
+
+        // Sample a position around the target within radius
+        let angle = rng.random_range(0.0..2.0 * PI);
+        let radius = self.radius * rng.random::&lt;f64&gt;().sqrt();
+
+        let x = target_rv.values[0] + radius * angle.cos();
+        let y = target_rv.values[1] + radius * angle.sin();
+
+        // Sample a random orientation for the goal (or keep it fixed if desired)
+        // Here we sample a random orientation effectively ignoring orientation for the goal region
+        let theta = rng.random_range(0.0..2.0 * PI);
+
+        Ok(CompoundState {
+            components: vec![
+                Box::new(RealVectorState { values: vec![x, y] }),
+                Box::new(SO2State::new(theta)),
+            ],
+        })
+    }
+}
+
+#[allow(clippy::arc_with_non_send_sync)]
+fn main() {
+    // 1. Define the state space: R^2 x SO(2)
+    // R^2 for position (x, y)
+    let r2 = RealVectorStateSpace::new(2, Some(vec![(-5.0, 5.0), (-5.0, 5.0)]))
+        .expect("Failed to create R2 space");
+
+    // SO(2) for orientation (theta)
+    let so2 = SO2StateSpace::new(None).expect("Failed to create SO2 space");
+
+    // Combine them into a CompoundStateSpace
+    // Weights: 1.0 for position, 0.5 for orientation (orientation matters less for distance)
+    let space = Arc::new(CompoundStateSpace::new(
+        vec![Box::new(r2), Box::new(so2)],
+        vec![1.0, 0.5],
+    ));
+
+    // 2. Define Start and Goal states
+    let start_state = CompoundState {
+        components: vec![
+            Box::new(RealVectorState::new(vec![-2.0, 0.0])),
+            Box::new(SO2State::new(0.0)),
+        ],
+    };
+
+    let target_state = CompoundState {
+        components: vec![
+            Box::new(RealVectorState::new(vec![2.0, 0.0])),
+            Box::new(SO2State::new(PI)),
+        ],
+    };
+
+    // 3. Define Goal Region
+    let goal_definition = Arc::new(CompoundGoalRegion {
+        target: target_state.clone(),
+        radius: 0.5,
+        space: space.clone(),
+    });
+
+    // 4. Define Problem
+    let problem_definition = Arc::new(ProblemDefinition {
+        space: space.clone(),
+        start_states: vec![start_state.clone()],
+        goal: goal_definition.clone(),
+    });
+
+    // 5. Define Validity Checker (Box Obstacle)
+    let validity_checker = Arc::new(BoxObstacleChecker {
+        x_min: -0.5,
+        x_max: 0.5,
+        y_min: -2.0,
+        y_max: 2.0,
+    });
+
+    // 6. Setup Planner (RRT)
+    let mut planner = RRT::new(0.5, 0.1, &amp;PlannerConfig { seed: Some(123) });
+    planner.setup(problem_definition, validity_checker.clone());
+
+    // 7. Solve
+    println!("Solving Compound State planning problem...");
+    let timeout = Duration::from_secs(5);
+    match planner.solve(timeout) {
+        Ok(path) =&gt; {
+            println!("Solution found with {} states.", path.0.len());
+
+            // Print first and last state to verify
+            if let Some(first) = path.0.first() {
+                let rv = first.components[0]
+                    .as_any()
+                    .downcast_ref::&lt;RealVectorState&gt;()
+                    .unwrap();
+                let so2 = first.components[1]
+                    .as_any()
+                    .downcast_ref::&lt;SO2State&gt;()
+                    .unwrap();
+                println!(
+                    "Start: ({:.2}, {:.2}, {:.2})",
+                    rv.values[0], rv.values[1], so2.value
+                );
+            }
+            if let Some(last) = path.0.last() {
+                let rv = last.components[0]
+                    .as_any()
+                    .downcast_ref::&lt;RealVectorState&gt;()
+                    .unwrap();
+                let so2 = last.components[1]
+                    .as_any()
+                    .downcast_ref::&lt;SO2State&gt;()
+                    .unwrap();
+                println!(
+                    "End:   ({:.2}, {:.2}, {:.2})",
+                    rv.values[0], rv.values[1], so2.value
+                );
+            }
+        }
+        Err(e) =&gt; println!("Planner failed: {:?}", e),
+    }
+}</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="compound-state-planning-python"><a class="header" href="#compound-state-planning-python">Compound State Planning: Python</a></h1>
+<p>This example demonstrates how to use <code>CompoundStateSpace</code> in Python to plan for a system with both position and orientation.</p>
+<pre><code class="language-python">import math
+import random
+from oxmpl_py.base import (
+    CompoundState,
+    CompoundStateSpace,
+    RealVectorStateSpace,
+    SO2StateSpace,
+    ProblemDefinition,
+    RealVectorState,
+    SO2State,
+    PlannerConfig,
+)
+from oxmpl_py.geometric import RRT
+
+class CompoundCircularGoal:
+    def __init__(self, space: CompoundStateSpace, x: float, y: float, radius: float):
+        self.space = space
+        # Target: Position (x,y) and Orientation 0.0 (though orientation is ignored for goal satisfaction here)
+        self.target = CompoundState([RealVectorState([x, y]), SO2State(0.0)])
+        self.radius = radius
+        self.rng = random.Random(123)
+
+    def is_satisfied(self, state: CompoundState) -&gt; bool:
+        return self.space.distance(self.target, state) &lt;= self.radius
+
+    def sample_goal(self) -&gt; CompoundState:
+        angle = self.rng.uniform(0, 2 * math.pi)
+        radius = self.radius * math.sqrt(self.rng.uniform(0, 1))
+
+        x = self.target.components[0].values[0] + radius * math.cos(angle)
+        y = self.target.components[0].values[1] + radius * math.sin(angle)
+
+        # Random orientation for the goal sample
+        so2_value = self.rng.uniform(0, 2 * math.pi)
+
+        return CompoundState([RealVectorState([x, y]), SO2State(so2_value)])
+
+def is_state_valid(state: CompoundState) -&gt; bool:
+    """
+    Checks if the state is valid.
+    Invalid if the position is inside a box obstacle centered at (0, 0)
+    with width 1.0 and height 4.0.
+    """
+    rv_state = state.components[0]
+    x, y = rv_state.values
+
+    # Obstacle definition
+    x_min, x_max = -0.5, 0.5
+    y_min, y_max = -2.0, 2.0
+
+    is_in_wall = (
+        x &gt;= x_min and x &lt;= x_max and
+        y &gt;= y_min and y &lt;= y_max
+    )
+
+    return not is_in_wall
+
+def main():
+    # 1. Define State Space: R^2 x SO(2)
+    rv_space = RealVectorStateSpace(dimension=2, bounds=[(-5.0, 5.0), (-5.0, 5.0)])
+    so2_space = SO2StateSpace()
+
+    # Combined space with weights
+    space = CompoundStateSpace([rv_space, so2_space], weights=[1.0, 0.5])
+
+    # 2. Define Start and Goal
+    start_state = CompoundState([RealVectorState([-2.0, 0.0]), SO2State(0.0)])
+
+    # Goal region around (2.0, 0.0) with radius 0.5
+    goal_region = CompoundCircularGoal(space, x=2.0, y=0.0, radius=0.5)
+
+    # 3. Create Problem Definition
+    problem_def = ProblemDefinition.from_compound(space, start_state, goal_region)
+    planner_config = PlannerConfig(seed=123)
+
+    # 4. Setup Planner (RRT)
+    planner = RRT(
+        max_distance=0.5,
+        goal_bias=0.1,
+        problem_definition=problem_def,
+        planner_config=planner_config,
+    )
+
+    planner.setup(is_state_valid)
+
+    # 5. Solve
+    print("Solving Compound State planning problem (Python)...")
+    try:
+        path = planner.solve(timeout_secs=5.0)
+        print(f"Solution found with {len(path.states)} states.")
+
+        if len(path.states) &gt; 0:
+            start = path.states[0]
+            end = path.states[-1]
+            s_rv = start.components[0].values
+            s_so2 = start.components[1].value
+            e_rv = end.components[0].values
+            e_so2 = end.components[1].value
+
+            print(f"Start: ({s_rv[0]:.2f}, {s_rv[1]:.2f}, {s_so2:.2f})")
+            print(f"End:   ({e_rv[0]:.2f}, {e_rv[1]:.2f}, {e_so2:.2f})")
+
+    except Exception as e:
+        print(f"Planning failed: {e}")
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="compound-state-planning-javascript"><a class="header" href="#compound-state-planning-javascript">Compound State Planning: JavaScript</a></h1>
+<p>This example demonstrates how to use <code>CompoundStateSpace</code> and <code>CompoundStateBuilder</code> in JavaScript/WASM to solve a planning problem in a composite state space.</p>
+<pre><code class="language-javascript">import oxmpl from 'oxmpl-js';
+
+// Define the validity checker
+// State is invalid if the position (x, y) is inside a box obstacle
+function isStateValid(state) {
+  try {
+    const rvPart = state.getComponent(0);
+    const [x, y] = rvPart.values;
+
+    // Box obstacle
+    const x_min = -0.5,
+      x_max = 0.5;
+    const y_min = -2.0,
+      y_max = 2.0;
+
+    const insideBox = x &gt;= x_min &amp;&amp; x &lt;= x_max &amp;&amp; y &gt;= y_min &amp;&amp; y &lt;= y_max;
+
+    return !insideBox;
+  } catch (e) {
+    console.error('Validity check error:', e);
+    return false;
+  }
+}
+
+// 1. Create State Space
+const r2 = new oxmpl.base.RealVectorStateSpace(2, [-5.0, 5.0, -5.0, 5.0]);
+const so2 = new oxmpl.base.SO2StateSpace();
+
+const spaceBuilder = new oxmpl.base.CompoundStateSpaceBuilder();
+spaceBuilder.addRealVectorStateSpace(r2, 1.0);
+spaceBuilder.addSO2StateSpace(so2, 0.5);
+const space = spaceBuilder.build();
+
+// 2. Define Start State
+const startBuilder = new oxmpl.base.CompoundStateBuilder();
+startBuilder.addRealVectorState(new oxmpl.base.RealVectorState([-2.0, 0.0]));
+startBuilder.addSO2State(new oxmpl.base.SO2State(0.0));
+const startState = startBuilder.build();
+
+// 3. Define Goal Region
+const targetBuilder = new oxmpl.base.CompoundStateBuilder();
+targetBuilder.addRealVectorState(new oxmpl.base.RealVectorState([2.0, 0.0]));
+targetBuilder.addSO2State(new oxmpl.base.SO2State(Math.PI));
+const targetState = targetBuilder.build();
+
+const radius = 0.5;
+
+const goal = new oxmpl.base.Goal({
+  isSatisfied: (state) =&gt; {
+    return space.distance(state, targetState) &lt;= radius;
+  },
+  distanceGoal: (state) =&gt; {
+    const dist = space.distance(state, targetState);
+    return Math.max(0, dist - radius);
+  },
+  sampleGoal: () =&gt; {
+    // Sample a random point within radius of the target position
+    // For simplicity in this example, we sample a random angle and distance
+    // But we need to construct a proper CompoundState
+
+    const tRV = targetState.getComponent(0);
+    const [tx, ty] = tRV.values;
+
+    const angle = Math.random() * 2 * Math.PI;
+    const r = radius * Math.sqrt(Math.random());
+
+    const x = tx + r * Math.cos(angle);
+    const y = ty + r * Math.sin(angle);
+
+    // Random orientation for goal
+    const theta = Math.random() * 2 * Math.PI;
+
+    const builder = new oxmpl.base.CompoundStateBuilder();
+    builder.addRealVectorState(new oxmpl.base.RealVectorState([x, y]));
+    builder.addSO2State(new oxmpl.base.SO2State(theta));
+    return builder.build();
+  },
+});
+
+// 4. Create Problem
+const problem = oxmpl.base.ProblemDefinition.fromCompoundState(space, startState, goal);
+const validityChecker = new oxmpl.base.StateValidityChecker(isStateValid);
+const plannerConfig = new oxmpl.base.PlannerConfig(123);
+
+// 5. Setup Planner
+const planner = new oxmpl.geometric.RRT(0.5, 0.1, problem, plannerConfig);
+planner.setup(validityChecker);
+
+// 6. Solve
+console.log('Solving Compound State planning problem (JS)...');
+try {
+  const path = planner.solve(5.0);
+  if (path &amp;&amp; path.getLength() &gt; 0) {
+    const states = path.getStates();
+    console.log(`Solution found with ${states.length} states!`);
+
+    if (states.length &gt; 0) {
+      const start = states[0];
+      const end = states[states.length - 1];
+
+      const sRV = start.getComponent(0);
+      const sSO2 = start.getComponent(1);
+      const eRV = end.getComponent(0);
+      const eSO2 = end.getComponent(1);
+
+      console.log(
+        `Start: (${sRV.values[0].toFixed(2)}, ${sRV.values[1].toFixed(2)}, ${sSO2.value.toFixed(2)})`
+      );
+      console.log(
+        `End:   (${eRV.values[0].toFixed(2)}, ${eRV.values[1].toFixed(2)}, ${eSO2.value.toFixed(2)})`
+      );
+    }
+  } else {
+    console.log('No solution found');
+  }
+} catch (e) {
+  console.log(`Planning failed: ${e}`);
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="state-validity-checkers"><a class="header" href="#state-validity-checkers">State Validity Checkers</a></h1>
+<p>The <code>StateValidityChecker</code> is a crucial component in any motion planning problem. It defines all the valide configurations the robot is allowed to be. Its primary job is to take a state and return <code>true</code> if it is valid (collision-free, within constraints) or <code>false</code> otherwise.</p>
+<h2 id="the-interface"><a class="header" href="#the-interface">The Interface</a></h2>
+<p>A validity checker is essentially a function or closure with the signature:
+<code>fn(state) -&gt; bool</code></p>
+<p>Since planners call this function thousands of times, it <strong>must be efficient</strong>.</p>
+<h2 id="implementations"><a class="header" href="#implementations">Implementations</a></h2>
+<h3 id="rust-2"><a class="header" href="#rust-2">Rust</a></h3>
+<p>In Rust, you implement the <code>StateValidityChecker</code> trait for your specific state type.</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use oxmpl::base::{validity::StateValidityChecker, state::RealVectorState};
+
+struct MyObstacleChecker {
+    // Store efficient data structures here
+    obstacles: Vec&lt;(f64, f64, f64)&gt;, // x, y, radius
+}
+
+impl StateValidityChecker&lt;RealVectorState&gt; for MyObstacleChecker {
+    fn is_valid(&amp;self, state: &amp;RealVectorState) -&gt; bool {
+        let x = state.values[0];
+        let y = state.values[1];
+
+        for (ox, oy, r) in &amp;self.obstacles {
+            let dist_sq = (x - ox).powi(2) + (y - oy).powi(2);
+            if dist_sq &lt; r.powi(2) {
+                return false; // Collision!
+            }
+        }
+        true
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="python-2"><a class="header" href="#python-2">Python</a></h3>
+<p>In Python, you simply provide a callable (function or lambda) that accepts a state and returns a boolean.</p>
+<pre><code class="language-python">from oxmpl_py.base import RealVectorState
+
+def is_state_valid(state: RealVectorState) -&gt; bool:
+    x, y = state.values
+
+    # Check bounds (optional if StateSpace already handles it, but good practice)
+    if not (-10 &lt; x &lt; 10 and -10 &lt; y &lt; 10):
+        return False
+
+    # Check circular obstacle at (0,0) with radius 2
+    if x*x + y*y &lt; 4.0:
+        return False
+
+    return True
+
+# Pass this function to the planner setup
+planner.setup(is_state_valid)
+</code></pre>
+<h3 id="javascript"><a class="header" href="#javascript">JavaScript</a></h3>
+<p>In JavaScript, you pass a callback function to the <code>StateValidityChecker</code> constructor.</p>
+<pre><code class="language-javascript">const validityChecker = new oxmpl.base.StateValidityChecker((state) =&gt; {
+    // Assuming RealVectorState
+    const [x, y] = state.values;
+
+    // Check circular obstacle
+    if (x*x + y*y &lt; 4.0) {
+        return false;
+    }
+
+    return true;
+});
+
+planner.setup(validityChecker);
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Fail Fast</strong>: Check the most likely collisions first. If you have a bounding box for your robot, check that against the environment bounds before doing complex mesh collision detection.</li>
+<li><strong>Broad-Phase vs. Narrow-Phase</strong>: Use simple geometric shapes (spheres, boxes) to approximate obstacles for a quick check. Only perform expensive checks (detailed mesh intersection) if the broad-phase check passes.</li>
+<li><strong>Thread Safety</strong>: The <code>StateValidityChecker</code> trait enforces <code>Send + Sync</code>. This is in anticipation of a future where multithreading will be implemented.</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="goal-definitions"><a class="header" href="#goal-definitions">Goal Definitions</a></h1>
+<p>The <code>Goal</code> component defines the termination condition for the planner. It tells the planner when it has successfully found a valid configuration.</p>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<p>A Goal generally consists of three parts (though some are optional depending on the planner):</p>
+<ol>
+<li><strong><code>is_satisfied(state) -&gt; bool</code></strong>: Returns <code>true</code> if the state is in the goal region.</li>
+<li><strong><code>distance_goal(state) -&gt; float</code></strong>: Heuristic distance to the goal. Used by some planners to bias sampling towards the goal.</li>
+<li><strong><code>sample_goal() -&gt; State</code></strong>: Returns a random state within the goal region. Required by bi-directional planners (like <code>RRTConnect</code>) to grow trees from the goal.</li>
+</ol>
+<h2 id="implementations-1"><a class="header" href="#implementations-1">Implementations</a></h2>
+<h3 id="rust-3"><a class="header" href="#rust-3">Rust</a></h3>
+<p>OxMPL provides traits for different levels of goal capability: <code>Goal</code>, <code>GoalRegion</code>, and <code>GoalSampleableRegion</code>.</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use oxmpl::base::{
+    goal::{Goal, GoalRegion, GoalSampleableRegion},
+    state::RealVectorState,
+    space::RealVectorStateSpace,
+    error::StateSamplingError
+};
+use std::sync::Arc;
+use rand::Rng;
+
+struct MyGoal {
+    target: RealVectorState,
+    threshold: f64,
+    space: Arc&lt;RealVectorStateSpace&gt;,
+}
+
+// Basic Goal: Just checks satisfaction
+impl Goal&lt;RealVectorState&gt; for MyGoal {
+    fn is_satisfied(&amp;self, state: &amp;RealVectorState) -&gt; bool {
+        self.space.distance(state, &amp;self.target) &lt;= self.threshold
+    }
+}
+
+// GoalRegion: Provides distance heuristic
+impl GoalRegion&lt;RealVectorState&gt; for MyGoal {
+    fn distance_goal(&amp;self, state: &amp;RealVectorState) -&gt; f64 {
+        let dist = self.space.distance(state, &amp;self.target);
+        (dist - self.threshold).max(0.0)
+    }
+}
+
+// GoalSampleableRegion: Allows sampling (Required for RRTConnect)
+impl GoalSampleableRegion&lt;RealVectorState&gt; for MyGoal {
+    fn sample_goal(&amp;self, _rng: &amp;mut impl Rng) -&gt; Result&lt;RealVectorState, StateSamplingError&gt; {
+        // Simple implementation: just return the target
+        // A better implementation would sample around the target
+        Ok(self.target.clone())
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="python-3"><a class="header" href="#python-3">Python</a></h3>
+<p>In Python, you define a class that implements the required methods.</p>
+<pre><code class="language-python">import random
+from oxmpl_py.base import RealVectorStateSpace, RealVectorState
+
+class MyGoal:
+    def __init__(self, space, target_x, target_y, radius):
+        self.space = space
+        self.target = RealVectorState([target_x, target_y])
+        self.radius = radius
+
+    def is_satisfied(self, state: RealVectorState) -&gt; bool:
+        return self.space.distance(state, self.target) &lt;= self.radius
+
+    def distance_goal(self, state: RealVectorState) -&gt; float:
+        dist = self.space.distance(state, self.target)
+        return max(0.0, dist - self.radius)
+
+    def sample_goal(self) -&gt; RealVectorState:
+        # Sample a random point within the goal circle
+        angle = random.uniform(0, 6.28)
+        r = self.radius * random.uniform(0, 1)**0.5
+        x = self.target.values[0] + r * math.cos(angle)
+        y = self.target.values[1] + r * math.sin(angle)
+        return RealVectorState([x, y])
+
+# Usage
+goal = MyGoal(space, 5.0, 5.0, 0.5)
+problem = ProblemDefinition.from_real_vector(space, start, goal)
+</code></pre>
+<h3 id="javascript-1"><a class="header" href="#javascript-1">JavaScript</a></h3>
+<p>In JavaScript, you pass an object (or class instance) with the required function properties.</p>
+<pre><code class="language-javascript">const goal = new oxmpl.base.Goal({
+    isSatisfied: (state) =&gt; {
+        return space.distance(state, targetState) &lt;= radius;
+    },
+
+    distanceGoal: (state) =&gt; {
+        const dist = space.distance(state, targetState);
+        return Math.max(0, dist - radius);
+    },
+
+    sampleGoal: () =&gt; {
+        // Return a new State object inside the goal region
+        return new oxmpl.base.RealVectorState([5.0, 5.0]);
+    }
+});
+</code></pre>
+<h2 id="types-of-goals"><a class="header" href="#types-of-goals">Types of Goals</a></h2>
+<ol>
+<li><strong>Fixed State Goal</strong>: The goal is a single specific configuration.</li>
+<li><strong>Goal Region</strong>: The goal is a set of states.</li>
+<li><strong>Threshold Goal</strong>: The goal is defined by a condition.</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="python-api-reference"><a class="header" href="#python-api-reference">Python API Reference</a></h1>
 <p>The <code>oxmpl-py</code> package provides Python bindings for the core OxMPL functionality.</p>
 <h2 id="oxmpl_pybase"><a class="header" href="#oxmpl_pybase"><code>oxmpl_py.base</code></a></h2>
@@ -547,7 +1161,6 @@ try {
 <li><code>components: List[State]</code> (read-only)</li>
 <li><code>__len__() -&gt; int</code>: Returns the number of component states.</li>
 </ul>
-<hr>
 <h3 id="state-spaces"><a class="header" href="#state-spaces">State Spaces</a></h3>
 <p>These classes define the planning space, including its dimensions, boundaries, and distance metrics.</p>
 <h4 id="realvectorstatespace"><a class="header" href="#realvectorstatespace"><code>RealVectorStateSpace</code></a></h4>
@@ -604,7 +1217,6 @@ try {
 <li><code>__init__(subspaces: List[StateSpace], weights: List[float])</code></li>
 <li><code>distance(state1: CompoundState, state2: CompoundState) -&gt; float</code></li>
 </ul>
-<hr>
 <h3 id="planning-components"><a class="header" href="#planning-components">Planning Components</a></h3>
 <h4 id="goal"><a class="header" href="#goal"><code>Goal</code></a></h4>
 <p>A user-defined Python class that specifies the goal condition for the planner. It must implement the following methods:</p>
@@ -733,7 +1345,6 @@ try {
 <li><code>addCompoundState(state: CompoundState)</code></li>
 <li><code>build(): CompoundState</code></li>
 </ul>
-<hr>
 <h3 id="state-spaces-1"><a class="header" href="#state-spaces-1">State Spaces</a></h3>
 <p>These classes define the planning space, including its dimensions, boundaries, and distance metrics.</p>
 <h4 id="realvectorstatespace-1"><a class="header" href="#realvectorstatespace-1"><code>RealVectorStateSpace</code></a></h4>
@@ -836,7 +1447,6 @@ try {
 <li><code>addCompoundStateSpace(space: CompoundStateSpace, weight: number)</code></li>
 <li><code>build(): CompoundStateSpace</code></li>
 </ul>
-<hr>
 <h3 id="planning-components-1"><a class="header" href="#planning-components-1">Planning Components</a></h3>
 <h4 id="goal-1"><a class="header" href="#goal-1"><code>Goal</code></a></h4>
 <p>An interface that user-provided objects must satisfy to define the goal.</p>
@@ -908,6 +1518,259 @@ try {
 <li><code>setup(validityChecker: StateValidityChecker)</code></li>
 <li><code>constructRoadmap()</code></li>
 <li><code>solve(timeout: number): Path</code></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
+<p>Thank you for your interest in contributing to OxMPL!</p>
+<p>This section provides guides on how to extend the library with new functionality, specifically focusing on adding new planners and state spaces, and ensuring they are available in the Python and JavaScript bindings.</p>
+<ul>
+<li><a href="#implementing-new-planners">Implementing New Planners</a></li>
+<li><a href="#implementing-new-state-spaces">Implementing New State Spaces</a></li>
+<li><a href="#contributors">Contributors</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="implementing-new-planners"><a class="header" href="#implementing-new-planners">Implementing New Planners</a></h1>
+<p>This guide outlines the steps to add a new planning algorithm to OxMPL and expose it to the Python and JavaScript bindings.</p>
+<h2 id="rust-implementation-oxmpl"><a class="header" href="#rust-implementation-oxmpl">Rust Implementation (<code>oxmpl</code>)</a></h2>
+<ol>
+<li><strong>Create the Planner Struct</strong>: Define your planner struct in <code>oxmpl/src/geometric/planners/&lt;your_planner&gt;.rs</code>.</li>
+<li><strong>Implement <code>Planner</code> Trait</strong>: Implement the <code>oxmpl::base::planner::Planner</code> trait for your struct.
+<ul>
+<li><code>setup</code>: Initialize the planner with the problem definition.</li>
+<li><code>solve</code>: The core logic to find a path.</li>
+<li><code>get_planner_data</code>: Return internal data (like the graph) for visualization/debugging.</li>
+</ul>
+</li>
+<li><strong>Export</strong>: Add your planner to <code>oxmpl/src/geometric/planners/mod.rs</code> and re-export it in <code>oxmpl/src/geometric/mod.rs</code>.</li>
+</ol>
+<pre><code class="language-rust ignore">// oxmpl/src/geometric/planners/my_planner.rs
+use crate::base::planner::Planner;
+
+pub struct MyPlanner&lt;State, Space, Goal&gt; {
+    // ... fields
+}
+
+impl&lt;State, Space, Goal&gt; Planner&lt;State, Space, Goal&gt; for MyPlanner&lt;State, Space, Goal&gt;
+where
+    // ... constraints
+{
+    // ... implementation
+}</code></pre>
+<h2 id="python-bindings-oxmpl-py"><a class="header" href="#python-bindings-oxmpl-py">Python Bindings (<code>oxmpl-py</code>)</a></h2>
+<p>To make your planner available in Python, you need to wrap the Rust struct using PyO3.</p>
+<ol>
+<li><strong>Create Wrapper File</strong>: Create <code>oxmpl-py/src/geometric/&lt;my_planner&gt;.rs</code>.</li>
+<li><strong>Define Type Aliases</strong>: Since PyO3 classes cannot be generic, define type aliases for your planner specialized for each supported state space (e.g., <code>MyPlannerForRealVector</code>, <code>MyPlannerForSO2</code>, etc.).</li>
+<li><strong>Define the PyO3 Class</strong>: Create a struct (e.g., <code>PyMyPlanner</code>) decorated with <code>#[pyclass]</code>.
+<ul>
+<li>It should hold an enum <code>PlannerVariant</code> that wraps the specialized Rust planner instances (usually inside <code>Rc&lt;RefCell&lt;...&gt;&gt;</code>).</li>
+</ul>
+</li>
+<li><strong>Implement <code>__init__</code></strong>: In <code>#[new]</code>, inspect the <code>PyProblemDefinition</code> to determine which variant to instantiate.</li>
+<li><strong>Implement Methods</strong>: Implement <code>solve</code>, <code>setup</code>, etc., delegating the call to the inner Rust planner.</li>
+<li><strong>Export</strong>: Register the class in <code>oxmpl-py/src/geometric/mod.rs</code>.</li>
+</ol>
+<p><strong>Template:</strong></p>
+<pre><code class="language-rust ignore">// oxmpl-py/src/geometric/my_planner.rs
+use pyo3::prelude::*;
+use crate::base::{ProblemDefinitionVariant, PyGoal, PyPath, PyPlannerConfig, PyProblemDefinition};
+use oxmpl::geometric::MyPlanner;
+// ... imports
+
+// 1. Define aliases for concrete types
+type MyPlannerForRealVector = MyPlanner&lt;RealVectorState, RealVectorStateSpace, PyGoal&lt;RealVectorState&gt;&gt;;
+// ... repeat for SO2, SO3, SE2, SE3, Compound
+
+// 2. Define enum wrapper
+enum PlannerVariant {
+    RealVector(Rc&lt;RefCell&lt;MyPlannerForRealVector&gt;&gt;),
+    // ...
+}
+
+// 3. Define Python class
+#[pyclass(name = "MyPlanner", unsendable)]
+pub struct PyMyPlanner {
+    planner: PlannerVariant,
+    pd: ProblemDefinitionVariant,
+}
+
+#[pymethods]
+impl PyMyPlanner {
+    #[new]
+    fn new(
+        problem_definition: &amp;PyProblemDefinition,
+        planner_config: &amp;PyPlannerConfig,
+    ) -&gt; PyResult&lt;Self&gt; {
+        // Switch on problem_definition type to create correct PlannerVariant
+    }
+
+    fn solve(&amp;mut self, timeout_secs: f32) -&gt; PyResult&lt;PyPath&gt; {
+        // Delegate to self.planner
+    }
+}</code></pre>
+<h2 id="javascript-bindings-oxmpl-js"><a class="header" href="#javascript-bindings-oxmpl-js">JavaScript Bindings (<code>oxmpl-js</code>)</a></h2>
+<p>To make your planner available in JavaScript/WASM, wrap it using <code>wasm-bindgen</code>.</p>
+<ol>
+<li><strong>Create Wrapper File</strong>: Create <code>oxmpl-js/src/geometric/&lt;my_planner&gt;.rs</code>.</li>
+<li><strong>Define Enum Wrapper</strong>: Similar to Python, define an enum <code>MyPlannerVariant</code> holding the specialized Rust planners.</li>
+<li><strong>Define JS Class</strong>: Create a struct <code>JsMyPlanner</code> decorated with <code>#[wasm_bindgen]</code>.</li>
+<li><strong>Implement Constructor</strong>: Match the <code>JsProblemDefinition</code> variant to instantiate the correct planner type.</li>
+<li><strong>Implement Methods</strong>: Implement <code>solve</code> etc., delegating to the inner planner and returning <code>JsPath</code>.</li>
+<li><strong>Export</strong>: Add to <code>oxmpl-js/src/geometric/mod.rs</code>.</li>
+</ol>
+<p><strong>Template:</strong></p>
+<pre><code class="language-rust ignore">// oxmpl-js/src/geometric/my_planner.rs
+use wasm_bindgen::prelude::*;
+use crate::base::{JsPath, JsProblemDefinition, ProblemDefinitionVariant, JsPlannerConfig};
+use oxmpl::geometric::MyPlanner;
+
+enum MyPlannerVariant {
+    RealVector(MyPlanner&lt;RealVectorState, RealVectorStateSpace, JsGoal&gt;),
+    // ...
+}
+
+#[wasm_bindgen(js_name = MyPlanner)]
+pub struct JsMyPlanner {
+    planner: MyPlannerVariant,
+    pd: ProblemDefinitionVariant,
+}
+
+#[wasm_bindgen(js_class = MyPlanner)]
+impl JsMyPlanner {
+    #[wasm_bindgen(constructor)]
+    pub fn new(problem_def: &amp;JsProblemDefinition, config: &amp;JsPlannerConfig) -&gt; Self {
+        // Switch on problem_def.inner to create correct MyPlannerVariant
+    }
+
+    pub fn solve(&amp;mut self, timeout_secs: f32) -&gt; Result&lt;JsPath, String&gt; {
+        // Delegate and convert result
+    }
+}</code></pre>
+<h2 id="integration-testing"><a class="header" href="#integration-testing">Integration Testing</a></h2>
+<p>Strict testing is required for any new planner to ensure correctness and stability across all bindings. You must implement integration tests for <strong>each layer</strong> of the stack.</p>
+<h3 id="rust-oxmpltests"><a class="header" href="#rust-oxmpltests">Rust (<code>oxmpl/tests/</code>)</a></h3>
+<p>Create a new integration test file <code>oxmpl/tests/&lt;planner_name&gt;_tests.rs</code>.</p>
+<ul>
+<li>Verify the planner solves basic problems (e.g., finding a path in a free space).</li>
+<li>Test with <strong>all supported state spaces</strong> (RealVector, SO2, SO3, SE2, SE3, Compound).</li>
+<li>Ensure the planner respects time limits and goal conditions.</li>
+</ul>
+<h3 id="python-oxmpl-pytests"><a class="header" href="#python-oxmpl-pytests">Python (<code>oxmpl-py/tests/</code>)</a></h3>
+<p>Add tests in <code>oxmpl-py/tests/</code> using <code>pytest</code>.</p>
+<ul>
+<li>Create a file <code>test_&lt;planner_name&gt;.py</code>.</li>
+<li>Implement tests that mirror the Rust integration tests.</li>
+<li>Ensure the Python bindings correctly expose the planner and return valid paths.</li>
+<li>Run tests with: <code>pytest oxmpl-py/tests/</code></li>
+</ul>
+<h3 id="javascript-oxmpl-jstests"><a class="header" href="#javascript-oxmpl-jstests">JavaScript (<code>oxmpl-js/tests/</code>)</a></h3>
+<p>Add tests in <code>oxmpl-js/tests/</code> using <code>vitest</code>.</p>
+<ul>
+<li>Create a file <code>test_&lt;planner_name&gt;.test.js</code>.</li>
+<li>Verify the planner works in a simulated JS environment.</li>
+<li>Check that the API handles JavaScript objects correctly (e.g., passing options, callbacks).</li>
+<li>Run tests with: <code>npm test</code> inside the <code>oxmpl-js</code> directory.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="implementing-new-state-spaces"><a class="header" href="#implementing-new-state-spaces">Implementing New State Spaces</a></h1>
+<p>This guide explains how to add a new <code>State</code> and <code>StateSpace</code> to OxMPL and expose them to the bindings.</p>
+<h2 id="do-you-need-a-new-state-type"><a class="header" href="#do-you-need-a-new-state-type">Do You Need a New State Type?</a></h2>
+<p>Before implementing a custom <code>State</code> and <code>StateSpace</code>, consider if your requirements can be met using <code>CompoundState</code> and <code>CompoundStateSpace</code>.</p>
+<h3 id="using-compoundstatespace"><a class="header" href="#using-compoundstatespace">Using <code>CompoundStateSpace</code></a></h3>
+<p>Most robotic systems can be represented as a collection of simpler state spaces. A <code>CompoundStateSpace</code> allows you to combine existing spaces (like <code>RealVectorStateSpace</code>, <code>SO2StateSpace</code>, <code>SO3StateSpace</code>) via a Cartesian product.</p>
+<p><strong>When to use <code>CompoundStateSpace</code>:</strong></p>
+<ul>
+<li>Your system is composed of multiple independent parts (e.g., a mobile base ($SE(2)$) + a robotic arm ($R^n$)).</li>
+<li>You need to assign different weights to different components during distance calculation.</li>
+</ul>
+<p><strong>When to implement a New State:</strong></p>
+<ul>
+<li><strong>Unique Topology</strong>: You are working with a manifold that is not easily represented by existing spaces (e.g., a specific non-Euclidean surface).</li>
+<li><strong>Custom Metric</strong>: You require a specialized distance function that cannot be decomposed into component-wise distances (e.g., Dubins path distance for non-holonomic vehicles).</li>
+<li><strong>Custom Interpolation</strong>: The path between two states follows specific rules (e.g., geodesic on a sphere).</li>
+</ul>
+<h2 id="rust-implementation-oxmpl-1"><a class="header" href="#rust-implementation-oxmpl-1">Rust Implementation (<code>oxmpl</code>)</a></h2>
+<ol>
+<li><strong>Define State</strong>: Create a struct implementing <code>oxmpl::base::state::State</code> (and <code>Clone</code>, <code>Debug</code>, <code>serde::Serialize</code>, <code>serde::Deserialize</code>).</li>
+<li><strong>Define State Space</strong>: Create a struct implementing <code>oxmpl::base::space::StateSpace</code>.
+<ul>
+<li><code>sample_uniform</code>: Generate a random state.</li>
+<li><code>distance</code>: Compute distance between two states.</li>
+<li><code>interpolate</code>: Interpolate between two states.</li>
+<li><code>satisfies_bounds</code> / <code>enforce_bounds</code>: Check/enforce constraints.</li>
+</ul>
+</li>
+<li><strong>Export</strong>: Add them to <code>oxmpl/src/base/states/</code> and <code>oxmpl/src/base/spaces/</code>.</li>
+</ol>
+<h2 id="python-bindings-oxmpl-py-1"><a class="header" href="#python-bindings-oxmpl-py-1">Python Bindings (<code>oxmpl-py</code>)</a></h2>
+<ol>
+<li><strong>Wrap the State</strong>:
+<ul>
+<li>Create <code>oxmpl-py/src/base/&lt;my_state&gt;.rs</code>.</li>
+<li>Define <code>PyMyState(pub Arc&lt;OxmplMyState&gt;)</code> with <code>#[pyclass]</code>.</li>
+<li>Implement <code>__init__</code>, getters, and <code>__repr__</code>.</li>
+<li>Implement <code>oxmpl_py::base::py_state_convert::PyStateConvert</code> for <code>OxmplMyState</code> to handle conversion between Rust and Python wrappers.</li>
+</ul>
+</li>
+<li><strong>Wrap the State Space</strong>:
+<ul>
+<li>Create <code>oxmpl-py/src/base/&lt;my_state_space&gt;.rs</code>.</li>
+<li>Define <code>PyMyStateSpace(pub Arc&lt;Mutex&lt;OxmplMyStateSpace&gt;&gt;)</code> with <code>#[pyclass]</code>.</li>
+<li>Implement <code>distance</code>, <code>sample</code>, etc.</li>
+</ul>
+</li>
+<li><strong>Register</strong>: Add the classes to <code>oxmpl-py/src/base/mod.rs</code> in <code>create_module</code>.</li>
+<li><strong>Update Planners</strong>: You may need to update the <code>PlannerVariant</code> enums in <code>oxmpl-py/src/geometric/*.rs</code> to include a variant for your new state type if it’s not covered by existing generic logic.</li>
+</ol>
+<h2 id="javascript-bindings-oxmpl-js-1"><a class="header" href="#javascript-bindings-oxmpl-js-1">JavaScript Bindings (<code>oxmpl-js</code>)</a></h2>
+<ol>
+<li><strong>Wrap the State</strong>:
+<ul>
+<li>Create <code>oxmpl-js/src/base/&lt;my_state&gt;.rs</code>.</li>
+<li>Define <code>JsMyState</code> struct wrapping <code>Arc&lt;OxmplMyState&gt;</code> with <code>#[wasm_bindgen]</code>.</li>
+<li>Implement constructor and getters.</li>
+<li>Implement <code>oxmpl_js::base::js_state_convert::JsStateConvert</code> for <code>OxmplMyState</code>.</li>
+</ul>
+</li>
+<li><strong>Wrap the State Space</strong>:
+<ul>
+<li>Create <code>oxmpl-js/src/base/&lt;my_state_space&gt;.rs</code>.</li>
+<li>Define <code>JsMyStateSpace</code> struct wrapping <code>Arc&lt;Mutex&lt;OxmplMyStateSpace&gt;&gt;</code>.</li>
+<li>Implement <code>sample</code>, <code>distance</code>, etc.</li>
+</ul>
+</li>
+<li><strong>Register</strong>: Export them in <code>oxmpl-js/src/base/mod.rs</code>.</li>
+<li><strong>Update Planners</strong>: Similar to Python, update <code>oxmpl-js/src/geometric/*.rs</code> to include the new state variant in the planner enums.</li>
+</ol>
+<p><strong>Note on <code>JsStateConvert</code>:</strong>
+When implementing <code>from_js_value</code> for your state, you often need to inspect the JS object properties to ensure it matches your state type (e.g., check for <code>x</code>, <code>y</code> for a 2D point).</p>
+<h2 id="integration-testing-1"><a class="header" href="#integration-testing-1">Integration Testing</a></h2>
+<p>Ensure your new state space is robust by adding tests across the stack.</p>
+<h3 id="rust-4"><a class="header" href="#rust-4">Rust</a></h3>
+<ul>
+<li><strong>Unit Tests</strong>: Add <code>#[test]</code> functions in your implementation file (or a separate test module) to verify:
+<ul>
+<li>Distance calculation properties (symmetry, non-negativity).</li>
+<li>Interpolation accuracy.</li>
+<li>Bounds enforcement.</li>
+<li>Serialization/Deserialization (if applicable).</li>
+</ul>
+</li>
+<li><strong>Integration Tests</strong>: Add a test file in <code>oxmpl/tests/</code> to check interaction with planners.</li>
+</ul>
+<h3 id="python-oxmpl-pytests-1"><a class="header" href="#python-oxmpl-pytests-1">Python (<code>oxmpl-py/tests/</code>)</a></h3>
+<p>Add tests in <code>oxmpl-py/tests/</code> to ensure the bindings are correct.</p>
+<ul>
+<li>Verify that <code>__init__</code> works with valid arguments and raises errors for invalid ones.</li>
+<li>Check that methods like <code>distance()</code> and <code>sample()</code> return expected types and values.</li>
+<li>Ensure that states can be passed to and retrieved from planners correctly.</li>
+</ul>
+<h3 id="javascript-oxmpl-jstests-1"><a class="header" href="#javascript-oxmpl-jstests-1">JavaScript (<code>oxmpl-js/tests/</code>)</a></h3>
+<p>Add tests in <code>oxmpl-js/tests/</code> to ensure the WASM bindings work as expected.</p>
+<ul>
+<li>Verify object creation and property access.</li>
+<li>Test that the <code>JsStateConvert</code> trait correctly handles conversion between JS objects and Rust structs.</li>
+<li>Ensure usage within a <code>ProblemDefinition</code> works without panic.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="contributors"><a class="header" href="#contributors">Contributors</a></h1>

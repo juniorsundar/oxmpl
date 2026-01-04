@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust - OxMPL Documentation</title>
+        <title>Implementing New Planners - OxMPL Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -45,10 +45,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-42d4528e.js";
+            window.path_to_searchindex_js = "../searchindex-fdf3f3cd.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-e9bad5c2.js"></script>
+        <script src="../toc-58cf20b0.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -156,7 +156,7 @@
                         <a href="https://github.com/juniorsundar/oxmpl" title="Git repository" aria-label="Git repository">
                             <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
                         </a>
-                        <a href="https://github.com/juniorsundar/oxmpl/edit/main/docs/src/quickstart/rust.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                        <a href="https://github.com/juniorsundar/oxmpl/edit/main/docs/src/contributing/implementing_planners.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
                             <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
                         </a>
 
@@ -190,127 +190,158 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="quick-start-rust"><a class="header" href="#quick-start-rust">Quick Start: Rust</a></h1>
-<p>Here is a complete example of solving a 2D planning problem with a custom collision checker and goal region.</p>
-<pre><code class="language-rust ignore">use std::{f64::consts::PI, sync::Arc, time::Duration};
+                        <h1 id="implementing-new-planners"><a class="header" href="#implementing-new-planners">Implementing New Planners</a></h1>
+<p>This guide outlines the steps to add a new planning algorithm to OxMPL and expose it to the Python and JavaScript bindings.</p>
+<h2 id="rust-implementation-oxmpl"><a class="header" href="#rust-implementation-oxmpl">Rust Implementation (<code>oxmpl</code>)</a></h2>
+<ol>
+<li><strong>Create the Planner Struct</strong>: Define your planner struct in <code>oxmpl/src/geometric/planners/&lt;your_planner&gt;.rs</code>.</li>
+<li><strong>Implement <code>Planner</code> Trait</strong>: Implement the <code>oxmpl::base::planner::Planner</code> trait for your struct.
+<ul>
+<li><code>setup</code>: Initialize the planner with the problem definition.</li>
+<li><code>solve</code>: The core logic to find a path.</li>
+<li><code>get_planner_data</code>: Return internal data (like the graph) for visualization/debugging.</li>
+</ul>
+</li>
+<li><strong>Export</strong>: Add your planner to <code>oxmpl/src/geometric/planners/mod.rs</code> and re-export it in <code>oxmpl/src/geometric/mod.rs</code>.</li>
+</ol>
+<pre><code class="language-rust ignore">// oxmpl/src/geometric/planners/my_planner.rs
+use crate::base::planner::Planner;
 
-use oxmpl::base::{
-    error::StateSamplingError,
-    goal::{Goal, GoalRegion, GoalSampleableRegion},
-    planner::{Path, Planner, PlannerConfig},
-    problem_definition::ProblemDefinition,
-    space::{RealVectorStateSpace, StateSpace},
-    state::RealVectorState,
-    validity::StateValidityChecker,
-};
-use oxmpl::geometric::planners::rrt::RRT;
-
-use rand::Rng;
-
-/// A StateValidityChecker that defines a simple vertical wall obstacle.
-struct WallObstacleChecker {
-    wall_x_pos: f64,
-    wall_y_min: f64,
-    wall_y_max: f64,
-    wall_thickness: f64,
+pub struct MyPlanner&lt;State, Space, Goal&gt; {
+    // ... fields
 }
 
-impl StateValidityChecker&lt;RealVectorState&gt; for WallObstacleChecker {
-    fn is_valid(&amp;self, state: &amp;RealVectorState) -&gt; bool {
-        let x = state.values[0];
-        let y = state.values[1];
-
-        let is_in_wall = x &gt;= self.wall_x_pos - self.wall_thickness / 2.0
-            &amp;&amp; x &lt;= self.wall_x_pos + self.wall_thickness / 2.0
-            &amp;&amp; y &gt;= self.wall_y_min
-            &amp;&amp; y &lt;= self.wall_y_max;
-
-        !is_in_wall
-    }
-}
-
-/// A Goal definition where success is being within a certain radius of a target state.
-struct CircularGoalRegion {
-    target: RealVectorState,
-    radius: f64,
-    space: Arc&lt;RealVectorStateSpace&gt;,
-}
-
-impl Goal&lt;RealVectorState&gt; for CircularGoalRegion {
-    fn is_satisfied(&amp;self, state: &amp;RealVectorState) -&gt; bool {
-        self.space.distance(state, &amp;self.target) &lt;= self.radius
-    }
-}
-
-impl GoalRegion&lt;RealVectorState&gt; for CircularGoalRegion {
-    fn distance_goal(&amp;self, state: &amp;RealVectorState) -&gt; f64 {
-        let dist_to_center = self.space.distance(state, &amp;self.target);
-        (dist_to_center - self.radius).max(0.0)
-    }
-}
-
-impl GoalSampleableRegion&lt;RealVectorState&gt; for CircularGoalRegion {
-    fn sample_goal(&amp;self, rng: &amp;mut impl Rng) -&gt; Result&lt;RealVectorState, StateSamplingError&gt; {
-        let angle = rng.random_range(0.0..2.0 * PI);
-
-        let radius = self.radius * rng.random::&lt;f64&gt;().sqrt();
-
-        let x = self.target.values[0] + radius * angle.cos();
-        let y = self.target.values[1] + radius * angle.sin();
-
-        Ok(RealVectorState { values: vec![x, y] })
-    }
-}
-
-fn main() {
-    let new_rvss_result = RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]));
-
-    let space = Arc::new(new_rvss_result.expect("Error creating new RealVectorState!"));
-
-    let start_state = RealVectorState {
-        values: vec![1.0, 5.0],
-    };
-    let goal_definition = Arc::new(CircularGoalRegion {
-        target: RealVectorState {
-            values: vec![9.0, 5.0],
-        },
-        radius: 0.5,
-        space: space.clone(),
-    });
-
-    let problem_definition = Arc::new(ProblemDefinition {
-        space: space.clone(),
-        start_states: vec![start_state.clone()],
-        goal: goal_definition.clone(),
-    });
-
-    let validity_checker = Arc::new(WallObstacleChecker {
-        wall_x_pos: 5.0,
-        wall_y_min: 2.0,
-        wall_y_max: 8.0,
-        wall_thickness: 0.5,
-    });
-
-    let mut planner = RRT::new(0.5, 0.0, &amp;PlannerConfig{ seed: Some(123) });
-
-    planner.setup(problem_definition, validity_checker.clone());
-
-    let timeout = Duration::from_secs(5);
-    let result = planner.solve(timeout);
-
-    let path = result.expect("Planner failed to find a solution");
-    println!("Found path with {} states.", path.0.len());
+impl&lt;State, Space, Goal&gt; Planner&lt;State, Space, Goal&gt; for MyPlanner&lt;State, Space, Goal&gt;
+where
+    // ... constraints
+{
+    // ... implementation
 }</code></pre>
+<h2 id="python-bindings-oxmpl-py"><a class="header" href="#python-bindings-oxmpl-py">Python Bindings (<code>oxmpl-py</code>)</a></h2>
+<p>To make your planner available in Python, you need to wrap the Rust struct using PyO3.</p>
+<ol>
+<li><strong>Create Wrapper File</strong>: Create <code>oxmpl-py/src/geometric/&lt;my_planner&gt;.rs</code>.</li>
+<li><strong>Define Type Aliases</strong>: Since PyO3 classes cannot be generic, define type aliases for your planner specialized for each supported state space (e.g., <code>MyPlannerForRealVector</code>, <code>MyPlannerForSO2</code>, etc.).</li>
+<li><strong>Define the PyO3 Class</strong>: Create a struct (e.g., <code>PyMyPlanner</code>) decorated with <code>#[pyclass]</code>.
+<ul>
+<li>It should hold an enum <code>PlannerVariant</code> that wraps the specialized Rust planner instances (usually inside <code>Rc&lt;RefCell&lt;...&gt;&gt;</code>).</li>
+</ul>
+</li>
+<li><strong>Implement <code>__init__</code></strong>: In <code>#[new]</code>, inspect the <code>PyProblemDefinition</code> to determine which variant to instantiate.</li>
+<li><strong>Implement Methods</strong>: Implement <code>solve</code>, <code>setup</code>, etc., delegating the call to the inner Rust planner.</li>
+<li><strong>Export</strong>: Register the class in <code>oxmpl-py/src/geometric/mod.rs</code>.</li>
+</ol>
+<p><strong>Template:</strong></p>
+<pre><code class="language-rust ignore">// oxmpl-py/src/geometric/my_planner.rs
+use pyo3::prelude::*;
+use crate::base::{ProblemDefinitionVariant, PyGoal, PyPath, PyPlannerConfig, PyProblemDefinition};
+use oxmpl::geometric::MyPlanner;
+// ... imports
+
+// 1. Define aliases for concrete types
+type MyPlannerForRealVector = MyPlanner&lt;RealVectorState, RealVectorStateSpace, PyGoal&lt;RealVectorState&gt;&gt;;
+// ... repeat for SO2, SO3, SE2, SE3, Compound
+
+// 2. Define enum wrapper
+enum PlannerVariant {
+    RealVector(Rc&lt;RefCell&lt;MyPlannerForRealVector&gt;&gt;),
+    // ...
+}
+
+// 3. Define Python class
+#[pyclass(name = "MyPlanner", unsendable)]
+pub struct PyMyPlanner {
+    planner: PlannerVariant,
+    pd: ProblemDefinitionVariant,
+}
+
+#[pymethods]
+impl PyMyPlanner {
+    #[new]
+    fn new(
+        problem_definition: &amp;PyProblemDefinition,
+        planner_config: &amp;PyPlannerConfig,
+    ) -&gt; PyResult&lt;Self&gt; {
+        // Switch on problem_definition type to create correct PlannerVariant
+    }
+
+    fn solve(&amp;mut self, timeout_secs: f32) -&gt; PyResult&lt;PyPath&gt; {
+        // Delegate to self.planner
+    }
+}</code></pre>
+<h2 id="javascript-bindings-oxmpl-js"><a class="header" href="#javascript-bindings-oxmpl-js">JavaScript Bindings (<code>oxmpl-js</code>)</a></h2>
+<p>To make your planner available in JavaScript/WASM, wrap it using <code>wasm-bindgen</code>.</p>
+<ol>
+<li><strong>Create Wrapper File</strong>: Create <code>oxmpl-js/src/geometric/&lt;my_planner&gt;.rs</code>.</li>
+<li><strong>Define Enum Wrapper</strong>: Similar to Python, define an enum <code>MyPlannerVariant</code> holding the specialized Rust planners.</li>
+<li><strong>Define JS Class</strong>: Create a struct <code>JsMyPlanner</code> decorated with <code>#[wasm_bindgen]</code>.</li>
+<li><strong>Implement Constructor</strong>: Match the <code>JsProblemDefinition</code> variant to instantiate the correct planner type.</li>
+<li><strong>Implement Methods</strong>: Implement <code>solve</code> etc., delegating to the inner planner and returning <code>JsPath</code>.</li>
+<li><strong>Export</strong>: Add to <code>oxmpl-js/src/geometric/mod.rs</code>.</li>
+</ol>
+<p><strong>Template:</strong></p>
+<pre><code class="language-rust ignore">// oxmpl-js/src/geometric/my_planner.rs
+use wasm_bindgen::prelude::*;
+use crate::base::{JsPath, JsProblemDefinition, ProblemDefinitionVariant, JsPlannerConfig};
+use oxmpl::geometric::MyPlanner;
+
+enum MyPlannerVariant {
+    RealVector(MyPlanner&lt;RealVectorState, RealVectorStateSpace, JsGoal&gt;),
+    // ...
+}
+
+#[wasm_bindgen(js_name = MyPlanner)]
+pub struct JsMyPlanner {
+    planner: MyPlannerVariant,
+    pd: ProblemDefinitionVariant,
+}
+
+#[wasm_bindgen(js_class = MyPlanner)]
+impl JsMyPlanner {
+    #[wasm_bindgen(constructor)]
+    pub fn new(problem_def: &amp;JsProblemDefinition, config: &amp;JsPlannerConfig) -&gt; Self {
+        // Switch on problem_def.inner to create correct MyPlannerVariant
+    }
+
+    pub fn solve(&amp;mut self, timeout_secs: f32) -&gt; Result&lt;JsPath, String&gt; {
+        // Delegate and convert result
+    }
+}</code></pre>
+<h2 id="integration-testing"><a class="header" href="#integration-testing">Integration Testing</a></h2>
+<p>Strict testing is required for any new planner to ensure correctness and stability across all bindings. You must implement integration tests for <strong>each layer</strong> of the stack.</p>
+<h3 id="rust-oxmpltests"><a class="header" href="#rust-oxmpltests">Rust (<code>oxmpl/tests/</code>)</a></h3>
+<p>Create a new integration test file <code>oxmpl/tests/&lt;planner_name&gt;_tests.rs</code>.</p>
+<ul>
+<li>Verify the planner solves basic problems (e.g., finding a path in a free space).</li>
+<li>Test with <strong>all supported state spaces</strong> (RealVector, SO2, SO3, SE2, SE3, Compound).</li>
+<li>Ensure the planner respects time limits and goal conditions.</li>
+</ul>
+<h3 id="python-oxmpl-pytests"><a class="header" href="#python-oxmpl-pytests">Python (<code>oxmpl-py/tests/</code>)</a></h3>
+<p>Add tests in <code>oxmpl-py/tests/</code> using <code>pytest</code>.</p>
+<ul>
+<li>Create a file <code>test_&lt;planner_name&gt;.py</code>.</li>
+<li>Implement tests that mirror the Rust integration tests.</li>
+<li>Ensure the Python bindings correctly expose the planner and return valid paths.</li>
+<li>Run tests with: <code>pytest oxmpl-py/tests/</code></li>
+</ul>
+<h3 id="javascript-oxmpl-jstests"><a class="header" href="#javascript-oxmpl-jstests">JavaScript (<code>oxmpl-js/tests/</code>)</a></h3>
+<p>Add tests in <code>oxmpl-js/tests/</code> using <code>vitest</code>.</p>
+<ul>
+<li>Create a file <code>test_&lt;planner_name&gt;.test.js</code>.</li>
+<li>Verify the planner works in a simulated JS environment.</li>
+<li>Check that the API handles JavaScript objects correctly (e.g., passing options, callbacks).</li>
+<li>Run tests with: <code>npm test</code> inside the <code>oxmpl-js</code> directory.</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../concepts.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../contributing/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../quickstart/python.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../contributing/implementing_state_spaces.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -320,11 +351,11 @@ fn main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../concepts.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../contributing/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../quickstart/python.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../contributing/implementing_state_spaces.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
