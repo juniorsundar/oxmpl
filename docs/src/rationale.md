@@ -1,11 +1,9 @@
 # Rationale
-
 OMPL is great, but it isn't written in Rust. While that's not a valid reason to rewrite it, the truth is C++ doesn't particularly *spark joy* for many modern developers.
 
 The creator of OxMPL started this project while teaching themselves Rust. After a few small projects, they found that Rust *sparked joy*. To really dive deep into the language, they decided to rewrite something that already exists: OMPL.
 
 ## Goals
-
 The goal isn't necessarily to create a full "drop-in" replacement for OMPL. Rust's traits and implementations can handle OMPL's modular nature more elegantly than C++'s inheritance models in some cases.
 
 However, the project aims to:

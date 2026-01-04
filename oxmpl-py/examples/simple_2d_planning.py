@@ -1,8 +1,3 @@
-# Quick Start: Python
-
-Here is a complete example of solving a 2D planning problem with a custom collision checker written in Python.
-
-```python
 import math
 from oxmpl_py.base import RealVectorState, RealVectorStateSpace, ProblemDefinition, PlannerConfig
 from oxmpl_py.geometric import RRT
@@ -42,4 +37,3 @@ try:
     print(f"Solution found with {len(path.states)} states!")
 except Exception as e:
     print(f"Planning failed: {e}")
-```

@@ -1,9 +1,7 @@
 # Python API Reference
-
 The `oxmpl-py` package provides Python bindings for the core OxMPL functionality.
 
 ## `oxmpl_py.base`
-
 This module contains the fundamental components for defining a motion planning problem.
 
 ### States
@@ -44,8 +42,6 @@ A state composed of one or more other state objects.
 - `__init__(components: List[State])`
 - `components: List[State]` (read-only)
 - `__len__() -> int`: Returns the number of component states.
-
----
 
 ### State Spaces
 These classes define the planning space, including its dimensions, boundaries, and distance metrics.
@@ -89,10 +85,7 @@ Defines a space composed of multiple, weighted subspaces.
 - `__init__(subspaces: List[StateSpace], weights: List[float])`
 - `distance(state1: CompoundState, state2: CompoundState) -> float`
 
----
-
 ### Planning Components
-
 #### `Goal`
 A user-defined Python class that specifies the goal condition for the planner. It must implement the following methods:
 - `is_satisfied(state: State) -> bool`: Returns true if the state satisfies the goal.

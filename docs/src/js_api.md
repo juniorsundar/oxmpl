@@ -1,9 +1,7 @@
 # JavaScript API Reference
-
 The `oxmpl-js` package provides WASM-based bindings for JavaScript environments.
 
 ## `oxmpl.base`
-
 This module contains the fundamental components for defining a motion planning problem.
 
 ### States
@@ -56,8 +54,6 @@ A helper class to construct `CompoundState` instances.
 - `addSE3State(state: SE3State)`
 - `addCompoundState(state: CompoundState)`
 - `build(): CompoundState`
-
----
 
 ### State Spaces
 These classes define the planning space, including its dimensions, boundaries, and distance metrics.
@@ -143,10 +139,7 @@ A helper class to construct `CompoundStateSpace` instances.
 - `addCompoundStateSpace(space: CompoundStateSpace, weight: number)`
 - `build(): CompoundStateSpace`
 
----
-
 ### Planning Components
-
 #### `Goal`
 An interface that user-provided objects must satisfy to define the goal.
 - `constructor(config: { isSatisfied: Function, distanceGoal: Function, sampleGoal: Function })`
@@ -177,7 +170,6 @@ A sequence of states representing a solution path.
 - `getLength(): number`
 
 ## `oxmpl.geometric`
-
 ### `RRT`
 Rapidly-exploring Random Tree.
 - `constructor(maxDistance: number, goalBias: number, problem: ProblemDefinition, config: PlannerConfig)`
