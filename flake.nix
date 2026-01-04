@@ -46,6 +46,7 @@
           pkgs.nodejs
           pkgs.typescript-language-server
           pkgs.eslint
+          pkgs.just
           pkgs.mdbook
         ];
 
