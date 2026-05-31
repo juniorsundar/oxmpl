@@ -3,4 +3,5 @@
 oxmpl-py/tests/__pycache__
 .DS_Store
 .direnv
+.pi
 docs/book

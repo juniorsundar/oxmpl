@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use js_sys::Float64Array;
 use oxmpl::base::state::{
-    CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State, State,
+    AnyState, CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State,
 };
 use wasm_bindgen::prelude::*;
 
@@ -175,7 +175,7 @@ impl JsStateConvert for CompoundState {
     }
 }
 
-fn infer_and_convert_state(val: JsValue) -> Result<Box<dyn State>, String> {
+fn infer_and_convert_state(val: JsValue) -> Result<Box<dyn AnyState>, String> {
     // Try SE3 (has rotation)
     if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("rotation")) {
         if !v.is_undefined() {
@@ -371,7 +371,7 @@ pub fn js_array_to_se3_state(array: &Float64Array) -> SE3State {
 pub fn compound_state_to_js_array(state: &CompoundState) -> Float64Array {
     let mut values = Vec::new();
     // Helper to recursively flatten
-    fn flatten(s: &dyn State, out: &mut Vec<f64>) {
+    fn flatten(s: &dyn AnyState, out: &mut Vec<f64>) {
         let any_s = s.as_any();
         if let Some(rv) = any_s.downcast_ref::<RealVectorState>() {
             out.extend_from_slice(&rv.values);

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+pub mod any_state;
 pub mod compound_state;
 pub mod real_vector_state;
 pub mod se2_state;
