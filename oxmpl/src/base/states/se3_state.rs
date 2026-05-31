@@ -4,7 +4,7 @@
 
 use std::{any::Any, ops::Deref};
 
-use crate::base::state::{AnyState, CompoundState, RealVectorState, SO3State, State};
+use crate::base::state::{CompoundState, RealVectorState, SO3State, State};
 
 /// A state representing a 3D rigid body transformation, an element of the Special Euclidean group
 /// SE(3).
@@ -15,12 +15,6 @@ use crate::base::state::{AnyState, CompoundState, RealVectorState, SO3State, Sta
 pub struct SE3State(pub CompoundState);
 
 impl State for SE3State {}
-
-impl AnyState for SE3State {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-}
 
 impl SE3State {
     /// Creates a new `SE3State` from x, y, z, and an `SO3State` for rotation.

@@ -4,7 +4,7 @@
 
 use std::{any::Any, ops::Deref};
 
-use crate::base::state::{AnyState, CompoundState, RealVectorState, SO2State, State};
+use crate::base::state::{CompoundState, RealVectorState, SO2State, State};
 
 /// A state representing a 2D rigid body transformation, an element of the Special Euclidean group
 /// SE(2).
@@ -15,12 +15,6 @@ use crate::base::state::{AnyState, CompoundState, RealVectorState, SO2State, Sta
 pub struct SE2State(pub CompoundState);
 
 impl State for SE2State {}
-
-impl AnyState for SE2State {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-}
 
 impl SE2State {
     /// Creates a new `SE2State` from x, y, and yaw components.
