@@ -36,11 +36,7 @@ use crate::base::{error::StateSamplingError, state::State};
 /// struct Point1D {
 ///     x: f64,
 /// }
-/// impl State for Point1D {
-///     fn as_any(&self) -> &dyn std::any::Any {
-///         self
-///     }
-/// }
+/// impl State for Point1D {}
 ///
 /// struct LineSegmentSpace {
 ///     bounds: (f64, f64),

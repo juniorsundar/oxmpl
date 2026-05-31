@@ -5,7 +5,11 @@
 use rand::RngCore;
 use std::{any::Any, clone::Clone};
 
-use crate::base::{error::StateSamplingError, space::StateSpace, state::State};
+use crate::base::{
+    error::StateSamplingError,
+    space::StateSpace,
+    state::{AnyState, State},
+};
 
 pub trait DynCloneAnyStateSpace {
     fn clone_box(&self) -> Box<dyn AnyStateSpace>;
@@ -34,8 +38,8 @@ impl Clone for Box<dyn AnyStateSpace> {
 /// `Vec`.
 ///
 /// Each method in this trait is a dynamically-dispatchable version of the corresponding method in
-/// the `StateSpace` trait, designed to work with trait objects like `&dyn State` and `&mut dyn
-/// State`.
+/// the `StateSpace` trait, designed to work with trait objects like `&dyn AnyState` and `&mut dyn
+/// AnyState`.
 ///
 /// This is an internal implementation detail and is not typically used directly by end-users.
 pub trait AnyStateSpace: DynCloneAnyStateSpace {
@@ -44,55 +48,67 @@ pub trait AnyStateSpace: DynCloneAnyStateSpace {
     /// # Panics
     /// Panics if the concrete types of `state1` or `state2` do not match the `StateType`
     /// associated with the underlying concrete `StateSpace`.
-    fn distance_dyn(&self, state1: &dyn State, state2: &dyn State) -> f64;
+    fn distance_dyn(&self, state1: &dyn AnyState, state2: &dyn AnyState) -> f64;
 
     /// A dynamically-dispatchable version of `StateSpace::interpolate`.
     ///
     /// # Panics
     /// Panics if the concrete types of the states do not match the `StateType` associated with the
     /// underlying concrete `StateSpace`.
-    fn interpolate_dyn(&self, from: &dyn State, to: &dyn State, t: f64, state: &mut dyn State);
+    fn interpolate_dyn(
+        &self,
+        from: &dyn AnyState,
+        to: &dyn AnyState,
+        t: f64,
+        state: &mut dyn AnyState,
+    );
 
     /// A dynamically-dispatchable version of `StateSpace::enforce_bounds`.
     ///
     /// # Panics
     /// Panics if the concrete type of `state` does not match the `StateType` associated with the
     /// underlying concrete `StateSpace`.
-    fn enforce_bounds_dyn(&self, state: &mut dyn State);
+    fn enforce_bounds_dyn(&self, state: &mut dyn AnyState);
 
     /// A dynamically-dispatchable version of `StateSpace::satisfies_bounds`.
     ///
     /// # Panics
     /// Panics if the concrete type of `state` does not match the `StateType` associated with the
     /// underlying concrete `StateSpace`.
-    fn satisfies_bounds_dyn(&self, state: &dyn State) -> bool;
+    fn satisfies_bounds_dyn(&self, state: &dyn AnyState) -> bool;
 
     /// A dynamically-dispatchable version of `StateSpace::sample_uniform`.
     ///
-    /// Returns a `Box<dyn State>` because the concrete state type is not known at compile time.
+    /// Returns a `Box<dyn AnyState>` because the concrete state type is not known at compile time.
     fn sample_uniform_dyn(
         &self,
         rng: &mut dyn RngCore,
-    ) -> Result<Box<dyn State>, StateSamplingError>;
+    ) -> Result<Box<dyn AnyState>, StateSamplingError>;
 
     /// A dynamically-dispatchable version of `StateSpace::get_longest_valid_segment_length`.
     fn get_longest_valid_segment_length_dyn(&self) -> f64;
 }
 
 /// Provides a blanket implementation of `AnyStateSpace` for any type that implements `StateSpace`.
-/// It works by downcasting the generic `&dyn State` trait objects back to their concrete types at
-/// runtime.
+/// It works by downcasting the generic `&dyn AnyState` trait objects back to their concrete types
+/// at runtime.
 impl<T: StateSpace + Clone + 'static> AnyStateSpace for T
 where
-    T::StateType: 'static,
+    T::StateType: State + AnyState,
 {
-    fn distance_dyn(&self, state1: &dyn State, state2: &dyn State) -> f64 {
+    fn distance_dyn(&self, state1: &dyn AnyState, state2: &dyn AnyState) -> f64 {
         let s1 = (state1 as &dyn Any).downcast_ref::<T::StateType>().unwrap();
         let s2 = (state2 as &dyn Any).downcast_ref::<T::StateType>().unwrap();
         self.distance(s1, s2)
     }
 
-    fn interpolate_dyn(&self, from: &dyn State, to: &dyn State, t: f64, state: &mut dyn State) {
+    fn interpolate_dyn(
+        &self,
+        from: &dyn AnyState,
+        to: &dyn AnyState,
+        t: f64,
+        state: &mut dyn AnyState,
+    ) {
         let from_s = (from as &dyn Any).downcast_ref::<T::StateType>().unwrap();
         let to_s = (to as &dyn Any).downcast_ref::<T::StateType>().unwrap();
         let state_s = (state as &mut dyn Any)
@@ -104,7 +120,7 @@ where
     fn sample_uniform_dyn(
         &self,
         rng: &mut dyn RngCore,
-    ) -> Result<Box<dyn State>, StateSamplingError> {
+    ) -> Result<Box<dyn AnyState>, StateSamplingError> {
         // Adaptor because of Sized trait issue causing problems in downcasting. It's a mess!
         // TODO: Get better in Rust and find a different way to go about it.
         struct RngWrapper<'a>(&'a mut dyn RngCore);
@@ -125,14 +141,14 @@ where
         Ok(Box::new(concrete_state))
     }
 
-    fn enforce_bounds_dyn(&self, state: &mut dyn State) {
+    fn enforce_bounds_dyn(&self, state: &mut dyn AnyState) {
         let state_s = (state as &mut dyn Any)
             .downcast_mut::<T::StateType>()
             .unwrap();
         self.enforce_bounds(state_s);
     }
 
-    fn satisfies_bounds_dyn(&self, state: &dyn State) -> bool {
+    fn satisfies_bounds_dyn(&self, state: &dyn AnyState) -> bool {
         let state_s = (state as &dyn Any).downcast_ref::<T::StateType>().unwrap();
         self.satisfies_bounds(state_s)
     }

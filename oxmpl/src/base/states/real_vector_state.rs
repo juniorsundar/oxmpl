@@ -1,4 +1,4 @@
-use crate::base::state::State;
+use crate::base::state::{AnyState, State};
 
 /// A state representing a point in an N-dimensional Euclidean space (R^n).
 #[derive(Clone, Debug, PartialEq)]
@@ -13,7 +13,11 @@ impl RealVectorState {
     }
 }
 /// Implements the `State` marker trait for `RealVectorState`.
-impl State for RealVectorState {
+impl State for RealVectorState {}
+
+/// Implements `AnyState` for `RealVectorState`, enabling it as a component in
+/// [`CompoundState`] for dynamic runtime composition.
+impl AnyState for RealVectorState {
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }

@@ -4,7 +4,10 @@
 
 use std::fmt;
 
-use crate::base::{error::StateError, state::State};
+use crate::base::{
+    error::StateError,
+    state::{AnyState, State},
+};
 
 /// A state representing a 3D rotation, an element of the Special Orthogonal group SO(3).
 ///
@@ -82,7 +85,9 @@ impl SO3State {
         }
     }
 }
-impl State for SO3State {
+impl State for SO3State {}
+
+impl AnyState for SO3State {
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
