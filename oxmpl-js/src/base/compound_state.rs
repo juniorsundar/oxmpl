@@ -5,7 +5,7 @@
 use std::{any::Any, sync::Arc};
 
 use oxmpl::base::state::{
-    CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State, State,
+    AnyState, CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State,
 };
 use wasm_bindgen::prelude::*;
 
@@ -31,7 +31,7 @@ impl JsCompoundState {
         }
 
         let component = &self.inner.components[index];
-        let component_ref: &dyn State = component.as_ref();
+        let component_ref: &dyn AnyState = component.as_ref();
         let any_ref = component_ref as &dyn Any;
 
         if let Some(s) = any_ref.downcast_ref::<RealVectorState>() {
@@ -83,7 +83,7 @@ impl JsCompoundState {
 /// is not well-supported by `wasm-bindgen`.
 #[wasm_bindgen(js_name = CompoundStateBuilder)]
 pub struct JsCompoundStateBuilder {
-    components: Vec<Box<dyn State>>,
+    components: Vec<Box<dyn AnyState>>,
 }
 
 impl Default for JsCompoundStateBuilder {

@@ -6,8 +6,8 @@ use pyo3::{prelude::*, types::PyList};
 use std::{any::Any, rc::Rc, sync::Arc};
 
 use oxmpl::base::state::{
-    CompoundState as OxmplCompoundState, RealVectorState as OxmplRealVectorState,
-    SO2State as OxmplSO2State, SO3State as OxmplSO3State, State,
+    AnyState, CompoundState as OxmplCompoundState, RealVectorState as OxmplRealVectorState,
+    SO2State as OxmplSO2State, SO3State as OxmplSO3State,
 };
 
 use crate::base::{PyRealVectorState, PySO2State, PySO3State};
@@ -27,7 +27,7 @@ pub struct PyCompoundState(pub Rc<OxmplCompoundState>);
 impl PyCompoundState {
     #[new]
     fn new(components: Vec<PyObject>) -> PyResult<Self> {
-        let mut rust_components: Vec<Box<dyn State>> = Vec::with_capacity(components.len());
+        let mut rust_components: Vec<Box<dyn AnyState>> = Vec::with_capacity(components.len());
 
         Python::with_gil(|py| {
             for comp_object in components {
