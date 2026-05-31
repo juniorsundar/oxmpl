@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use crate::base::state::State;
+use crate::base::state::{AnyState, State};
 use std::{f64::consts::PI, fmt};
 
 /// A state representing a 2D rotation, an element of the Special Orthogonal group SO(2).
@@ -58,7 +58,9 @@ impl SO2State {
         }
     }
 }
-impl State for SO2State {
+impl State for SO2State {}
+
+impl AnyState for SO2State {
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use crate::base::state::State;
+use crate::base::state::{AnyState, State};
 
 /// A state that is composed of one or more other states.
 ///
@@ -11,17 +11,19 @@ use crate::base::state::State;
 #[derive(Clone, Debug)]
 pub struct CompoundState {
     /// The individual states that form this compound state.
-    pub components: Vec<Box<dyn State>>,
+    pub components: Vec<Box<dyn AnyState>>,
 }
 
 impl CompoundState {
     /// Creates a new `CompoundState`.
-    pub fn new(components: Vec<Box<dyn State>>) -> Self {
+    pub fn new(components: Vec<Box<dyn AnyState>>) -> Self {
         CompoundState { components }
     }
 }
 
-impl State for CompoundState {
+impl State for CompoundState {}
+
+impl AnyState for CompoundState {
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
@@ -31,14 +33,13 @@ impl State for CompoundState {
 mod tests {
     use super::*;
     use crate::base::state::RealVectorState;
-    use std::any::Any;
-    use std::ops::Deref;
 
     #[test]
     fn test_compound_state_creation() {
         let state1 = RealVectorState::new(vec![1.0, 2.0]);
         let state2 = RealVectorState::new(vec![3.0, 4.0]);
-        let compound_state = CompoundState::new(vec![Box::new(state1), Box::new(state2)]);
+        let components: Vec<Box<dyn AnyState>> = vec![Box::new(state1), Box::new(state2)];
+        let compound_state = CompoundState::new(components);
         assert_eq!(compound_state.components.len(), 2);
     }
 
@@ -54,19 +55,23 @@ mod tests {
             compound_state2.components.len()
         );
 
-        let s1_c1 = (compound_state1.components[0].deref() as &dyn Any)
+        let s1_c1 = compound_state1.components[0]
+            .as_any()
             .downcast_ref::<RealVectorState>()
             .unwrap();
-        let s2_c1 = (compound_state2.components[0].deref() as &dyn Any)
+        let s2_c1 = compound_state2.components[0]
+            .as_any()
             .downcast_ref::<RealVectorState>()
             .unwrap();
 
         assert_eq!(s1_c1, s2_c1);
 
-        let s1_c2 = (compound_state1.components[1].deref() as &dyn Any)
+        let s1_c2 = compound_state1.components[1]
+            .as_any()
             .downcast_ref::<RealVectorState>()
             .unwrap();
-        let s2_c2 = (compound_state2.components[1].deref() as &dyn Any)
+        let s2_c2 = compound_state2.components[1]
+            .as_any()
             .downcast_ref::<RealVectorState>()
             .unwrap();
         assert_eq!(s1_c2, s2_c2);
