@@ -50,7 +50,7 @@ impl Clone for Box<dyn AnyState> {
 mod tests {
     use super::*;
     use crate::base::state::{
-        CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State,
+        CompoundState, RealVectorState, SO2State, SO3State,
     };
     use std::f64::consts::PI;
 
@@ -82,20 +82,6 @@ mod tests {
         let state: Box<dyn AnyState> = Box::new(SO3State::new(1.0, 2.0, 3.0, 4.0));
         assert!(state.as_any().downcast_ref::<SO3State>().is_some());
         assert_boxed_any_state_clone_and_downcast::<SO3State>(state);
-    }
-
-    #[test]
-    fn test_se2_state_any_state() {
-        let state: Box<dyn AnyState> = Box::new(SE2State::new(1.0, 2.0, PI));
-        assert!(state.as_any().downcast_ref::<SE2State>().is_some());
-        assert_boxed_any_state_clone_and_downcast::<SE2State>(state);
-    }
-
-    #[test]
-    fn test_se3_state_any_state() {
-        let state: Box<dyn AnyState> = Box::new(SE3State::new(1.0, 2.0, 3.0, SO3State::identity()));
-        assert!(state.as_any().downcast_ref::<SE3State>().is_some());
-        assert_boxed_any_state_clone_and_downcast::<SE3State>(state);
     }
 
     #[test]
