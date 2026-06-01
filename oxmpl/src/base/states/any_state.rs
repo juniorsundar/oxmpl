@@ -49,9 +49,7 @@ impl Clone for Box<dyn AnyState> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::base::state::{
-        CompoundState, RealVectorState, SO2State, SO3State,
-    };
+    use crate::base::state::{CompoundState, RealVectorState, SO2State, SO3State};
     use std::f64::consts::PI;
 
     fn assert_boxed_any_state_clone_and_downcast<T: 'static>(state: Box<dyn AnyState>) {

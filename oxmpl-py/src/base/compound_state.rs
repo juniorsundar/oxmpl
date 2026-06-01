@@ -18,7 +18,10 @@ use crate::base::{PyRealVectorState, PySO2State, PySO3State};
 /// joints, or a rigid body in space (which is composed of a translation and a rotation).
 ///
 /// Args:
-///     components (List[State]): A list of state objects (e.g., `RealVectorState`, `SO2State`).
+///     components (List[State]): A list of dynamic component state objects (e.g.,
+///         `RealVectorState`, `SO2State`, `SO3State`, or nested `CompoundState`). Fixed named
+///         states such as `SE2State` and `SE3State` use their dedicated typed APIs and are not
+///         valid compound components.
 #[pyclass(name = "CompoundState", unsendable)]
 #[derive(Clone)]
 pub struct PyCompoundState(pub Rc<OxmplCompoundState>);
@@ -38,9 +41,11 @@ impl PyCompoundState {
                     rust_components.push(Box::new((*so2_state.0).clone()));
                 } else if let Ok(so3_state) = comp_any.extract::<PyRef<PySO3State>>() {
                     rust_components.push(Box::new((*so3_state.0).clone()));
+                } else if let Ok(compound_state) = comp_any.extract::<PyRef<PyCompoundState>>() {
+                    rust_components.push(Box::new((*compound_state.0).clone()));
                 } else {
                     return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                        "Object of type '{}' is not a valid state component.",
+                        "Object of type '{}' is not a valid compound-state component. CompoundState accepts RealVectorState, SO2State, SO3State, and nested CompoundState components; fixed named states such as SE2State and SE3State must use their dedicated typed APIs.",
                         comp_any.get_type().name()?
                     )));
                 }
@@ -67,6 +72,12 @@ impl PyCompoundState {
                 list.append(Py::new(py, PySO2State(Arc::new(so2_state.clone())))?)?;
             } else if let Some(so3_state) = component_any.downcast_ref::<OxmplSO3State>() {
                 list.append(Py::new(py, PySO3State(Arc::new(so3_state.clone())))?)?;
+            } else if let Some(compound_state) = component_any.downcast_ref::<OxmplCompoundState>()
+            {
+                list.append(Py::new(
+                    py,
+                    PyCompoundState(Rc::new(compound_state.clone())),
+                )?)?;
             } else {
                 return Err(pyo3::exceptions::PyTypeError::new_err(
                     "Encountered an unknown state type when getting components.",

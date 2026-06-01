@@ -43,6 +43,10 @@ A state composed of one or more other state objects.
 - `components: List[State]` (read-only)
 - `__len__() -> int`: Returns the number of component states.
 
+`CompoundState` is for dynamic products of component states. Fixed named states such as
+`SE2State` and `SE3State` use their dedicated APIs and are not valid `CompoundState`
+components.
+
 ### State Spaces
 These classes define the planning space, including its dimensions, boundaries, and distance metrics.
 
@@ -84,6 +88,10 @@ Defines the state space for 3D rigid body motion (SE(3)).
 Defines a space composed of multiple, weighted subspaces.
 - `__init__(subspaces: List[StateSpace], weights: List[float])`
 - `distance(state1: CompoundState, state2: CompoundState) -> float`
+
+`CompoundStateSpace` is for dynamic products of component spaces. Fixed named spaces such as
+`SE2StateSpace` and `SE3StateSpace` use their dedicated APIs and are not valid compound
+subspaces.
 
 ### Planning Components
 #### `Goal`

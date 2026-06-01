@@ -50,10 +50,11 @@ A helper class to construct `CompoundState` instances.
 - `addRealVectorState(state: RealVectorState)`
 - `addSO2State(state: SO2State)`
 - `addSO3State(state: SO3State)`
-- `addSE2State(state: SE2State)`
-- `addSE3State(state: SE3State)`
 - `addCompoundState(state: CompoundState)`
 - `build(): CompoundState`
+
+`CompoundState` is for dynamic products of component states. Fixed named states such as `SE2State`
+and `SE3State` use their dedicated APIs and are not valid `CompoundState` components.
 
 ### State Spaces
 These classes define the planning space, including its dimensions, boundaries, and distance metrics.
@@ -134,10 +135,11 @@ A helper class to construct `CompoundStateSpace` instances.
 - `addRealVectorStateSpace(space: RealVectorStateSpace, weight: number)`
 - `addSO2StateSpace(space: SO2StateSpace, weight: number)`
 - `addSO3StateSpace(space: SO3StateSpace, weight: number)`
-- `addSE2StateSpace(space: SE2StateSpace, weight: number)`
-- `addSE3StateSpace(space: SE3StateSpace, weight: number)`
 - `addCompoundStateSpace(space: CompoundStateSpace, weight: number)`
 - `build(): CompoundStateSpace`
+
+`CompoundStateSpace` is for dynamic products of component spaces. Fixed named spaces such as
+`SE2StateSpace` and `SE3StateSpace` use their dedicated APIs and are not valid compound subspaces.
 
 ### Planning Components
 #### `Goal`

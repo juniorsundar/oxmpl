@@ -2,17 +2,18 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use std::{any::Any, ops::Deref};
+use crate::base::state::{RealVectorState, SO2State, State};
 
-use crate::base::state::{CompoundState, RealVectorState, SO2State, State};
-
-/// A state representing a 2D rigid body transformation, an element of the Special Euclidean group
-/// SE(2).
+/// A fixed named state representing a planar rigid-body configuration in SE(2).
 ///
-/// This state is composed of a 2D translation (x, y) and a 2D rotation (yaw). It is internally
-/// represented as a `CompoundState`.
+/// An SE(2) state consists of a planar translation `(x, y)` and a planar rotation `(yaw)`.
+/// Construction is kept behind the public constructor so the state stays internally consistent and
+/// yaw normalization remains observable through the public getters.
 #[derive(Clone, Debug)]
-pub struct SE2State(pub CompoundState);
+pub struct SE2State {
+    translation: RealVectorState,
+    rotation: SO2State,
+}
 
 impl State for SE2State {}
 
@@ -34,50 +35,53 @@ impl SE2State {
     /// assert!((state2.get_yaw() + PI).abs() < 1e-9);
     /// ```
     pub fn new(x: f64, y: f64, yaw: f64) -> Self {
-        SE2State(CompoundState {
-            components: vec![
-                Box::new(RealVectorState::new(vec![x, y])),
-                Box::new(SO2State::new(yaw)),
-            ],
-        })
+        Self::from_parts(RealVectorState::new(vec![x, y]), SO2State::new(yaw))
     }
 
-    /// Returns a reference to the translational component (x, y) of the state.
+    pub(crate) fn from_parts(translation: RealVectorState, rotation: SO2State) -> Self {
+        assert_eq!(
+            translation.values.len(),
+            2,
+            "SE2State translation must have exactly two components."
+        );
+
+        Self {
+            translation,
+            rotation: SO2State::new(rotation.value),
+        }
+    }
+
+    pub(crate) fn translation_mut(&mut self) -> &mut RealVectorState {
+        &mut self.translation
+    }
+
+    pub(crate) fn rotation_mut(&mut self) -> &mut SO2State {
+        &mut self.rotation
+    }
+
+    /// Returns a reference to the translational component `(x, y)` of the state.
     pub fn get_translation(&self) -> &RealVectorState {
-        (self.0.components[0].deref() as &dyn Any)
-            .downcast_ref::<RealVectorState>()
-            .expect("Issue found in retreiving the translation vector.")
+        &self.translation
     }
 
-    /// Returns a reference to the rotational component (yaw) of the state.
+    /// Returns a reference to the rotational component `(yaw)` of the state.
     pub fn get_rotation(&self) -> &SO2State {
-        (self.0.components[1].deref() as &dyn Any)
-            .downcast_ref::<SO2State>()
-            .expect("Issue found in retreiving the rotation.")
+        &self.rotation
     }
 
     /// Returns the x-coordinate of the state.
     pub fn get_x(&self) -> f64 {
-        (self.0.components[0].deref() as &dyn Any)
-            .downcast_ref::<RealVectorState>()
-            .expect("Issue found in retreiving the translation vector.")
-            .values[0]
+        self.translation.values[0]
     }
 
     /// Returns the y-coordinate of the state.
     pub fn get_y(&self) -> f64 {
-        (self.0.components[0].deref() as &dyn Any)
-            .downcast_ref::<RealVectorState>()
-            .expect("Issue found in retreiving the translation vector.")
-            .values[1]
+        self.translation.values[1]
     }
 
     /// Returns the yaw (rotation) of the state in radians.
     pub fn get_yaw(&self) -> f64 {
-        (self.0.components[1].deref() as &dyn Any)
-            .downcast_ref::<SO2State>()
-            .expect("Issue found in retreiving the rotation.")
-            .value
+        self.rotation.value
     }
 }
 

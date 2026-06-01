@@ -4,12 +4,10 @@
 
 use std::{any::Any, sync::Arc};
 
-use oxmpl::base::state::{
-    AnyState, CompoundState, RealVectorState, SE2State, SE3State, SO2State, SO3State,
-};
+use oxmpl::base::state::{AnyState, CompoundState, RealVectorState, SO2State, SO3State};
 use wasm_bindgen::prelude::*;
 
-use crate::base::{JsRealVectorState, JsSE2State, JsSE3State, JsSO2State, JsSO3State};
+use crate::base::{JsRealVectorState, JsSO2State, JsSO3State};
 
 #[wasm_bindgen(js_name = CompoundState)]
 pub struct JsCompoundState {
@@ -44,27 +42,6 @@ impl JsCompoundState {
         }
         if let Some(s) = any_ref.downcast_ref::<SO3State>() {
             return Ok(JsValue::from(JsSO3State::new(s.x, s.y, s.z, s.w)));
-        }
-        if let Some(s) = any_ref.downcast_ref::<SE2State>() {
-            return Ok(JsValue::from(JsSE2State::new(
-                s.get_x(),
-                s.get_y(),
-                s.get_yaw(),
-            )));
-        }
-        if let Some(s) = any_ref.downcast_ref::<SE3State>() {
-            let rotation = JsSO3State::new(
-                s.get_rotation().x,
-                s.get_rotation().y,
-                s.get_rotation().z,
-                s.get_rotation().w,
-            );
-            return Ok(JsValue::from(JsSE3State::new(
-                s.get_x(),
-                s.get_y(),
-                s.get_z(),
-                rotation,
-            )));
         }
         if let Some(s) = any_ref.downcast_ref::<CompoundState>() {
             return Ok(JsValue::from(JsCompoundState {
@@ -113,16 +90,6 @@ impl JsCompoundStateBuilder {
 
     #[wasm_bindgen(js_name = addSO3State)]
     pub fn add_so3_state(&mut self, state: &JsSO3State) {
-        self.components.push(Box::new((*state.inner).clone()));
-    }
-
-    #[wasm_bindgen(js_name = addSE2State)]
-    pub fn add_se2_state(&mut self, state: &JsSE2State) {
-        self.components.push(Box::new((*state.inner).clone()));
-    }
-
-    #[wasm_bindgen(js_name = addSE3State)]
-    pub fn add_se3_state(&mut self, state: &JsSE3State) {
         self.components.push(Box::new((*state.inner).clone()));
     }
 

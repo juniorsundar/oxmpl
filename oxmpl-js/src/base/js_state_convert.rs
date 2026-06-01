@@ -176,20 +176,6 @@ impl JsStateConvert for CompoundState {
 }
 
 fn infer_and_convert_state(val: JsValue) -> Result<Box<dyn AnyState>, String> {
-    // Try SE3 (has rotation)
-    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("rotation")) {
-        if !v.is_undefined() {
-            let s = SE3State::from_js_value(val)?;
-            return Ok(Box::new(s));
-        }
-    }
-    // Try SE2 (has yaw)
-    if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("yaw")) {
-        if !v.is_undefined() {
-            let s = SE2State::from_js_value(val)?;
-            return Ok(Box::new(s));
-        }
-    }
     // Try SO3 (has w)
     if let Ok(v) = js_sys::Reflect::get(&val, &JsValue::from_str("w")) {
         if !v.is_undefined() {
@@ -377,27 +363,17 @@ pub fn compound_state_to_js_array(state: &CompoundState) -> Float64Array {
             out.extend_from_slice(&rv.values);
         } else if let Some(so2) = any_s.downcast_ref::<SO2State>() {
             out.push(so2.value);
-        } else if let Some(se2) = any_s.downcast_ref::<SE2State>() {
-            out.push(se2.get_x());
-            out.push(se2.get_y());
-            out.push(se2.get_yaw());
         } else if let Some(so3) = any_s.downcast_ref::<SO3State>() {
             out.push(so3.x);
             out.push(so3.y);
             out.push(so3.z);
             out.push(so3.w);
-        } else if let Some(se3) = any_s.downcast_ref::<SE3State>() {
-            out.push(se3.get_x());
-            out.push(se3.get_y());
-            out.push(se3.get_z());
-            out.push(se3.get_rotation().x);
-            out.push(se3.get_rotation().y);
-            out.push(se3.get_rotation().z);
-            out.push(se3.get_rotation().w);
         } else if let Some(comp) = any_s.downcast_ref::<CompoundState>() {
             for c in &comp.components {
                 flatten(c.as_ref(), out);
             }
+        } else {
+            log("Warning: encountered an unsupported compound-state component while flattening to a JS array.");
         }
     }
 
