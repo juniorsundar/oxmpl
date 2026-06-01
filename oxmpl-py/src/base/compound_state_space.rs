@@ -27,7 +27,8 @@ impl PyCompoundStateSpace {
     /// Creates a new `CompoundStateSpace`.
     ///
     /// Args:
-    ///     subspaces (List[StateSpace]): A list of state space objects.
+    ///     subspaces (List[StateSpace]): A list of dynamic component state space objects,
+    ///         including nested `CompoundStateSpace` values.
     ///     weights (List[float]): A list of weights, one for each subspace.
     ///
     /// Raises:
@@ -56,9 +57,13 @@ impl PyCompoundStateSpace {
                     rust_subspaces.push(Box::new((*so2_space.0).lock().unwrap().clone()));
                 } else if let Ok(so3_space) = space_any.extract::<PyRef<PySO3StateSpace>>() {
                     rust_subspaces.push(Box::new((*so3_space.0).lock().unwrap().clone()));
+                } else if let Ok(compound_space) =
+                    space_any.extract::<PyRef<PyCompoundStateSpace>>()
+                {
+                    rust_subspaces.push(Box::new((*compound_space.0).borrow().clone()));
                 } else {
                     return Err(PyValueError::new_err(format!(
-                        "Object of type '{}' is not a valid state space component.",
+                        "Object of type '{}' is not a valid compound-state-space component. CompoundStateSpace accepts RealVectorStateSpace, SO2StateSpace, SO3StateSpace, and nested CompoundStateSpace subspaces; fixed named spaces such as SE2StateSpace and SE3StateSpace must use their dedicated typed APIs.",
                         space_any.get_type().name()?
                     )));
                 }

@@ -4,17 +4,20 @@
 
 use crate::base::{
     error::StateSpaceError,
-    space::{AnyStateSpace, CompoundStateSpace, RealVectorStateSpace, SO2StateSpace, StateSpace},
+    space::{RealVectorStateSpace, SO2StateSpace, StateSpace},
     state::SE2State,
 };
 
-/// A state space for 2D rigid body transformations (SE(2)).
+/// A fixed typed state space for planar rigid-body transformations (SE(2)).
 ///
-/// This space combines a 2D translational space (`RealVectorStateSpace` of dimension 2) and a 2D
-/// rotational space (`SO2StateSpace`). It allows for defining bounds for x, y, and yaw, and
-/// calculating weighted distances between states.
+/// This space owns a 2D translational space and a planar rotational space directly instead of
+/// routing normal SE(2) operations through the dynamic compound-state machinery.
 #[derive(Clone)]
-pub struct SE2StateSpace(pub CompoundStateSpace);
+pub struct SE2StateSpace {
+    translation_space: RealVectorStateSpace,
+    rotation_space: SO2StateSpace,
+    rotation_weight: f64,
+}
 
 impl SE2StateSpace {
     /// Creates a new `SE2StateSpace`.
@@ -44,19 +47,19 @@ impl SE2StateSpace {
         weight: f64,
         bounds_option: Option<Vec<(f64, f64)>>,
     ) -> Result<Self, StateSpaceError> {
-        let (r2, so2) = match bounds_option {
+        let (translation_space, rotation_space) = match bounds_option {
             Some(bounds) => {
                 if bounds.len() != 3 {
                     return Err(StateSpaceError::DimensionMismatch {
                         expected: 3,
                         found: bounds.len(),
                     });
-                } else {
-                    (
-                        RealVectorStateSpace::new(2, Some(vec![bounds[0], bounds[1]]))?,
-                        SO2StateSpace::new(Some(bounds[2]))?,
-                    )
                 }
+
+                (
+                    RealVectorStateSpace::new(2, Some(vec![bounds[0], bounds[1]]))?,
+                    SO2StateSpace::new(Some(bounds[2]))?,
+                )
             }
             None => (
                 RealVectorStateSpace::new(2, None)?,
@@ -64,9 +67,11 @@ impl SE2StateSpace {
             ),
         };
 
-        let compound_space =
-            CompoundStateSpace::new(vec![Box::new(r2), Box::new(so2)], vec![1.0, weight]);
-        Ok(SE2StateSpace(compound_space))
+        Ok(Self {
+            translation_space,
+            rotation_space,
+            rotation_weight: weight,
+        })
     }
 }
 
@@ -74,7 +79,14 @@ impl StateSpace for SE2StateSpace {
     type StateType = SE2State;
 
     fn distance(&self, state1: &Self::StateType, state2: &Self::StateType) -> f64 {
-        self.0.distance_dyn(&state1.0, &state2.0)
+        let translation_distance = self
+            .translation_space
+            .distance(state1.get_translation(), state2.get_translation());
+        let rotation_distance = self
+            .rotation_space
+            .distance(state1.get_rotation(), state2.get_rotation());
+
+        (translation_distance.powi(2) + (self.rotation_weight * rotation_distance).powi(2)).sqrt()
     }
 
     fn interpolate(
@@ -84,27 +96,46 @@ impl StateSpace for SE2StateSpace {
         t: f64,
         state: &mut Self::StateType,
     ) {
-        self.0.interpolate_dyn(&from.0, &to.0, t, &mut state.0);
+        self.translation_space.interpolate(
+            from.get_translation(),
+            to.get_translation(),
+            t,
+            state.translation_mut(),
+        );
+        self.rotation_space.interpolate(
+            from.get_rotation(),
+            to.get_rotation(),
+            t,
+            state.rotation_mut(),
+        );
     }
 
     fn enforce_bounds(&self, state: &mut Self::StateType) {
-        self.0.enforce_bounds_dyn(&mut state.0);
+        self.translation_space
+            .enforce_bounds(state.translation_mut());
+        self.rotation_space.enforce_bounds(state.rotation_mut());
     }
 
     fn satisfies_bounds(&self, state: &Self::StateType) -> bool {
-        self.0.satisfies_bounds_dyn(&state.0)
+        self.translation_space
+            .satisfies_bounds(state.get_translation())
+            && self.rotation_space.satisfies_bounds(state.get_rotation())
     }
 
     fn sample_uniform(
         &self,
         rng: &mut impl rand::Rng,
     ) -> Result<Self::StateType, crate::base::error::StateSamplingError> {
-        let compound_state = self.0.sample_uniform(rng)?;
-        Ok(SE2State(compound_state))
+        let translation = self.translation_space.sample_uniform(rng)?;
+        let rotation = self.rotation_space.sample_uniform(rng)?;
+        Ok(SE2State::from_parts(translation, rotation))
     }
 
     fn get_longest_valid_segment_length(&self) -> f64 {
-        self.0.get_longest_valid_segment_length_dyn()
+        let translation_segment = self.translation_space.get_longest_valid_segment_length();
+        let rotation_segment = self.rotation_space.get_longest_valid_segment_length();
+
+        (translation_segment.powi(2) + (self.rotation_weight * rotation_segment).powi(2)).sqrt()
     }
 }
 
@@ -138,6 +169,25 @@ mod tests {
     }
 
     #[test]
+    fn test_fixed_typed_se2_public_behavior() {
+        let bounds = vec![(-1.0, 1.0), (-2.0, 2.0), (-PI / 2.0, PI / 2.0)];
+        let space = SE2StateSpace::new(0.5, Some(bounds)).unwrap();
+        let state1 = SE2State::new(0.0, 0.0, 0.0);
+        let state2 = SE2State::new(3.0, 4.0, 3.0 * PI);
+        let mut candidate = SE2State::new(2.0, -3.0, 0.8 * PI);
+
+        let expected_distance = (5.0f64.powi(2) + (0.5 * PI).powi(2)).sqrt();
+        assert!((space.distance(&state1, &state2) - expected_distance).abs() < 1e-9);
+        assert!((state2.get_yaw() + PI).abs() < 1e-9);
+        assert!(!space.satisfies_bounds(&candidate));
+
+        space.enforce_bounds(&mut candidate);
+        assert_eq!(candidate.get_x(), 1.0);
+        assert_eq!(candidate.get_y(), -2.0);
+        assert!((candidate.get_yaw() - (PI / 2.0)).abs() < 1e-9);
+    }
+
+    #[test]
     fn test_distance() {
         let space = SE2StateSpace::new(0.5, None).unwrap();
         let state1 = SE2State::new(0.0, 0.0, 0.0);
@@ -149,6 +199,7 @@ mod tests {
             (expected_dist_r2.powi(2) + (0.5 * expected_dist_so2).powi(2)).sqrt();
 
         assert!((space.distance(&state1, &state2) - expected_total_dist).abs() < 1e-9);
+        assert_eq!(space.distance(&state1, &state1), 0.0);
     }
 
     #[test]
@@ -163,6 +214,16 @@ mod tests {
         assert_eq!(interpolated_state.get_x(), 5.0);
         assert_eq!(interpolated_state.get_y(), -5.0);
         assert!((interpolated_state.get_yaw() - PI / 4.0).abs() < 1e-9);
+
+        space.interpolate(&state1, &state2, 0.0, &mut interpolated_state);
+        assert_eq!(interpolated_state.get_x(), state1.get_x());
+        assert_eq!(interpolated_state.get_y(), state1.get_y());
+        assert_eq!(interpolated_state.get_yaw(), state1.get_yaw());
+
+        space.interpolate(&state1, &state2, 1.0, &mut interpolated_state);
+        assert_eq!(interpolated_state.get_x(), state2.get_x());
+        assert_eq!(interpolated_state.get_y(), state2.get_y());
+        assert_eq!(interpolated_state.get_yaw(), state2.get_yaw());
     }
 
     #[test]

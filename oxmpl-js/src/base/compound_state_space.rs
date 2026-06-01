@@ -8,10 +8,7 @@ use oxmpl::base::space::{AnyStateSpace, CompoundStateSpace, StateSpace};
 use rand::rng;
 use wasm_bindgen::prelude::*;
 
-use crate::base::{
-    JsCompoundState, JsRealVectorStateSpace, JsSE2StateSpace, JsSE3StateSpace, JsSO2StateSpace,
-    JsSO3StateSpace,
-};
+use crate::base::{JsCompoundState, JsRealVectorStateSpace, JsSO2StateSpace, JsSO3StateSpace};
 
 #[wasm_bindgen(js_name = CompoundStateSpace)]
 pub struct JsCompoundStateSpace {
@@ -118,20 +115,6 @@ impl JsCompoundStateSpaceBuilder {
 
     #[wasm_bindgen(js_name = addSO3StateSpace)]
     pub fn add_so3_state_space(&mut self, space: &JsSO3StateSpace, weight: f64) {
-        self.subspaces
-            .push(Box::new(space.inner.lock().unwrap().clone()));
-        self.weights.push(weight);
-    }
-
-    #[wasm_bindgen(js_name = addSE2StateSpace)]
-    pub fn add_se2_state_space(&mut self, space: &JsSE2StateSpace, weight: f64) {
-        self.subspaces
-            .push(Box::new(space.inner.lock().unwrap().clone()));
-        self.weights.push(weight);
-    }
-
-    #[wasm_bindgen(js_name = addSE3StateSpace)]
-    pub fn add_se3_state_space(&mut self, space: &JsSE3StateSpace, weight: f64) {
         self.subspaces
             .push(Box::new(space.inner.lock().unwrap().clone()));
         self.weights.push(weight);
