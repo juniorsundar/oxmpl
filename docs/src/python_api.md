@@ -24,14 +24,14 @@ A state representing a 3D rotation (Quaternion).
 - `x: float`, `y: float`, `z: float`, `w: float` (read-only)
 
 #### `SE2State`
-A state representing a 2D rigid body transformation ($x, y, yaw$). It is a composition of `RealVectorState` (for translation) and `SO2State` (for rotation).
+A state representing a fixed 2D rigid body transformation ($x, y, yaw$), combining planar translation and planar rotation.
 - `__init__(x: float, y: float, yaw: float)`
 - `x: float`, `y: float`, `yaw: float` (read-only)
 - `translation: RealVectorState` (read-only)
 - `rotation: SO2State` (read-only)
 
 #### `SE3State`
-A state representing a 3D rigid body transformation ($x, y, z, rotation$). It is a composition of `RealVectorState` and `SO3State`.
+A state representing a fixed 3D rigid body transformation ($x, y, z, rotation$), combining spatial translation and spatial rotation.
 - `__init__(x: float, y: float, z: float, rotation: SO3State)`
 - `x: float`, `y: float`, `z: float` (read-only)
 - `translation: RealVectorState` (read-only)

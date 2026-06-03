@@ -26,14 +26,14 @@ A state representing a 3D rotation (Quaternion).
 - `normalise(): SO3State`
 
 #### `SE2State`
-A state representing a 2D rigid body transformation ($x, y, yaw$).
+A state representing a fixed 2D rigid body transformation ($x, y, yaw$), combining planar translation and planar rotation.
 - `constructor(x: number, y: number, yaw: number)`
 - `x: number`, `y: number`, `yaw: number` (read-only)
 - `translation: RealVectorState` (read-only)
 - `rotation: SO2State` (read-only)
 
 #### `SE3State`
-A state representing a 3D rigid body transformation ($x, y, z, rotation$).
+A state representing a fixed 3D rigid body transformation ($x, y, z, rotation$), combining spatial translation and spatial rotation.
 - `constructor(x: number, y: number, z: number, rotation: SO3State)`
 - `x: number`, `y: number`, `z: number` (read-only)
 - `translation: RealVectorState` (read-only)

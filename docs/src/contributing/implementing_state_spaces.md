@@ -8,13 +8,16 @@ Before implementing a custom `State` and `StateSpace`, consider if your requirem
 Most robotic systems can be represented as a collection of simpler state spaces. A `CompoundStateSpace` allows you to combine existing spaces (like `RealVectorStateSpace`, `SO2StateSpace`, `SO3StateSpace`) via a Cartesian product.
 
 **When to use `CompoundStateSpace`:**
-*   Your system is composed of multiple independent parts (e.g., a mobile base ($SE(2)$) + a robotic arm ($R^n$)).
+*   Your system is composed of multiple independent parts whose states can be represented as an ordered product of existing component states (e.g., a custom robot combining position and orientation into a single arbitrary product space).
 *   You need to assign different weights to different components during distance calculation.
+
+**Fixed versus compound spaces**: `SE(2)`, `SE(3)`, `SO(2)`, `SO(3)`, and $R^n$ are **fixed named state spaces** with dedicated APIs. `CompoundStateSpace` is the **dynamic API** for arbitrary ordered products of component spaces. Fixed named spaces are not compound subspaces — use them directly when a fixed rigid-body or vector-space configuration matches your needs.
 
 **When to implement a New State:**
 *   **Unique Topology**: You are working with a manifold that is not easily represented by existing spaces (e.g., a specific non-Euclidean surface).
 *   **Custom Metric**: You require a specialized distance function that cannot be decomposed into component-wise distances (e.g., Dubins path distance for non-holonomic vehicles).
 *   **Custom Interpolation**: The path between two states follows specific rules (e.g., geodesic on a sphere).
+*   **Fixed Named State**: You are modelling a specific rigid-body or manifold configuration that warrants its own named identity and dedicated API (e.g., a Dubins vehicle state for non-holonomic planning).
 
 ## Rust Implementation (`oxmpl`)
 1.  **Define State**: Create a struct implementing `oxmpl::base::state::State` (and `Clone`, `Debug`, `serde::Serialize`, `serde::Deserialize`).
