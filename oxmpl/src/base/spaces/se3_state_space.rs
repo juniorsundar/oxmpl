@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 use crate::base::{
+    error::StateSamplingError,
     error::StateSpaceError,
-    space::{AnyStateSpace, CompoundStateSpace, RealVectorStateSpace, SO3StateSpace, StateSpace},
+    space::{RealVectorStateSpace, SO3StateSpace, StateSpace},
     state::SE3State,
 };
 
@@ -15,16 +16,19 @@ use crate::base::{
 /// z) and rotation (a maximum angle from a center rotation), and calculating weighted distances
 /// between states.
 #[derive(Clone)]
-pub struct SE3StateSpace(pub CompoundStateSpace);
+pub struct SE3StateSpace {
+    translation_space: RealVectorStateSpace,
+    rotation_space: SO3StateSpace,
+    weight: f64,
+}
 
 impl SE3StateSpace {
     /// Creates a new `SE3StateSpace`.
     ///
-    /// The `translation_bounds` argument allows specifying the valid range for the translational
-    /// part of the state. If provided, it must be a `Vec` corresponding to the bounds for x, y, and z.
-    ///
-    /// The `rotation_bounds` argument allows specifying the valid range for the rotational part of
-    /// the state as a tuple `(center_rotation, max_angle)`.
+    /// The `bounds_option` argument allows specifying the valid range for the translational
+    /// part of the state. If provided, it must be a `Vec` of exactly three `(min, max)` tuples
+    /// corresponding to the bounds for x, y, and z. The rotational component (SO(3)) is always
+    /// unbounded.
     ///
     /// The `weight` parameter is applied to the rotational component when calculating distances,
     /// allowing control over the trade-off between translational and rotational costs.
@@ -68,9 +72,11 @@ impl SE3StateSpace {
             ),
         };
 
-        let compound_space =
-            CompoundStateSpace::new(vec![Box::new(r3), Box::new(so3)], vec![1.0, weight]);
-        Ok(SE3StateSpace(compound_space))
+        Ok(SE3StateSpace {
+            translation_space: r3,
+            rotation_space: so3,
+            weight,
+        })
     }
 }
 
@@ -78,7 +84,15 @@ impl StateSpace for SE3StateSpace {
     type StateType = SE3State;
 
     fn distance(&self, state1: &Self::StateType, state2: &Self::StateType) -> f64 {
-        self.0.distance_dyn(&state1.0, &state2.0)
+        let trans1 = state1.get_translation();
+        let trans2 = state2.get_translation();
+        let rot1 = state1.get_rotation();
+        let rot2 = state2.get_rotation();
+
+        let dist_trans = self.translation_space.distance(trans1, trans2);
+        let dist_rot = self.rotation_space.distance(rot1, rot2);
+
+        (dist_trans.powi(2) + (self.weight * dist_rot).powi(2)).sqrt()
     }
 
     fn interpolate(
@@ -88,27 +102,45 @@ impl StateSpace for SE3StateSpace {
         t: f64,
         state: &mut Self::StateType,
     ) {
-        self.0.interpolate_dyn(&from.0, &to.0, t, &mut state.0);
+        self.translation_space.interpolate(
+            from.get_translation(),
+            to.get_translation(),
+            t,
+            state.translation_mut(),
+        );
+        self.rotation_space.interpolate(
+            from.get_rotation(),
+            to.get_rotation(),
+            t,
+            state.rotation_mut(),
+        );
     }
 
     fn enforce_bounds(&self, state: &mut Self::StateType) {
-        self.0.enforce_bounds_dyn(&mut state.0);
+        self.translation_space
+            .enforce_bounds(state.translation_mut());
+        self.rotation_space.enforce_bounds(state.rotation_mut());
     }
 
     fn satisfies_bounds(&self, state: &Self::StateType) -> bool {
-        self.0.satisfies_bounds_dyn(&state.0)
+        self.translation_space
+            .satisfies_bounds(state.get_translation())
+            && self.rotation_space.satisfies_bounds(state.get_rotation())
     }
 
     fn sample_uniform(
         &self,
         rng: &mut impl rand::Rng,
-    ) -> Result<Self::StateType, crate::base::error::StateSamplingError> {
-        let compound_state = self.0.sample_uniform(rng)?;
-        Ok(SE3State(compound_state))
+    ) -> Result<Self::StateType, StateSamplingError> {
+        let trans = self.translation_space.sample_uniform(rng)?;
+        let rot = self.rotation_space.sample_uniform(rng)?;
+        Ok(SE3State::from_parts(trans, rot))
     }
 
     fn get_longest_valid_segment_length(&self) -> f64 {
-        self.0.get_longest_valid_segment_length_dyn()
+        let trans_lvsl = self.translation_space.get_longest_valid_segment_length();
+        let rot_lvsl = self.rotation_space.get_longest_valid_segment_length();
+        (trans_lvsl.powi(2) + (self.weight * rot_lvsl).powi(2)).sqrt()
     }
 }
 
