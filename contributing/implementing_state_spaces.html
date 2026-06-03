@@ -23,8 +23,8 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -45,10 +45,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-fdf3f3cd.js";
+            window.path_to_searchindex_js = "../searchindex-adef59bf.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-58cf20b0.js"></script>
+        <script src="../toc-62ebb65a.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -198,14 +198,16 @@
 <p>Most robotic systems can be represented as a collection of simpler state spaces. A <code>CompoundStateSpace</code> allows you to combine existing spaces (like <code>RealVectorStateSpace</code>, <code>SO2StateSpace</code>, <code>SO3StateSpace</code>) via a Cartesian product.</p>
 <p><strong>When to use <code>CompoundStateSpace</code>:</strong></p>
 <ul>
-<li>Your system is composed of multiple independent parts (e.g., a mobile base ($SE(2)$) + a robotic arm ($R^n$)).</li>
+<li>Your system is composed of multiple independent parts whose states can be represented as an ordered product of existing component states (e.g., a custom robot combining position and orientation into a single arbitrary product space).</li>
 <li>You need to assign different weights to different components during distance calculation.</li>
 </ul>
+<p><strong>Fixed versus compound spaces</strong>: <code>SE(2)</code>, <code>SE(3)</code>, <code>SO(2)</code>, <code>SO(3)</code>, and $R^n$ are <strong>fixed named state spaces</strong> with dedicated APIs. <code>CompoundStateSpace</code> is the <strong>dynamic API</strong> for arbitrary ordered products of component spaces. Fixed named spaces are not compound subspaces — use them directly when a fixed rigid-body or vector-space configuration matches your needs.</p>
 <p><strong>When to implement a New State:</strong></p>
 <ul>
 <li><strong>Unique Topology</strong>: You are working with a manifold that is not easily represented by existing spaces (e.g., a specific non-Euclidean surface).</li>
 <li><strong>Custom Metric</strong>: You require a specialized distance function that cannot be decomposed into component-wise distances (e.g., Dubins path distance for non-holonomic vehicles).</li>
 <li><strong>Custom Interpolation</strong>: The path between two states follows specific rules (e.g., geodesic on a sphere).</li>
+<li><strong>Fixed Named State</strong>: You are modelling a specific rigid-body or manifold configuration that warrants its own named identity and dedicated API (e.g., a Dubins vehicle state for non-holonomic planning).</li>
 </ul>
 <h2 id="rust-implementation-oxmpl"><a class="header" href="#rust-implementation-oxmpl">Rust Implementation (<code>oxmpl</code>)</a></h2>
 <ol>
@@ -335,11 +337,11 @@ When implementing <code>from_js_value</code> for your state, you often need to i
 
         <script src="../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
 
         <script src="../clipboard-1626706a.min.js"></script>
         <script src="../highlight-abc7f01d.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

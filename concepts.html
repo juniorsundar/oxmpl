@@ -23,8 +23,8 @@
         <link rel="icon" href="favicon-de23e50b.svg">
         <link rel="shortcut icon" href="favicon-8114d1fc.png">
         <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-2459343d.css">
-        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/general-0392ca55.css">
+        <link rel="stylesheet" href="css/chrome-fc474251.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -45,10 +45,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fdf3f3cd.js";
+            window.path_to_searchindex_js = "searchindex-adef59bf.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-58cf20b0.js"></script>
+        <script src="toc-62ebb65a.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -193,14 +193,32 @@
                         <h1 id="concepts"><a class="header" href="#concepts">Concepts</a></h1>
 <p>OxMPL follows the modular design principles of OMPL. Understanding these core concepts is key to using the library effectively.</p>
 <h2 id="state-space-statespace"><a class="header" href="#state-space-statespace">State Space (<code>StateSpace</code>)</a></h2>
-<p>The <code>StateSpace</code> defines the configuration space of the robot. Common spaces include:</p>
+<p>The <code>StateSpace</code> defines the configuration space of the robot.</p>
+<h3 id="fixed-named-spaces"><a class="header" href="#fixed-named-spaces">Fixed Named Spaces</a></h3>
 <ul>
 <li><code>RealVectorStateSpace</code>: For $R^n$ spaces (e.g., 2D or 3D positions).</li>
 <li><code>SE2StateSpace</code> / <code>SE3StateSpace</code>: For rigid bodies in 2D or 3D.</li>
 <li><code>SO2StateSpace</code> / <code>SO3StateSpace</code>: For rotations.</li>
 </ul>
+<h3 id="compound-state-space-compoundstatespace"><a class="header" href="#compound-state-space-compoundstatespace">Compound State Space (<code>CompoundStateSpace</code>)</a></h3>
+<p>A <code>CompoundStateSpace</code> is the dynamic API for arbitrary ordered products of component spaces, each optionally weighted. Use it when your system does not map to a single fixed named space and is naturally modelled as a collection of simpler state spaces.</p>
+<blockquote>
+<p><strong>Note</strong>: Fixed named spaces such as <code>SE2StateSpace</code> and <code>SE3StateSpace</code> use their dedicated APIs and are not valid compound subspaces.</p>
+</blockquote>
 <h2 id="state-state"><a class="header" href="#state-state">State (<code>State</code>)</a></h2>
-<p>A <code>State</code> represents a single point in the <code>StateSpace</code>. In Rust, these are often specific types like <code>RealVectorState</code>.</p>
+<p>A <code>State</code> represents a single point in a <code>StateSpace</code>.</p>
+<h3 id="fixed-named-states"><a class="header" href="#fixed-named-states">Fixed Named States</a></h3>
+<p>These correspond to fixed named spaces:</p>
+<ul>
+<li><code>RealVectorState</code>: An $R^n$ point.</li>
+<li><code>SE2State</code> / <code>SE3State</code>: A 2D or 3D rigid-body configuration.</li>
+<li><code>SO2State</code> / <code>SO3State</code>: A 2D or 3D rotation.</li>
+</ul>
+<h3 id="compound-state-compoundstate"><a class="header" href="#compound-state-compoundstate">Compound State (<code>CompoundState</code>)</a></h3>
+<p>A <code>CompoundState</code> is a dynamic heterogeneous container holding an ordered collection of component states, one per component space in a <code>CompoundStateSpace</code>. Each component is accessed by index.</p>
+<blockquote>
+<p><strong>Note</strong>: Fixed named states such as <code>SE2State</code> and <code>SE3State</code> use their dedicated APIs and are not valid <code>CompoundState</code> components.</p>
+</blockquote>
 <h2 id="state-validity-checker-statevaliditychecker"><a class="header" href="#state-validity-checker-statevaliditychecker">State Validity Checker (<code>StateValidityChecker</code>)</a></h2>
 <p>This is a user-defined component that determines if a given <code>State</code> is “valid” (e.g., collision-free, within joint limits).</p>
 <h2 id="goal-goal"><a class="header" href="#goal-goal">Goal (<code>Goal</code>)</a></h2>
@@ -254,11 +272,11 @@
 
         <script src="elasticlunr-ef4e11c1.min.js"></script>
         <script src="mark-09e88c2c.min.js"></script>
-        <script src="searcher-c2a407aa.js"></script>
+        <script src="searcher-09f2665d.js"></script>
 
         <script src="clipboard-1626706a.min.js"></script>
         <script src="highlight-abc7f01d.js"></script>
-        <script src="book-a0b12cfe.js"></script>
+        <script src="book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 
