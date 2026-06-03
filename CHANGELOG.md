@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.0.0](https://github.com/juniorsundar/oxmpl/compare/v0.6.0...v1.0.0) (2026-06-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **base:** introduce AnyState trait for compound state dynamic dispatch
+
+### Features
+
+* **base:** introduce AnyState trait for compound state dynamic dispatch ([e7ff142](https://github.com/juniorsundar/oxmpl/commit/e7ff14220b397cb8b92f5175f76659c72fac1c37))
+
+
+### Bug Fixes
+
+* **se2:** split fixed typed SE2 from compound-state bindings ([b7f0c0f](https://github.com/juniorsundar/oxmpl/commit/b7f0c0f21a31ea32b87166a22a97c9702bd7e49a))
+
+
+### Documentation
+
+* Update after refactor for SE2/3 ([4c8c777](https://github.com/juniorsundar/oxmpl/commit/4c8c7778cd83996accc8232f830278903a4f06c4))
+* Write up contribution guide ([e6fd25c](https://github.com/juniorsundar/oxmpl/commit/e6fd25c3f6416e526426a437ed0dabc990a5bc3c))
+
+
+### Code Refactoring
+
+* **base:** simplify State trait from `DynClone+Any` to lightweight marker ([aafde33](https://github.com/juniorsundar/oxmpl/commit/aafde33fc2f233eee3289113b973b2c1156da8a7))
+* **se3:** convert SE3State/SE3StateSpace from CompoundState wrappers to direct typed structs ([f2719b6](https://github.com/juniorsundar/oxmpl/commit/f2719b67ca30574f0df95676339cd3fe1ea27321))
+* **state:** remove AnyState impl from SE2State and SE3State ([5cbeb1a](https://github.com/juniorsundar/oxmpl/commit/5cbeb1af6f05740636470d19c12d8fdcdc0efe9f))
+
+
+### Continuous Integration
+
+* **js.yml:** Update to use the OpenIDC ([8d38823](https://github.com/juniorsundar/oxmpl/commit/8d388233d7aa1f0bbc428811fdffac215cee4cbe))
+
 ## [0.6.0](https://github.com/juniorsundar/oxmpl/compare/v0.5.0...v0.6.0) (2025-12-31)
 
 
