@@ -3,7 +3,7 @@
 oxmpl-py/tests/__pycache__
 .DS_Store
 .direnv
-.pi
+.pi/subagents
 docs/book
 .vscode/settings.json
 .serena/*
