@@ -52,6 +52,7 @@ def is_rotation_valid(state: SO3State) -> bool:
 
 def test_prm_finds_path_in_so3ss():
     space = SO3StateSpace()
+    space.set_longest_valid_segment_fraction(0.25)
     global FORBIDDEN_ZONE_SPACE
     FORBIDDEN_ZONE_SPACE = space
 

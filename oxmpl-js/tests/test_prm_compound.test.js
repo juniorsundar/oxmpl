@@ -30,6 +30,10 @@ describe('PRM Compound Integration Tests', () => {
     // R2 + SO2
     const r2Space = new oxmpl.base.RealVectorStateSpace(2, [-5, 5, -5, 5]);
     const so2Space = new oxmpl.base.SO2StateSpace();
+
+    r2Space.setLongestValidLineSegmentFraction(0.25);
+    so2Space.setLongestValidLineSegmentFraction(0.25);
+
     const spaceBuilder = new oxmpl.base.CompoundStateSpaceBuilder();
     spaceBuilder.addRealVectorStateSpace(r2Space, 1.0);
     spaceBuilder.addSO2StateSpace(so2Space, 0.5);
