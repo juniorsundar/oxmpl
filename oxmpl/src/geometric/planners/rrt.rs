@@ -4,6 +4,7 @@
 
 use std::sync::Arc;
 
+use log::debug;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::{
@@ -183,12 +184,9 @@ where
 
             // 2. Sample a state (q_rand)
             let q_rand = if rng.random_bool(self.goal_bias) {
-                // TODO: assume sample_goal can't fail here for simplicity, but a real
-                // implementation would handle the Result.
-                goal.sample_goal(&mut rng).unwrap()
+                goal.sample_goal(&mut rng)?
             } else {
-                // TODO: assume uniform sampling can't fail if bounds are set correctly.
-                pd.space.sample_uniform(&mut rng).unwrap()
+                pd.space.sample_uniform(&mut rng)?
             };
 
             // 3. Find the nearest node in the tree (q_near)
@@ -226,11 +224,12 @@ where
 
                 // 7. Check if the new node satisfies the goal
                 if goal.is_satisfied(&q_new) {
-                    println!("Solution found after {} nodes.", self.tree.len());
+                    debug!("Solution found after {} nodes.", self.tree.len());
                     return Ok(self.reconstruct_path(self.tree.len() - 1));
                 }
             }
         }
-        // TODO: Limit iteration counts and add Err(PlanningError::NoSolutionFound)
+        // Timeout-only termination is deliberate: iteration caps are tuning that
+        // belongs with future benchmarking work, as currently no max_iterations knob present.
     }
 }

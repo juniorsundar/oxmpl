@@ -7,6 +7,7 @@ use std::{
     sync::Arc,
 };
 
+use log::debug;
 use rand::{rngs::StdRng, SeedableRng};
 
 use crate::time::{Duration, Instant};
@@ -110,7 +111,7 @@ where
             .ok_or(PlanningError::PlannerUninitialised)?;
 
         if !self.roadmap.is_empty() {
-            println!(
+            debug!(
                 "PRM: Roadmap already constructed with {} milestones.",
                 self.roadmap.len()
             );
@@ -128,7 +129,7 @@ where
                 break;
             }
 
-            let q_rand = pd.space.sample_uniform(&mut *rng).unwrap();
+            let q_rand = pd.space.sample_uniform(&mut *rng)?;
             if vc.is_valid(&q_rand) {
                 let mut new_node = Node {
                     state: q_rand.clone(),
@@ -154,7 +155,7 @@ where
                 }
             }
         }
-        println!(
+        debug!(
             "PRM: Roadmap constructed with {} milestones.",
             self.roadmap.len()
         );

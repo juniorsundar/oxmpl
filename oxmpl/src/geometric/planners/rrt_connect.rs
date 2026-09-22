@@ -4,6 +4,7 @@
 
 use std::sync::Arc;
 
+use log::debug;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::{
@@ -212,21 +213,12 @@ where
         self.goal_tree.clear();
         let pd = self.problem_def.as_ref().unwrap();
 
-        // Initialise the trees beginning from start and goal states.
         let start_state = pd.start_states[0].clone();
         let start_node = Node {
             state: start_state,
             parent_index: None,
         };
         self.start_tree.push(start_node);
-
-        let mut rng = rand::rng();
-        let goal_state = pd.goal.sample_goal(&mut rng).unwrap();
-        let goal_node = Node {
-            state: goal_state,
-            parent_index: None,
-        };
-        self.goal_tree.push(goal_node);
     }
 
     fn solve(&mut self, timeout: Duration) -> Result<Path<S>, PlanningError> {
@@ -245,6 +237,15 @@ where
             .ok_or(PlanningError::PlannerUninitialised)?;
         let goal = &pd.goal;
 
+        if self.goal_tree.is_empty() {
+            let goal_state = goal.sample_goal(&mut rng)?;
+            let goal_node = Node {
+                state: goal_state,
+                parent_index: None,
+            };
+            self.goal_tree.push(goal_node);
+        }
+
         // Main loop
         loop {
             // 1. Check for timeout
@@ -262,11 +263,10 @@ where
                 };
 
             // 3. Sample a random target state `q_rand`, with goal biasing.
-            // TODO: Handle sampling failures.
             let q_rand = if rng.random_bool(self.goal_bias) {
-                goal.sample_goal(&mut rng).unwrap()
+                goal.sample_goal(&mut rng)?
             } else {
-                pd.space.sample_uniform(&mut rng).unwrap()
+                pd.space.sample_uniform(&mut rng)?
             };
 
             // 4. Try to extend tree_a towards q_rand.
@@ -277,7 +277,7 @@ where
 
                 // If growing the start tree, check if the new node is already in the goal.
                 if is_growing_start_tree && goal.is_satisfied(q_new) {
-                    println!("Solution found by start tree reaching goal directly.");
+                    debug!("Solution found by start tree reaching goal directly.");
                     return Ok(self.reconstruct_path(&self.start_tree, new_node_idx_a));
                 }
 
@@ -287,7 +287,7 @@ where
                 {
                     // 6. If the connection reached q_new, a solution is found.
                     if connect_result == ExtendResult::Reached {
-                        println!(
+                        debug!(
                             "Solution found after {} total nodes.",
                             self.start_tree.len() + self.goal_tree.len()
                         );
