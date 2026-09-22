@@ -1,7 +1,7 @@
 use std::{f64::consts::PI, sync::Arc, time::Duration};
 
 use oxmpl::base::{
-    error::StateSamplingError,
+    error::{PlanningError, StateSamplingError},
     goal::{Goal, GoalRegion, GoalSampleableRegion},
     planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
@@ -181,4 +181,62 @@ fn test_rrt_finds_path_in_rvss() {
     );
 
     println!("RRT planner test passed!");
+}
+
+#[test]
+fn test_rrt_timesout_in_rvss() {
+    let new_rvss_result = RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)]));
+
+    let space;
+    match new_rvss_result {
+        Ok(state) => space = Arc::new(state),
+        Err(_) => {
+            panic!("Error creating new RealVectorState!")
+        }
+    }
+
+    let start_state = RealVectorState {
+        values: vec![1.0, 5.0],
+    };
+    let goal_definition = Arc::new(CircularGoalRegion {
+        target: RealVectorState {
+            values: vec![9.0, 5.0],
+        },
+        radius: 0.5,
+        space: space.clone(),
+    });
+
+    let problem_definition = Arc::new(ProblemDefinition {
+        space: space.clone(),
+        start_states: vec![start_state.clone()],
+        goal: goal_definition.clone(),
+    });
+
+    let validity_checker = Arc::new(WallObstacleChecker {
+        wall_x_pos: 5.0,
+        wall_y_min: 0.0,
+        wall_y_max: 10.0,
+        wall_thickness: 0.5,
+    });
+    assert!(
+        validity_checker.is_valid(&start_state),
+        "Start state should be valid!"
+    );
+    assert!(
+        validity_checker.is_valid(&goal_definition.target),
+        "Goal target should be valid!"
+    );
+
+    let mut planner = RRT::new(0.5, 0.0, &PlannerConfig { seed: Some(0) });
+
+    planner.setup(problem_definition, validity_checker.clone());
+
+    let timeout = Duration::from_secs(1);
+    let result = planner.solve(timeout);
+
+    assert!(
+        matches!(&result, Err(PlanningError::Timeout)),
+        "Unsolvable problem must terminate with Err(PlanningError::Timeout); got={:?}",
+        result.err()
+    );
 }

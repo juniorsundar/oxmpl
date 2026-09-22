@@ -232,6 +232,7 @@ where
                 }
             }
         }
-        // TODO: Limit iteration counts and add Err(PlanningError::NoSolutionFound)
+        // Timeout-only termination is deliberate: iteration caps are tuning that
+        // belongs with future benchmarking work, as currently no max_iterations knob present.
     }
 }
