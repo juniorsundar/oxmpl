@@ -203,12 +203,9 @@ where
 
             // 2. Sample a state (q_rand)
             let q_rand = if rng.random_bool(self.goal_bias) {
-                // TODO: assume sample_goal can't fail here for simplicity, but a real
-                // implementation would handle the Result.
-                goal.sample_goal(&mut rng).unwrap()
+                goal.sample_goal(&mut rng)?
             } else {
-                // TODO: assume uniform sampling can't fail if bounds are set correctly.
-                pd.space.sample_uniform(&mut rng).unwrap()
+                pd.space.sample_uniform(&mut rng)?
             };
 
             // 3. Find the nearest node in the tree (q_near)
