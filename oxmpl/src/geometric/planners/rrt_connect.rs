@@ -4,6 +4,7 @@
 
 use std::sync::Arc;
 
+use log::debug;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::{
@@ -277,7 +278,7 @@ where
 
                 // If growing the start tree, check if the new node is already in the goal.
                 if is_growing_start_tree && goal.is_satisfied(q_new) {
-                    println!("Solution found by start tree reaching goal directly.");
+                    debug!("Solution found by start tree reaching goal directly.");
                     return Ok(self.reconstruct_path(&self.start_tree, new_node_idx_a));
                 }
 
@@ -287,7 +288,7 @@ where
                 {
                     // 6. If the connection reached q_new, a solution is found.
                     if connect_result == ExtendResult::Reached {
-                        println!(
+                        debug!(
                             "Solution found after {} total nodes.",
                             self.start_tree.len() + self.goal_tree.len()
                         );

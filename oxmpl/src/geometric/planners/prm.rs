@@ -7,6 +7,7 @@ use std::{
     sync::Arc,
 };
 
+use log::debug;
 use rand::{rngs::StdRng, SeedableRng};
 
 use crate::time::{Duration, Instant};
@@ -110,7 +111,7 @@ where
             .ok_or(PlanningError::PlannerUninitialised)?;
 
         if !self.roadmap.is_empty() {
-            println!(
+            debug!(
                 "PRM: Roadmap already constructed with {} milestones.",
                 self.roadmap.len()
             );
@@ -154,7 +155,7 @@ where
                 }
             }
         }
-        println!(
+        debug!(
             "PRM: Roadmap constructed with {} milestones.",
             self.roadmap.len()
         );

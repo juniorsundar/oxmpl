@@ -4,6 +4,7 @@
 
 use std::sync::Arc;
 
+use log::debug;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::{
@@ -226,7 +227,7 @@ where
 
                 // 7. Check if the new node satisfies the goal
                 if goal.is_satisfied(&q_new) {
-                    println!("Solution found after {} nodes.", self.tree.len());
+                    debug!("Solution found after {} nodes.", self.tree.len());
                     return Ok(self.reconstruct_path(self.tree.len() - 1));
                 }
             }
