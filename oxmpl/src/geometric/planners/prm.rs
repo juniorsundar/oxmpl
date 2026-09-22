@@ -129,7 +129,7 @@ where
                 break;
             }
 
-            let q_rand = pd.space.sample_uniform(&mut *rng).unwrap();
+            let q_rand = pd.space.sample_uniform(&mut *rng)?;
             if vc.is_valid(&q_rand) {
                 let mut new_node = Node {
                     state: q_rand.clone(),

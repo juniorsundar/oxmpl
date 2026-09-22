@@ -9,6 +9,7 @@ pub enum StateError {
     /// The magnitude/norm of state is 0,
     ZeroMagnitude,
 }
+
 impl fmt::Display for StateError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -16,6 +17,7 @@ impl fmt::Display for StateError {
         }
     }
 }
+
 impl error::Error for StateError {}
 
 #[derive(Debug, PartialEq)]
@@ -29,6 +31,7 @@ pub enum StateSpaceError {
     /// Below the least angular bound
     InvalidAngularDistance { lower: f64 },
 }
+
 impl fmt::Display for StateSpaceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -54,6 +57,7 @@ impl fmt::Display for StateSpaceError {
         }
     }
 }
+
 impl error::Error for StateSpaceError {}
 
 #[derive(Debug, PartialEq)]
@@ -67,6 +71,7 @@ pub enum StateSamplingError {
     /// An iterative sampling attempt failed to find a sample within a set number of attempts.
     GoalSamplingTimeout { attempts: u32 },
 }
+
 impl fmt::Display for StateSamplingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -91,6 +96,7 @@ impl fmt::Display for StateSamplingError {
         }
     }
 }
+
 impl error::Error for StateSamplingError {}
 
 #[derive(Debug, PartialEq)]
@@ -105,7 +111,10 @@ pub enum PlanningError {
     InvalidStartState,
     /// State space hasn't been sampled.
     UnsampledStateSpace,
+    /// StateSamplingError wrapper
+    Sampling(StateSamplingError),
 }
+
 impl fmt::Display for PlanningError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -130,7 +139,17 @@ impl fmt::Display for PlanningError {
                     "StateSpace is not sampled. Either Tree or Roadmap is empty."
                 )
             }
+            Self::Sampling(sse) => {
+                write!(f, "Sampling of StateSpace failed with error {}", sse)
+            }
         }
     }
 }
+
 impl error::Error for PlanningError {}
+
+impl From<StateSamplingError> for PlanningError {
+    fn from(e: StateSamplingError) -> Self {
+        PlanningError::Sampling(e)
+    }
+}
