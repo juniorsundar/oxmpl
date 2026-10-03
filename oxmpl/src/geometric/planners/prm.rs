@@ -119,17 +119,19 @@ where
             return Ok(());
         }
 
-        let mut rng = self
-            .rng
-            .take()
-            .unwrap_or_else(|| Box::new(StdRng::from_os_rng()));
         let start_time = Instant::now();
         loop {
             if start_time.elapsed().as_secs_f64() > self.timeout {
                 break;
             }
 
-            let q_rand = pd.space.sample_uniform(&mut *rng)?;
+            let q_rand = {
+                let rng = self
+                    .rng
+                    .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
+                pd.space.sample_uniform(&mut *rng)?
+            };
+
             if vc.is_valid(&q_rand) {
                 let mut new_node = Node {
                     state: q_rand.clone(),
