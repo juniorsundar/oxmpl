@@ -169,10 +169,6 @@ where
             .ok_or(PlanningError::PlannerUninitialised)?;
         let goal = &pd.goal;
 
-        let mut rng = self
-            .rng
-            .take()
-            .unwrap_or_else(|| Box::new(StdRng::from_os_rng()));
         let start_time = Instant::now();
 
         // Main Loop
@@ -183,10 +179,15 @@ where
             }
 
             // 2. Sample a state (q_rand)
-            let q_rand = if rng.random_bool(self.goal_bias) {
-                goal.sample_goal(&mut rng)?
-            } else {
-                pd.space.sample_uniform(&mut rng)?
+            let q_rand = {
+                let rng = self
+                    .rng
+                    .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
+                if rng.random_bool(self.goal_bias) {
+                    goal.sample_goal(rng)?
+                } else {
+                    pd.space.sample_uniform(rng)?
+                }
             };
 
             // 3. Find the nearest node in the tree (q_near)

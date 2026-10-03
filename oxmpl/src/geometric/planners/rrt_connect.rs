@@ -222,10 +222,6 @@ where
     }
 
     fn solve(&mut self, timeout: Duration) -> Result<Path<S>, PlanningError> {
-        let mut rng = self
-            .rng
-            .take()
-            .unwrap_or_else(|| Box::new(StdRng::from_os_rng()));
         let start_time = Instant::now();
         let pd = self
             .problem_def
@@ -238,7 +234,12 @@ where
         let goal = &pd.goal;
 
         if self.goal_tree.is_empty() {
-            let goal_state = goal.sample_goal(&mut rng)?;
+            let goal_state = {
+                let rng = self
+                    .rng
+                    .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
+                goal.sample_goal(rng)?
+            };
             let goal_node = Node {
                 state: goal_state,
                 parent_index: None,
@@ -263,10 +264,15 @@ where
                 };
 
             // 3. Sample a random target state `q_rand`, with goal biasing.
-            let q_rand = if rng.random_bool(self.goal_bias) {
-                goal.sample_goal(&mut rng)?
-            } else {
-                pd.space.sample_uniform(&mut rng)?
+            let q_rand = {
+                let rng = self
+                    .rng
+                    .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
+                if rng.random_bool(self.goal_bias) {
+                    goal.sample_goal(rng)?
+                } else {
+                    pd.space.sample_uniform(rng)?
+                }
             };
 
             // 4. Try to extend tree_a towards q_rand.
