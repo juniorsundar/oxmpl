@@ -46,7 +46,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-912dfe6c.js";
+            window.path_to_searchindex_js = "searchindex-7c08850b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-62ebb65a.js"></script>
@@ -1274,6 +1274,13 @@ subspaces.</p>
 </ul>
 <h2 id="oxmpl_pygeometric"><a class="header" href="#oxmpl_pygeometric"><code>oxmpl_py.geometric</code></a></h2>
 <p>This module contains the geometric planner implementations.</p>
+<h3 id="planner-errors"><a class="header" href="#planner-errors">Planner errors</a></h3>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>(TODO) Introduce structured planner exceptions so callers can distinguish
+failure kinds without parsing error messages. This applies to all planners’
+<code>solve()</code> methods and PRM’s <code>construct_roadmap()</code>.</p>
+</blockquote>
 <h3 id="rrt"><a class="header" href="#rrt"><code>RRT</code></a></h3>
 <p>Rapidly-exploring Random Tree.</p>
 <ul>
@@ -1510,6 +1517,13 @@ and <code>SE3State</code> use their dedicated APIs and are not valid <code>Compo
 <li><code>getLength(): number</code></li>
 </ul>
 <h2 id="oxmplgeometric"><a class="header" href="#oxmplgeometric"><code>oxmpl.geometric</code></a></h2>
+<h3 id="planner-errors-1"><a class="header" href="#planner-errors-1">Planner errors</a></h3>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>(TODO) Replace thrown planner-error strings with <code>Error</code> objects that let
+callers distinguish failure kinds without parsing messages. This applies to
+all planners’ <code>solve()</code> methods and PRM’s <code>constructRoadmap()</code>.</p>
+</blockquote>
 <h3 id="rrt-1"><a class="header" href="#rrt-1"><code>RRT</code></a></h3>
 <p>Rapidly-exploring Random Tree.</p>
 <ul>
