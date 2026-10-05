@@ -1,7 +1,7 @@
 use std::{f64::consts::PI, sync::Arc, time::Duration};
 
 use oxmpl::base::{
-    error::StateSamplingError,
+    error::{PlanningError, StateSamplingError},
     goal::{Goal, GoalRegion, GoalSampleableRegion},
     planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
@@ -176,4 +176,44 @@ fn test_rrt_connect_finds_path_in_rvss() {
     );
 
     println!("RRT-Connect planner test passed!");
+}
+
+#[test]
+fn test_rrt_connect_timesout_in_rvss() {
+    let space =
+        Arc::new(RealVectorStateSpace::new(2, Some(vec![(0.0, 10.0), (0.0, 10.0)])).unwrap());
+    let start_state = RealVectorState {
+        values: vec![1.0, 5.0],
+    };
+    let goal = Arc::new(CircularGoalRegion {
+        target: RealVectorState {
+            values: vec![9.0, 5.0],
+        },
+        radius: 0.5,
+        space: space.clone(),
+    });
+
+    let checker = Arc::new(WallObstacleChecker {
+        wall_x_pos: 5.0,
+        wall_y_min: 0.0,
+        wall_y_max: 10.0,
+        wall_thickness: 0.5,
+    });
+    assert!(checker.is_valid(&start_state));
+    assert!(checker.is_valid(&goal.target));
+
+    let problem = Arc::new(ProblemDefinition {
+        space,
+        start_states: vec![start_state],
+        goal,
+    });
+    let mut planner = RRTConnect::new(0.5, 0.0, &PlannerConfig { seed: Some(0) });
+    planner.setup(problem, checker);
+
+    let result = planner.solve(Duration::from_millis(100));
+    assert!(
+        matches!(&result, Err(PlanningError::Timeout)),
+        "Unsolvable problem must time out; got={:?}",
+        result.err()
+    );
 }

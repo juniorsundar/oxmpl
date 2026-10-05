@@ -1,7 +1,7 @@
 use std::{f64::consts::PI, sync::Arc, time::Duration};
 
 use oxmpl::base::{
-    error::StateSamplingError,
+    error::{PlanningError, StateSamplingError},
     goal::{Goal, GoalRegion, GoalSampleableRegion},
     planner::{Path, Planner, PlannerConfig},
     problem_definition::ProblemDefinition,
@@ -186,6 +186,13 @@ fn test_prm_finds_path_in_rvss() {
     assert!(
         is_path_valid(&path, &space, &*validity_checker),
         "The returned path was found to be invalid."
+    );
+
+    let result = planner.solve(Duration::ZERO);
+    assert!(
+        matches!(&result, Err(PlanningError::Timeout)),
+        "A populated, solvable roadmap must time out with a zero budget; got={:?}",
+        result.err()
     );
 
     println!("PRM planner test passed!");

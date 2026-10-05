@@ -322,3 +322,61 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::base::{
+        error::StateSamplingError, goal::GoalRegion, space::RealVectorStateSpace,
+        state::RealVectorState,
+    };
+
+    struct UnusedChecks;
+
+    impl Goal<RealVectorState> for UnusedChecks {
+        fn is_satisfied(&self, _state: &RealVectorState) -> bool {
+            panic!("Construction should not query the goal");
+        }
+    }
+
+    impl GoalRegion<RealVectorState> for UnusedChecks {
+        fn distance_goal(&self, _state: &RealVectorState) -> f64 {
+            panic!("Construction should not query the goal");
+        }
+    }
+
+    impl GoalSampleableRegion<RealVectorState> for UnusedChecks {
+        fn sample_goal(&self, _rng: &mut impl Rng) -> Result<RealVectorState, StateSamplingError> {
+            Ok(RealVectorState { values: vec![1.0] })
+        }
+    }
+
+    impl StateValidityChecker<RealVectorState> for UnusedChecks {
+        fn is_valid(&self, _state: &RealVectorState) -> bool {
+            panic!("Sampling should fail before validity checking");
+        }
+    }
+
+    #[test]
+    fn test_failure_path_rrt_connect() {
+        let rvss_unbound = Arc::new(RealVectorStateSpace::new(1, None).unwrap());
+        let mut planner = RRTConnect::new(0.5, 0.0, &PlannerConfig { seed: Some(42) });
+        planner.setup(
+            Arc::new(ProblemDefinition {
+                space: rvss_unbound,
+                start_states: vec![RealVectorState { values: vec![0.0] }],
+                goal: Arc::new(UnusedChecks),
+            }),
+            Arc::new(UnusedChecks),
+        );
+
+        let result = planner.solve(Duration::new(5, 0));
+
+        assert!(matches!(
+            result,
+            Err(PlanningError::Sampling(
+                StateSamplingError::UnboundedDimension { dimension_index: 0 }
+            ))
+        ));
+    }
+}
