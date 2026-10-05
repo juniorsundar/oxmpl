@@ -129,7 +129,13 @@ where
                 let rng = self
                     .rng
                     .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
-                pd.space.sample_uniform(&mut *rng)?
+                match pd.space.sample_uniform(&mut *rng) {
+                    Ok(q) => q,
+                    Err(e) => {
+                        self.roadmap.clear();
+                        return Err(e.into());
+                    }
+                }
             };
 
             if vc.is_valid(&q_rand) {
@@ -316,5 +322,149 @@ where
         let goal_node_idx = goal_reached.ok_or(PlanningError::NoSolutionFound)?;
 
         Ok(self.reconstruct_path(start_state, parent_map, goal_node_idx))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::cell::Cell;
+
+    use super::*;
+    use crate::base::{
+        error::StateSamplingError,
+        goal::GoalRegion,
+        space::{RealVectorStateSpace, StateSpace},
+        state::RealVectorState,
+    };
+    use rand::Rng;
+
+    struct UnusedChecks;
+
+    struct AlwaysValid;
+
+    impl StateValidityChecker<RealVectorState> for AlwaysValid {
+        fn is_valid(&self, _state: &RealVectorState) -> bool {
+            true
+        }
+    }
+
+    struct FailAfterOneSample {
+        space: RealVectorStateSpace,
+        first_sample: Cell<bool>,
+    }
+
+    impl StateSpace for FailAfterOneSample {
+        type StateType = RealVectorState;
+
+        fn distance(&self, state1: &RealVectorState, state2: &RealVectorState) -> f64 {
+            self.space.distance(state1, state2)
+        }
+
+        fn interpolate(
+            &self,
+            from: &RealVectorState,
+            to: &RealVectorState,
+            t: f64,
+            state: &mut RealVectorState,
+        ) {
+            self.space.interpolate(from, to, t, state);
+        }
+
+        fn enforce_bounds(&self, state: &mut RealVectorState) {
+            self.space.enforce_bounds(state);
+        }
+
+        fn satisfies_bounds(&self, state: &RealVectorState) -> bool {
+            self.space.satisfies_bounds(state)
+        }
+
+        fn sample_uniform(
+            &self,
+            rng: &mut impl Rng,
+        ) -> Result<RealVectorState, StateSamplingError> {
+            if self.first_sample.replace(false) {
+                self.space.sample_uniform(rng)
+            } else {
+                Err(StateSamplingError::ZeroVolume)
+            }
+        }
+
+        fn get_longest_valid_segment_length(&self) -> f64 {
+            self.space.get_longest_valid_segment_length()
+        }
+    }
+
+    impl Goal<RealVectorState> for UnusedChecks {
+        fn is_satisfied(&self, _state: &RealVectorState) -> bool {
+            panic!("Construction should not query the goal");
+        }
+    }
+
+    impl GoalRegion<RealVectorState> for UnusedChecks {
+        fn distance_goal(&self, _state: &RealVectorState) -> f64 {
+            panic!("Construction should not query the goal");
+        }
+    }
+
+    impl GoalSampleableRegion<RealVectorState> for UnusedChecks {
+        fn sample_goal(&self, _rng: &mut impl Rng) -> Result<RealVectorState, StateSamplingError> {
+            panic!("Construction should not sample the goal");
+        }
+    }
+
+    impl StateValidityChecker<RealVectorState> for UnusedChecks {
+        fn is_valid(&self, _state: &RealVectorState) -> bool {
+            panic!("Sampling should fail before validity checking");
+        }
+    }
+
+    #[test]
+    fn test_failure_path_prm() {
+        let rvss_unbound = Arc::new(RealVectorStateSpace::new(1, None).unwrap());
+        let mut planner = PRM::new(30.0, 0.5, &PlannerConfig { seed: Some(42) });
+        planner.set_problem_definition(Arc::new(ProblemDefinition {
+            space: rvss_unbound,
+            start_states: vec![RealVectorState { values: vec![0.0] }],
+            goal: Arc::new(UnusedChecks),
+        }));
+
+        planner.validity_checker = Some(Arc::new(UnusedChecks));
+
+        let result = planner.construct_roadmap();
+
+        assert_eq!(
+            result,
+            Err(PlanningError::Sampling(
+                StateSamplingError::UnboundedDimension { dimension_index: 0 }
+            ))
+        );
+    }
+
+    #[test]
+    #[allow(clippy::arc_with_non_send_sync)]
+    fn test_partial_roadmap() {
+        let space = Arc::new(FailAfterOneSample {
+            space: RealVectorStateSpace::new(1, Some(vec![(0.0, 1.0)])).unwrap(),
+            first_sample: Cell::new(true),
+        });
+        let mut planner = PRM::new(30.0, 0.5, &PlannerConfig { seed: Some(42) });
+        planner.setup(
+            Arc::new(ProblemDefinition {
+                space,
+                start_states: vec![RealVectorState { values: vec![0.0] }],
+                goal: Arc::new(UnusedChecks),
+            }),
+            Arc::new(AlwaysValid),
+        );
+
+        assert_eq!(
+            planner.construct_roadmap(),
+            Err(PlanningError::Sampling(StateSamplingError::ZeroVolume))
+        );
+        assert!(
+            planner.get_roadmap().is_empty(),
+            "Sampling failure left {} milestones in the roadmap",
+            planner.get_roadmap().len()
+        );
     }
 }
