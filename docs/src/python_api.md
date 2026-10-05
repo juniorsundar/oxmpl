@@ -123,6 +123,13 @@ A sequence of states representing a solution path.
 ## `oxmpl_py.geometric`
 This module contains the geometric planner implementations.
 
+### Planner errors
+
+> [!NOTE]
+> (TODO) Introduce structured planner exceptions so callers can distinguish
+> failure kinds without parsing error messages. This applies to all planners'
+> `solve()` methods and PRM's `construct_roadmap()`.
+
 ### `RRT`
 Rapidly-exploring Random Tree.
 - `__init__(max_distance: float, goal_bias: float, problem_definition: ProblemDefinition, planner_config: PlannerConfig)`
