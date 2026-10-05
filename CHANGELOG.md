@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.7.0](https://github.com/juniorsundar/oxmpl/compare/v0.6.0...v0.7.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **base:** introduce AnyState trait for compound state dynamic dispatch
+
+### Features
+
+* **base:** introduce AnyState trait for compound state dynamic dispatch ([e7ff142](https://github.com/juniorsundar/oxmpl/commit/e7ff14220b397cb8b92f5175f76659c72fac1c37))
+
+
+### Bug Fixes
+
+* **planners:** PlanningError::Sampling(...) now catches sampling errors in planner ([923682f](https://github.com/juniorsundar/oxmpl/commit/923682fc9031186dc6f2d578613c0e93a24e8d6f))
+* **planners:** Restoring `rng` after planner completes ([fcc203a](https://github.com/juniorsundar/oxmpl/commit/fcc203a47ff989eec19fd999b1df496fe93f019a))
+* Remove `println!` in library code and use `log` crate ([46c5d02](https://github.com/juniorsundar/oxmpl/commit/46c5d02d0e9b194d54b0ff85f8b9e750aeab4ee5))
+* **se2:** split fixed typed SE2 from compound-state bindings ([b7f0c0f](https://github.com/juniorsundar/oxmpl/commit/b7f0c0f21a31ea32b87166a22a97c9702bd7e49a))
+
+
+### Documentation
+
+* **todo:** Need to forward errors/exceptions properly in bindings side later ([8149abe](https://github.com/juniorsundar/oxmpl/commit/8149abe4a41ff6f0061600e2a3e584da23a3377f))
+* Update after refactor for SE2/3 ([4c8c777](https://github.com/juniorsundar/oxmpl/commit/4c8c7778cd83996accc8232f830278903a4f06c4))
+* Write up contribution guide ([e6fd25c](https://github.com/juniorsundar/oxmpl/commit/e6fd25c3f6416e526426a437ed0dabc990a5bc3c))
+
+
+### Code Refactoring
+
+* **base:** simplify State trait from `DynClone+Any` to lightweight marker ([aafde33](https://github.com/juniorsundar/oxmpl/commit/aafde33fc2f233eee3289113b973b2c1156da8a7))
+* **se3:** convert SE3State/SE3StateSpace from CompoundState wrappers to direct typed structs ([f2719b6](https://github.com/juniorsundar/oxmpl/commit/f2719b67ca30574f0df95676339cd3fe1ea27321))
+* **state:** remove AnyState impl from SE2State and SE3State ([5cbeb1a](https://github.com/juniorsundar/oxmpl/commit/5cbeb1af6f05740636470d19c12d8fdcdc0efe9f))
+
+
+### Tests
+
+* Add timeout termination error in integration test ([aaeaf1a](https://github.com/juniorsundar/oxmpl/commit/aaeaf1ae8911507c843746267b949ffdbe4745cc))
+* **bindings:** Covering the exceptions on planner fail with sampling error ([7a6789c](https://github.com/juniorsundar/oxmpl/commit/7a6789cf49345a58fa1e0633419520feaeefa8c3))
+* **planners:** Additional coverage for other planner failure paths ([1d10317](https://github.com/juniorsundar/oxmpl/commit/1d10317d57a8fe4c3168e0c60356a58f83d12b16))
+
+
+### Continuous Integration
+
+* **js.yml:** Update to use the OpenIDC ([8d38823](https://github.com/juniorsundar/oxmpl/commit/8d388233d7aa1f0bbc428811fdffac215cee4cbe))
+
 ## [0.6.0](https://github.com/juniorsundar/oxmpl/compare/v0.5.0...v0.6.0) (2025-12-31)
 
 
