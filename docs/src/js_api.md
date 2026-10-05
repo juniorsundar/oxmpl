@@ -172,6 +172,14 @@ A sequence of states representing a solution path.
 - `getLength(): number`
 
 ## `oxmpl.geometric`
+
+### Planner errors
+
+> [!NOTE]
+> (TODO) Replace thrown planner-error strings with `Error` objects that let
+> callers distinguish failure kinds without parsing messages. This applies to
+> all planners' `solve()` methods and PRM's `constructRoadmap()`.
+
 ### `RRT`
 Rapidly-exploring Random Tree.
 - `constructor(maxDistance: number, goalBias: number, problem: ProblemDefinition, config: PlannerConfig)`
