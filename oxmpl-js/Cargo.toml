@@ -8,7 +8,7 @@ authors = [
 ]
 description = "JavaScript/WASM Bindings for the OxMPL Library"
 license = "BSD-3-Clause"
-repository = "git+https://github.com/juniorsundar/oxmpl.git"
+repository = "https://github.com/juniorsundar/oxmpl"
 readme = "README.md"
 keywords = ["robotics", "motion-planning", "wasm", "javascript"]
 [lib]
