@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/juniorsundar/oxmpl/compare/v0.7.0...v0.7.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **ci:** `oxmpl-js/Cargo.toml` corrected repo URL format ([c558556](https://github.com/juniorsundar/oxmpl/commit/c558556b7bc068cdef0bfc93bbabb1a178859816))
+
 ## [0.7.0](https://github.com/juniorsundar/oxmpl/compare/v0.6.0...v0.7.0) (2026-10-05)
 
 
