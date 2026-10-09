@@ -7,12 +7,12 @@ use pyo3::{prelude::*, types::PyDict};
 mod base;
 mod geometric;
 
-#[pymodule]
+#[pymodule(gil_used = true)]
 fn oxmpl_py(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let sys_modules = py
         .import("sys")?
         .getattr("modules")?
-        .downcast_into::<PyDict>()?;
+        .cast_into::<PyDict>()?;
     let base_module = base::create_module(py)?;
     m.add_submodule(&base_module)?;
     sys_modules.set_item("oxmpl_py.base", base_module)?;

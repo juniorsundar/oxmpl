@@ -19,7 +19,7 @@ use crate::base::{PyRealVectorState, PySO3State};
 ///     y (float): The y-coordinate of the translation.
 ///     z (float): The z-coordinate of the translation.
 ///     rotation (SO3State): The rotational component of the state.
-#[pyclass(name = "SE3State", unsendable)]
+#[pyclass(name = "SE3State", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PySE3State(pub Rc<OxmplSE3State>);
 

@@ -18,7 +18,7 @@ use crate::base::{PyRealVectorState, PySO2State};
 ///     x (float): The x-coordinate of the translation.
 ///     y (float): The y-coordinate of the translation.
 ///     yaw (float): The rotation angle in radians.
-#[pyclass(name = "SE2State", unsendable)]
+#[pyclass(name = "SE2State", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PySE2State(pub Rc<OxmplSE2State>);
 

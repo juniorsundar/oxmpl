@@ -12,7 +12,7 @@ use super::real_vector_state::PyRealVectorState;
 /// Defines an N-dimensional space for `RealVectorState` instances.
 ///
 /// This class defines the planning space, including its dimensionality and boundaries.
-#[pyclass(name = "RealVectorStateSpace", unsendable)]
+#[pyclass(name = "RealVectorStateSpace", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PyRealVectorStateSpace(pub Arc<Mutex<OxmplRealVectorStateSpace>>);
 

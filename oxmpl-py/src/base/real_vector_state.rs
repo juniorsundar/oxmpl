@@ -14,7 +14,7 @@ use oxmpl::base::state::RealVectorState as OxmplRealVectorState;
 ///
 /// Args:
 ///     values (List[float]): A list of numbers representing the state's components.
-#[pyclass(name = "RealVectorState", unsendable)]
+#[pyclass(name = "RealVectorState", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PyRealVectorState(pub Arc<OxmplRealVectorState>);
 

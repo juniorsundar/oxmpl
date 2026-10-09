@@ -16,7 +16,7 @@ use std::{rc::Rc, sync::Arc};
 
 /// A trait to handle conversions between a core Rust state and its PyO3 wrapper.
 pub trait PyStateConvert: Clone + Send + Sync + 'static {
-    type Wrapper: for<'a> FromPyObject<'a> + for<'a> IntoPyObject<'a>;
+    type Wrapper: for<'a, 'py> FromPyObject<'a, 'py, Error: Into<PyErr>> + for<'a> IntoPyObject<'a>;
 
     fn to_py_wrapper(&self) -> Self::Wrapper;
 

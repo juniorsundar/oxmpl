@@ -13,7 +13,7 @@ use super::se2_state::PySE2State;
 ///
 /// This space combines a 2D translational component (`RealVectorStateSpace`) and a 1D rotational
 /// component (`SO2StateSpace`).
-#[pyclass(name = "SE2StateSpace", unsendable)]
+#[pyclass(name = "SE2StateSpace", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PySE2StateSpace(pub Rc<RefCell<OxmplSE2StateSpace>>);
 

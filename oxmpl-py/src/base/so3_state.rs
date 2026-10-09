@@ -13,7 +13,7 @@ use oxmpl::base::state::SO3State as OxmplSO3State;
 ///
 /// Args:
 ///     values (float): A number representing the state's components.
-#[pyclass(name = "SO3State", unsendable)]
+#[pyclass(name = "SO3State", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PySO3State(pub Arc<OxmplSO3State>);
 
