@@ -51,21 +51,33 @@ impl PyCompoundStateSpace {
             for obj in subspaces {
                 let space_any = obj.bind(py);
 
-                if let Ok(rv_space) = space_any.extract::<PyRef<PyRealVectorStateSpace>>() {
-                    rust_subspaces.push(Box::new((*rv_space.0).lock().unwrap().clone()));
-                } else if let Ok(so2_space) = space_any.extract::<PyRef<PySO2StateSpace>>() {
-                    rust_subspaces.push(Box::new((*so2_space.0).lock().unwrap().clone()));
-                } else if let Ok(so3_space) = space_any.extract::<PyRef<PySO3StateSpace>>() {
-                    rust_subspaces.push(Box::new((*so3_space.0).lock().unwrap().clone()));
-                } else if let Ok(compound_space) =
-                    space_any.extract::<PyRef<PyCompoundStateSpace>>()
-                {
-                    rust_subspaces.push(Box::new((*compound_space.0).borrow().clone()));
-                } else {
-                    return Err(PyValueError::new_err(format!(
-                        "Object of type '{}' is not a valid compound-state-space component. CompoundStateSpace accepts RealVectorStateSpace, SO2StateSpace, SO3StateSpace, and nested CompoundStateSpace subspaces; fixed named spaces such as SE2StateSpace and SE3StateSpace must use their dedicated typed APIs.",
-                        space_any.get_type().name()?
-                    )));
+                match space_any.extract::<PyRef<PyRealVectorStateSpace>>() {
+                    Ok(rv_space) => {
+                        rust_subspaces.push(Box::new((*rv_space.0).lock().unwrap().clone()));
+                    }
+                    _ => match space_any.extract::<PyRef<PySO2StateSpace>>() {
+                        Ok(so2_space) => {
+                            rust_subspaces.push(Box::new((*so2_space.0).lock().unwrap().clone()));
+                        }
+                        _ => match space_any.extract::<PyRef<PySO3StateSpace>>() {
+                            Ok(so3_space) => {
+                                rust_subspaces
+                                    .push(Box::new((*so3_space.0).lock().unwrap().clone()));
+                            }
+                            _ => match space_any.extract::<PyRef<PyCompoundStateSpace>>() {
+                                Ok(compound_space) => {
+                                    rust_subspaces
+                                        .push(Box::new((*compound_space.0).borrow().clone()));
+                                }
+                                _ => {
+                                    return Err(PyValueError::new_err(format!(
+                                        "Object of type '{}' is not a valid compound-state-space component. CompoundStateSpace accepts RealVectorStateSpace, SO2StateSpace, SO3StateSpace, and nested CompoundStateSpace subspaces; fixed named spaces such as SE2StateSpace and SE3StateSpace must use their dedicated typed APIs.",
+                                        space_any.get_type().name()?
+                                    )));
+                                }
+                            },
+                        },
+                    },
                 }
             }
             Ok(())

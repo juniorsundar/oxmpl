@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::PRM;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 // A compound space of R2 + SO2 (similar to SE2 but explicit compound)
 struct BoxObstacleChecker {

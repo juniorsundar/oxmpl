@@ -1,7 +1,8 @@
 [package]
 name = "oxmpl-py"
 version.workspace = true
-edition = "2021"
+edition.workspace = true
+rust-version.workspace = true
 authors = ["Junior Sundar <juniorsundar@gmail.com>"]
 description = "Python Bindings for the OxMPL Library"
 license = "BSD-3-Clause"
@@ -16,4 +17,4 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.25.0", features = ["extension-module"] }
 oxmpl = { path = "../oxmpl" }
-rand = "0.9.1"
+rand = "0.10"

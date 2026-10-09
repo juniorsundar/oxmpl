@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::RRT;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 /// A StateValidityChecker that defines a simple vertical wall obstacle.
 struct WallObstacleChecker {

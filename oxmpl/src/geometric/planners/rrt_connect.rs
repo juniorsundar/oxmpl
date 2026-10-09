@@ -5,7 +5,7 @@
 use std::sync::Arc;
 
 use log::debug;
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{RngExt, SeedableRng, rngs::StdRng};
 
 use crate::{
     base::{
@@ -235,9 +235,7 @@ where
 
         if self.goal_tree.is_empty() {
             let goal_state = {
-                let rng = self
-                    .rng
-                    .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
+                let rng = self.rng.get_or_insert_with(|| Box::new(rand::make_rng()));
                 goal.sample_goal(rng)?
             };
             let goal_node = Node {
@@ -265,9 +263,7 @@ where
 
             // 3. Sample a random target state `q_rand`, with goal biasing.
             let q_rand = {
-                let rng = self
-                    .rng
-                    .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
+                let rng = self.rng.get_or_insert_with(|| Box::new(rand::make_rng()));
                 if rng.random_bool(self.goal_bias) {
                     goal.sample_goal(rng)?
                 } else {
@@ -346,7 +342,10 @@ mod tests {
     }
 
     impl GoalSampleableRegion<RealVectorState> for UnusedChecks {
-        fn sample_goal(&self, _rng: &mut impl Rng) -> Result<RealVectorState, StateSamplingError> {
+        fn sample_goal(
+            &self,
+            _rng: &mut impl RngExt,
+        ) -> Result<RealVectorState, StateSamplingError> {
             Ok(RealVectorState { values: vec![1.0] })
         }
     }

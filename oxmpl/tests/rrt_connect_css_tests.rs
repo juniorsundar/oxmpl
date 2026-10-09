@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::RRTConnect;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 struct BoxObstacleChecker {
     x_min: f64,

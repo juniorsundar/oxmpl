@@ -85,7 +85,10 @@ impl fmt::Display for StateSamplingError {
                 write!(f, "Cannot sample from a region with zero volume.")
             }
             Self::GoalRegionUnsatisfiable => {
-                write!(f, "Could not generate a sample from the goal region because its constraints may be unsatisfiable.")
+                write!(
+                    f,
+                    "Could not generate a sample from the goal region because its constraints may be unsatisfiable."
+                )
             }
             Self::GoalSamplingTimeout { attempts } => {
                 write!(

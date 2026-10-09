@@ -20,7 +20,7 @@ use oxmpl::base::{
     error::StateSamplingError
 };
 use std::sync::Arc;
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 struct MyGoal {
     target: RealVectorState,

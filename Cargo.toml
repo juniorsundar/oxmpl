@@ -2,6 +2,8 @@
 members = ["oxmpl", "oxmpl-py", "oxmpl-js", "docs"]
 resolver = "2"
 package.version = "0.7.0"                   # x-release-please-version
+package.rust-version = "1.85"
+package.edition = "2024"
 
 [profile.release]
 opt-level = "s"

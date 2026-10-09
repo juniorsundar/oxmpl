@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 use std::f64::consts::PI;
 
 use crate::base::{

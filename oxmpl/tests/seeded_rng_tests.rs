@@ -15,9 +15,9 @@ use oxmpl::{
         state::RealVectorState,
         validity::StateValidityChecker,
     },
-    geometric::{RRTConnect, RRTStar, PRM, RRT},
+    geometric::{PRM, RRT, RRTConnect, RRTStar},
 };
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{Rng, RngExt, SeedableRng, rngs::StdRng};
 
 const SEED: u64 = 42;
 const SOLVE_TIMEOUT: Duration = Duration::from_secs(30);

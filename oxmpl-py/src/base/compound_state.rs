@@ -35,19 +35,31 @@ impl PyCompoundState {
         Python::with_gil(|py| {
             for comp_object in components {
                 let comp_any = comp_object.bind(py);
-                if let Ok(rv_state) = comp_any.extract::<PyRef<PyRealVectorState>>() {
-                    rust_components.push(Box::new((*rv_state.0).clone()));
-                } else if let Ok(so2_state) = comp_any.extract::<PyRef<PySO2State>>() {
-                    rust_components.push(Box::new((*so2_state.0).clone()));
-                } else if let Ok(so3_state) = comp_any.extract::<PyRef<PySO3State>>() {
-                    rust_components.push(Box::new((*so3_state.0).clone()));
-                } else if let Ok(compound_state) = comp_any.extract::<PyRef<PyCompoundState>>() {
-                    rust_components.push(Box::new((*compound_state.0).clone()));
-                } else {
-                    return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                        "Object of type '{}' is not a valid compound-state component. CompoundState accepts RealVectorState, SO2State, SO3State, and nested CompoundState components; fixed named states such as SE2State and SE3State must use their dedicated typed APIs.",
-                        comp_any.get_type().name()?
-                    )));
+                match comp_any.extract::<PyRef<PyRealVectorState>>() {
+                    Ok(rv_state) => {
+                        rust_components.push(Box::new((*rv_state.0).clone()));
+                    }
+                    _ => match comp_any.extract::<PyRef<PySO2State>>() {
+                        Ok(so2_state) => {
+                            rust_components.push(Box::new((*so2_state.0).clone()));
+                        }
+                        _ => match comp_any.extract::<PyRef<PySO3State>>() {
+                            Ok(so3_state) => {
+                                rust_components.push(Box::new((*so3_state.0).clone()));
+                            }
+                            _ => match comp_any.extract::<PyRef<PyCompoundState>>() {
+                                Ok(compound_state) => {
+                                    rust_components.push(Box::new((*compound_state.0).clone()));
+                                }
+                                _ => {
+                                    return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                                        "Object of type '{}' is not a valid compound-state component. CompoundState accepts RealVectorState, SO2State, SO3State, and nested CompoundState components; fixed named states such as SE2State and SE3State must use their dedicated typed APIs.",
+                                        comp_any.get_type().name()?
+                                    )));
+                                }
+                            },
+                        },
+                    },
                 }
             }
             Ok(())

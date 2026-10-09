@@ -1,7 +1,8 @@
 [package]
 name = "oxmpl"
 version.workspace = true
-edition = "2021"
+edition.workspace = true
+rust-version.workspace = true
 description = "The Open Motion-Planning Library but Oxidised"
 license = "BSD-3-Clause"
 authors = ["Junior Sundar <juniorsundar@gmail.com>"]
@@ -16,11 +17,10 @@ crate-type = ["lib"]
 
 [dependencies]
 log = "0.4.34"
-rand = "0.9.1"
-rand_chacha = "0.9.0"
+rand = "0.10"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-time = "1.1"
-getrandom = { version = "0.3", features = ["wasm_js"] }
+getrandom = { version = "0.4", features = ["wasm_js"] }
