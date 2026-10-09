@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::RRTConnect;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 struct ForbiddenAngleChecker {
     invalid_min: f64,

@@ -128,11 +128,14 @@ impl JsStateConvert for SE3State {
             .and_then(|v| v.as_f64());
         let rotation_val = js_sys::Reflect::get(&val, &JsValue::from_str("rotation")).ok();
 
-        if let (Some(x), Some(y), Some(z), Some(rot_val)) = (x, y, z, rotation_val) {
-            let rotation = SO3State::from_js_value(rot_val)?;
-            Ok(SE3State::new(x, y, z, rotation))
-        } else {
-            Err("Expected SE3State or object with x, y, z, and rotation properties".to_string())
+        match (x, y, z, rotation_val) {
+            (Some(x), Some(y), Some(z), Some(rot_val)) => {
+                let rotation = SO3State::from_js_value(rot_val)?;
+                Ok(SE3State::new(x, y, z, rotation))
+            }
+            _ => {
+                Err("Expected SE3State or object with x, y, z, and rotation properties".to_string())
+            }
         }
     }
 }
@@ -373,7 +376,9 @@ pub fn compound_state_to_js_array(state: &CompoundState) -> Float64Array {
                 flatten(c.as_ref(), out);
             }
         } else {
-            log("Warning: encountered an unsupported compound-state component while flattening to a JS array.");
+            log(
+                "Warning: encountered an unsupported compound-state component while flattening to a JS array.",
+            );
         }
     }
 

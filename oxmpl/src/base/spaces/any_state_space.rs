@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use rand::RngCore;
+use rand::Rng;
 use std::{any::Any, clone::Clone};
 
 use crate::base::{
@@ -82,7 +82,7 @@ pub trait AnyStateSpace: DynCloneAnyStateSpace {
     /// Returns a `Box<dyn AnyState>` because the concrete state type is not known at compile time.
     fn sample_uniform_dyn(
         &self,
-        rng: &mut dyn RngCore,
+        rng: &mut dyn Rng,
     ) -> Result<Box<dyn AnyState>, StateSamplingError>;
 
     /// A dynamically-dispatchable version of `StateSpace::get_longest_valid_segment_length`.
@@ -119,25 +119,9 @@ where
 
     fn sample_uniform_dyn(
         &self,
-        rng: &mut dyn RngCore,
+        mut rng: &mut dyn Rng,
     ) -> Result<Box<dyn AnyState>, StateSamplingError> {
-        // Adaptor because of Sized trait issue causing problems in downcasting. It's a mess!
-        // TODO: Get better in Rust and find a different way to go about it.
-        struct RngWrapper<'a>(&'a mut dyn RngCore);
-        impl<'a> RngCore for RngWrapper<'a> {
-            fn next_u32(&mut self) -> u32 {
-                self.0.next_u32()
-            }
-            fn next_u64(&mut self) -> u64 {
-                self.0.next_u64()
-            }
-            fn fill_bytes(&mut self, dest: &mut [u8]) {
-                self.0.fill_bytes(dest)
-            }
-        }
-
-        let mut wrapper = RngWrapper(rng);
-        let concrete_state = self.sample_uniform(&mut wrapper)?;
+        let concrete_state = self.sample_uniform(&mut rng)?;
         Ok(Box::new(concrete_state))
     }
 

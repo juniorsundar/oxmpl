@@ -30,7 +30,7 @@ use crate::base::{error::StateSamplingError, state::State};
 /// use oxmpl::base::state::State;
 /// use oxmpl::base::space::StateSpace;
 /// use oxmpl::base::error::StateSamplingError;
-/// use rand::Rng;
+/// use rand::{RngExt, Rng};
 ///
 /// #[derive(Debug, Clone, PartialEq)]
 /// struct Point1D {

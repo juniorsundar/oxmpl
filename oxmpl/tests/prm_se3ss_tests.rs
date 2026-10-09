@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::PRM;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 use std::f64::consts::PI;
 
 struct ObstacleChecker;

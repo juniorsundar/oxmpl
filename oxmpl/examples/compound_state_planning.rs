@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::RRT;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 /// A StateValidityChecker that checks for collision with a box obstacle.
 /// The robot is considered a point with orientation, but we check if the point

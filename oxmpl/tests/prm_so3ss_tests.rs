@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::PRM;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 /// Utility function to create Quaternions
 fn quaternion_from_axis_angle(axis: [f64; 3], angle: f64) -> SO3State {

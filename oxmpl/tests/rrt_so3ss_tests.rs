@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::RRT;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 fn quaternion_from_axis_angle(axis: [f64; 3], angle: f64) -> SO3State {
     let norm = (axis[0].powi(2) + axis[1].powi(2) + axis[2].powi(2)).sqrt();

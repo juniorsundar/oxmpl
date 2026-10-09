@@ -8,7 +8,7 @@ use std::{
 };
 
 use log::debug;
-use rand::{rngs::StdRng, SeedableRng};
+use rand::{SeedableRng, rngs::StdRng};
 
 use crate::time::{Duration, Instant};
 
@@ -126,9 +126,7 @@ where
             }
 
             let q_rand = {
-                let rng = self
-                    .rng
-                    .get_or_insert_with(|| Box::new(StdRng::from_os_rng()));
+                let rng = self.rng.get_or_insert_with(|| Box::new(rand::make_rng()));
                 match pd.space.sample_uniform(&mut *rng) {
                     Ok(q) => q,
                     Err(e) => {

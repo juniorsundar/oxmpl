@@ -11,7 +11,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::PRM;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 struct ObstacleChecker {
     x_min: f64,
@@ -87,9 +87,15 @@ fn is_path_valid(
                 if !checker.is_valid(&interpolated_state) {
                     println!(
                         "Path invalid: Motion between (x: {}, y: {}, yaw: {}) and (x: {}, y: {}, yaw: {}) is in collision at (x: {}, y: {}, yaw: {}).",
-                        state_a.get_x(), state_a.get_y(), state_a.get_yaw(),
-                        state_b.get_x(), state_b.get_y(), state_b.get_yaw(),
-                        interpolated_state.get_x(), interpolated_state.get_y(), interpolated_state.get_yaw()
+                        state_a.get_x(),
+                        state_a.get_y(),
+                        state_a.get_yaw(),
+                        state_b.get_x(),
+                        state_b.get_y(),
+                        state_b.get_yaw(),
+                        interpolated_state.get_x(),
+                        interpolated_state.get_y(),
+                        interpolated_state.get_yaw()
                     );
                     return false;
                 }

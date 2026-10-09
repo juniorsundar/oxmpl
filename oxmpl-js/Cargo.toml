@@ -1,7 +1,8 @@
 [package]
 name = "oxmpl-js"
 version.workspace = true
-edition = "2021"
+edition.workspace = true
+rust-version.workspace = true
 authors = [
   "Junior Sundar <juniorsundar@gmail.com>",
   "Ross Gardiner <github@public.rossng.eu>",
@@ -18,8 +19,8 @@ crate-type = ["cdylib"]
 wasm-bindgen = "0.2.105"
 js-sys = "0.3"
 oxmpl = { path = "../oxmpl" }
-rand = "0.9"
-getrandom = { version = "0.3", features = ["wasm_js"] }
+rand = "0.10"
+getrandom = { version = "0.4", features = ["wasm_js"] }
 serde = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
 console_error_panic_hook = "0.1"

@@ -30,19 +30,16 @@ impl JsGoal {
     fn call_is_satisfied<S: JsStateConvert + State>(&self, state: &S) -> bool {
         let js_state = state.to_js_value();
         match js_sys::Reflect::get(&self.instance, &JsValue::from_str("isSatisfied")) {
-            Ok(func_val) => {
-                if let Ok(func) = func_val.dyn_into::<js_sys::Function>() {
-                    match func.call1(&self.instance, &js_state) {
-                        Ok(result) => result.as_bool().unwrap_or(false),
-                        Err(e) => {
-                            console::error_2(&"Goal.isSatisfied failed:".into(), &e);
-                            false
-                        }
+            Ok(func_val) => match func_val.dyn_into::<js_sys::Function>() {
+                Ok(func) => match func.call1(&self.instance, &js_state) {
+                    Ok(result) => result.as_bool().unwrap_or(false),
+                    Err(e) => {
+                        console::error_2(&"Goal.isSatisfied failed:".into(), &e);
+                        false
                     }
-                } else {
-                    false
-                }
-            }
+                },
+                _ => false,
+            },
             Err(_) => false,
         }
     }
@@ -50,39 +47,33 @@ impl JsGoal {
     fn call_distance_goal<S: JsStateConvert + State>(&self, state: &S) -> f64 {
         let js_state = state.to_js_value();
         match js_sys::Reflect::get(&self.instance, &JsValue::from_str("distanceGoal")) {
-            Ok(func_val) => {
-                if let Ok(func) = func_val.dyn_into::<js_sys::Function>() {
-                    match func.call1(&self.instance, &js_state) {
-                        Ok(result) => result.as_f64().unwrap_or(f64::INFINITY),
-                        Err(e) => {
-                            console::error_2(&"Goal.distanceGoal failed:".into(), &e);
-                            f64::INFINITY
-                        }
+            Ok(func_val) => match func_val.dyn_into::<js_sys::Function>() {
+                Ok(func) => match func.call1(&self.instance, &js_state) {
+                    Ok(result) => result.as_f64().unwrap_or(f64::INFINITY),
+                    Err(e) => {
+                        console::error_2(&"Goal.distanceGoal failed:".into(), &e);
+                        f64::INFINITY
                     }
-                } else {
-                    f64::INFINITY
-                }
-            }
+                },
+                _ => f64::INFINITY,
+            },
             Err(_) => f64::INFINITY,
         }
     }
 
     fn call_sample_goal<S: JsStateConvert + State>(&self) -> Result<S, StateSamplingError> {
         match js_sys::Reflect::get(&self.instance, &JsValue::from_str("sampleGoal")) {
-            Ok(func_val) => {
-                if let Ok(func) = func_val.dyn_into::<js_sys::Function>() {
-                    match func.call0(&self.instance) {
-                        Ok(result) => S::from_js_value(result)
-                            .map_err(|_| StateSamplingError::GoalRegionUnsatisfiable),
-                        Err(e) => {
-                            console::error_2(&"Goal.sampleGoal failed:".into(), &e);
-                            Err(StateSamplingError::GoalRegionUnsatisfiable)
-                        }
+            Ok(func_val) => match func_val.dyn_into::<js_sys::Function>() {
+                Ok(func) => match func.call0(&self.instance) {
+                    Ok(result) => S::from_js_value(result)
+                        .map_err(|_| StateSamplingError::GoalRegionUnsatisfiable),
+                    Err(e) => {
+                        console::error_2(&"Goal.sampleGoal failed:".into(), &e);
+                        Err(StateSamplingError::GoalRegionUnsatisfiable)
                     }
-                } else {
-                    Err(StateSamplingError::GoalRegionUnsatisfiable)
-                }
-            }
+                },
+                _ => Err(StateSamplingError::GoalRegionUnsatisfiable),
+            },
             Err(_) => Err(StateSamplingError::GoalRegionUnsatisfiable),
         }
     }
