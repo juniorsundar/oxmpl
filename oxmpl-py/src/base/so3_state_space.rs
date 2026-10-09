@@ -17,7 +17,7 @@ use super::so3_state::PySO3State;
 /// Defines an N-dimensional space for `SO3State` instances.
 ///
 /// This class defines the planning space, including its dimensionality and boundaries.
-#[pyclass(name = "SO3StateSpace", unsendable)]
+#[pyclass(name = "SO3StateSpace", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PySO3StateSpace(pub Arc<Mutex<OxmplSO3StateSpace>>);
 

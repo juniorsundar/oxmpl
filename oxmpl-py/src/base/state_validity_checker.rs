@@ -23,11 +23,11 @@ use super::{
 /// An internal Rust struct that implements the `StateValidityChecker` trait by calling a
 /// user-provided Python function.
 pub struct PyStateValidityChecker {
-    pub callback: PyObject,
+    pub callback: Py<PyAny>,
 }
 impl Clone for PyStateValidityChecker {
     fn clone(&self) -> Self {
-        Python::with_gil(|py| Self {
+        Python::attach(|py| Self {
             callback: self.callback.clone_ref(py),
         })
     }
@@ -35,7 +35,7 @@ impl Clone for PyStateValidityChecker {
 
 impl StateValidityChecker<OxmplRealVectorState> for PyStateValidityChecker {
     fn is_valid(&self, state: &OxmplRealVectorState) -> bool {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let result: PyResult<bool> = (move || {
                 let py_state = Py::new(py, PyRealVectorState(Arc::new(state.clone())))?;
                 let args = (py_state,);
@@ -55,7 +55,7 @@ impl StateValidityChecker<OxmplRealVectorState> for PyStateValidityChecker {
 
 impl StateValidityChecker<OxmplSO2State> for PyStateValidityChecker {
     fn is_valid(&self, state: &OxmplSO2State) -> bool {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let result: PyResult<bool> = (move || {
                 let py_state = Py::new(py, PySO2State(Arc::new(state.clone())))?;
                 let args = (py_state,);
@@ -75,7 +75,7 @@ impl StateValidityChecker<OxmplSO2State> for PyStateValidityChecker {
 
 impl StateValidityChecker<OxmplSO3State> for PyStateValidityChecker {
     fn is_valid(&self, state: &OxmplSO3State) -> bool {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let result: PyResult<bool> = (move || {
                 let py_state = Py::new(py, PySO3State(Arc::new(state.clone())))?;
                 let args = (py_state,);
@@ -95,7 +95,7 @@ impl StateValidityChecker<OxmplSO3State> for PyStateValidityChecker {
 
 impl StateValidityChecker<OxmplCompoundState> for PyStateValidityChecker {
     fn is_valid(&self, state: &OxmplCompoundState) -> bool {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let result: PyResult<bool> = (move || {
                 let py_state = Py::new(py, PyCompoundState(Rc::new(state.clone())))?;
                 let args = (py_state,);
@@ -115,7 +115,7 @@ impl StateValidityChecker<OxmplCompoundState> for PyStateValidityChecker {
 
 impl StateValidityChecker<OxmplSE2State> for PyStateValidityChecker {
     fn is_valid(&self, state: &OxmplSE2State) -> bool {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let result: PyResult<bool> = (move || {
                 let py_state = Py::new(py, PySE2State(Rc::new(state.clone())))?;
                 let args = (py_state,);
@@ -135,7 +135,7 @@ impl StateValidityChecker<OxmplSE2State> for PyStateValidityChecker {
 
 impl StateValidityChecker<OxmplSE3State> for PyStateValidityChecker {
     fn is_valid(&self, state: &OxmplSE3State) -> bool {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let result: PyResult<bool> = (move || {
                 let py_state = Py::new(py, PySE3State(Rc::new(state.clone())))?;
                 let args = (py_state,);

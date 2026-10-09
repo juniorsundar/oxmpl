@@ -15,13 +15,13 @@ use oxmpl::base::{
 use super::py_state_convert::PyStateConvert;
 
 pub struct PyGoal<State> {
-    pub instance: PyObject,
+    pub instance: Py<PyAny>,
     pub _phantom: PhantomData<State>,
 }
 
 impl<State> Clone for PyGoal<State> {
     fn clone(&self) -> Self {
-        Python::with_gil(|py| Self {
+        Python::attach(|py| Self {
             instance: self.instance.clone_ref(py),
             _phantom: PhantomData,
         })
@@ -31,7 +31,7 @@ impl<State> Clone for PyGoal<State> {
 // Implement the Goal traits for ANY state type that satisfies our conversion trait.
 impl<State: PyStateConvert + state::State> Goal<State> for PyGoal<State> {
     fn is_satisfied(&self, state: &State) -> bool {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let py_state = state.to_py_wrapper();
             self.instance
                 .call_method1(py, "is_satisfied", (py_state,))
@@ -43,7 +43,7 @@ impl<State: PyStateConvert + state::State> Goal<State> for PyGoal<State> {
 
 impl<State: PyStateConvert + state::State> GoalRegion<State> for PyGoal<State> {
     fn distance_goal(&self, state: &State) -> f64 {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let py_state = state.to_py_wrapper();
             self.instance
                 .call_method1(py, "distance_goal", (py_state,))
@@ -55,10 +55,10 @@ impl<State: PyStateConvert + state::State> GoalRegion<State> for PyGoal<State> {
 
 impl<State: PyStateConvert + state::State> GoalSampleableRegion<State> for PyGoal<State> {
     fn sample_goal(&self, _rng: &mut impl Rng) -> Result<State, StateSamplingError> {
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             self.instance
                 .call_method0(py, "sample_goal")
-                .and_then(|res| res.extract::<State::Wrapper>(py))
+                .and_then(|res| res.extract::<State::Wrapper>(py).map_err(Into::into))
                 .map(State::from_py_wrapper)
                 .map_err(|e| {
                     e.print(py);

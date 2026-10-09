@@ -18,7 +18,7 @@ use super::compound_state::PyCompoundState;
 /// This is used for planning in complex configuration spaces where different components (e.g.,
 /// position and orientation) have different units or importance. The distance between two
 /// `CompoundState` objects is the weighted sum of the distances in each subspace.
-#[pyclass(name = "CompoundStateSpace", unsendable)]
+#[pyclass(name = "CompoundStateSpace", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PyCompoundStateSpace(pub Rc<RefCell<OxmplCompoundStateSpace>>);
 
@@ -36,7 +36,7 @@ impl PyCompoundStateSpace {
     ///         or if an invalid object is passed as a subspace.
     #[new]
     #[pyo3(signature = (subspaces, weights))]
-    fn new(subspaces: Vec<PyObject>, weights: Vec<f64>) -> PyResult<Self> {
+    fn new(subspaces: Vec<Py<PyAny>>, weights: Vec<f64>) -> PyResult<Self> {
         if subspaces.len() != weights.len() {
             return Err(PyValueError::new_err(format!(
                 "Number of subspaces ({}) must match number of weights ({}).",
@@ -47,7 +47,7 @@ impl PyCompoundStateSpace {
 
         let mut rust_subspaces: Vec<Box<dyn AnyStateSpace>> = Vec::with_capacity(subspaces.len());
 
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             for obj in subspaces {
                 let space_any = obj.bind(py);
 

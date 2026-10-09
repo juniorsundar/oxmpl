@@ -117,7 +117,7 @@ impl PyRrtConnect {
         Ok(Self { planner, pd })
     }
 
-    fn setup(&mut self, validity_callback: PyObject) -> PyResult<()> {
+    fn setup(&mut self, validity_callback: Py<PyAny>) -> PyResult<()> {
         match &mut self.planner {
             PlannerVariant::RealVector(planner_variant) => {
                 let checker = Arc::new(PyStateValidityChecker {

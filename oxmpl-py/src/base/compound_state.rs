@@ -22,17 +22,17 @@ use crate::base::{PyRealVectorState, PySO2State, PySO3State};
 ///         `RealVectorState`, `SO2State`, `SO3State`, or nested `CompoundState`). Fixed named
 ///         states such as `SE2State` and `SE3State` use their dedicated typed APIs and are not
 ///         valid compound components.
-#[pyclass(name = "CompoundState", unsendable)]
+#[pyclass(name = "CompoundState", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PyCompoundState(pub Rc<OxmplCompoundState>);
 
 #[pymethods]
 impl PyCompoundState {
     #[new]
-    fn new(components: Vec<PyObject>) -> PyResult<Self> {
+    fn new(components: Vec<Py<PyAny>>) -> PyResult<Self> {
         let mut rust_components: Vec<Box<dyn AnyState>> = Vec::with_capacity(components.len());
 
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             for comp_object in components {
                 let comp_any = comp_object.bind(py);
                 match comp_any.extract::<PyRef<PyRealVectorState>>() {
@@ -72,7 +72,7 @@ impl PyCompoundState {
 
     /// list[State]: The list of component states.
     #[getter]
-    fn get_components(&self, py: Python<'_>) -> PyResult<PyObject> {
+    fn get_components(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         let list = PyList::empty(py);
 
         for component in &self.0.components {

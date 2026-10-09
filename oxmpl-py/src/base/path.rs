@@ -29,7 +29,7 @@ pub enum PathVariant {
 }
 
 /// A sequence of states representing a solution path found by a planner.
-#[pyclass(name = "Path", unsendable)]
+#[pyclass(name = "Path", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PyPath(pub PathVariant);
 
@@ -79,7 +79,7 @@ impl PyPath {
 
     /// list[]: The sequence of states that make up the path.
     #[getter]
-    fn get_states(&self, py: Python<'_>) -> PyResult<PyObject> {
+    fn get_states(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         let py_list = match &self.0 {
             PathVariant::RealVector(path) => {
                 let list = PyList::empty(py);

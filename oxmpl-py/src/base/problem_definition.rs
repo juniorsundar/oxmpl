@@ -56,7 +56,7 @@ pub enum ProblemDefinitionVariant {
 }
 
 /// Encapsulates all the components of a motion planning problem.
-#[pyclass(name = "ProblemDefinition", unsendable)]
+#[pyclass(name = "ProblemDefinition", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PyProblemDefinition(pub ProblemDefinitionVariant);
 
@@ -69,7 +69,7 @@ impl PyProblemDefinition {
         _cls: &Bound<'_, PyType>,
         space: &PyRealVectorStateSpace,
         start_state: &PyRealVectorState,
-        goal: PyObject,
+        goal: Py<PyAny>,
     ) -> Self {
         // Instantiate the correct generic version of PyGoal
         let goal_wrapper = PyGoal::<OxmplRealVectorState> {
@@ -97,7 +97,7 @@ impl PyProblemDefinition {
         _cls: &Bound<'_, PyType>,
         space: &PySO2StateSpace,
         start_state: &PySO2State,
-        goal: PyObject,
+        goal: Py<PyAny>,
     ) -> Self {
         // Instantiate the correct generic version of PyGoal
         let goal_wrapper = PyGoal::<OxmplSO2State> {
@@ -125,7 +125,7 @@ impl PyProblemDefinition {
         _cls: &Bound<'_, PyType>,
         space: &PySO3StateSpace,
         start_state: &PySO3State,
-        goal: PyObject,
+        goal: Py<PyAny>,
     ) -> Self {
         // Instantiate the correct generic version of PyGoal
         let goal_wrapper = PyGoal::<OxmplSO3State> {
@@ -154,7 +154,7 @@ impl PyProblemDefinition {
         _cls: &Bound<'_, PyType>,
         space: &PyCompoundStateSpace,
         start_state: &PyCompoundState,
-        goal: PyObject,
+        goal: Py<PyAny>,
     ) -> Self {
         // Instantiate the correct generic version of PyGoal
         let goal_wrapper = PyGoal::<OxmplCompoundState> {
@@ -183,7 +183,7 @@ impl PyProblemDefinition {
         _cls: &Bound<'_, PyType>,
         space: &PySE2StateSpace,
         start_state: &PySE2State,
-        goal: PyObject,
+        goal: Py<PyAny>,
     ) -> Self {
         // Instantiate the correct generic version of PyGoal
         let goal_wrapper = PyGoal::<OxmplSE2State> {
@@ -212,7 +212,7 @@ impl PyProblemDefinition {
         _cls: &Bound<'_, PyType>,
         space: &PySE3StateSpace,
         start_state: &PySE3State,
-        goal: PyObject,
+        goal: Py<PyAny>,
     ) -> Self {
         // Instantiate the correct generic version of PyGoal
         let goal_wrapper = PyGoal::<OxmplSE3State> {

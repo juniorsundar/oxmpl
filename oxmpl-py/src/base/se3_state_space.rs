@@ -13,7 +13,7 @@ use super::se3_state::PySE3State;
 ///
 /// This space combines a 3D translational component (`RealVectorStateSpace`) and a 3D rotational
 /// component (`SO3StateSpace`).
-#[pyclass(name = "SE3StateSpace", unsendable)]
+#[pyclass(name = "SE3StateSpace", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PySE3StateSpace(pub Rc<RefCell<OxmplSE3StateSpace>>);
 

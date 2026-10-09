@@ -20,7 +20,7 @@ pub fn create_module(py: Python<'_>) -> PyResult<Bound<'_, PyModule>> {
     let sys_modules = py
         .import("sys")?
         .getattr("modules")?
-        .downcast_into::<PyDict>()?;
+        .cast_into::<PyDict>()?;
     geometric_module.add_class::<PyRrt>()?;
     geometric_module.add_class::<PyRrtConnect>()?;
     geometric_module.add_class::<PyRrtStar>()?;

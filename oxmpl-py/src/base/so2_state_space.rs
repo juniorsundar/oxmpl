@@ -12,7 +12,7 @@ use super::so2_state::PySO2State;
 /// Defines an N-dimensional space for `SO2State` instances.
 ///
 /// This class defines the planning space, including its dimensionality and boundaries.
-#[pyclass(name = "SO2StateSpace", unsendable)]
+#[pyclass(name = "SO2StateSpace", unsendable, from_py_object)]
 #[derive(Clone)]
 pub struct PySO2StateSpace(pub Arc<Mutex<OxmplSO2StateSpace>>);
 
