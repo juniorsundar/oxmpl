@@ -3,6 +3,8 @@
 - [Introduction](introduction.md)
 - [Rationale](rationale.md)
 - [Installation](installation.md)
+- [Migration Guides](migration/index.md)
+    - [0.7 to 0.8](migration/0.7-to-0.8.md)
 - [Concepts](concepts.md)
 - [Examples]()
     - [Simple 2D Planning]()
