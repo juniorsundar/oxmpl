@@ -22,3 +22,7 @@ dynamic = ["version"]
 dev = [
     "pytest>=9",
 ]
+
+[tool.maturin.generate-ci.github]
+pytest = true
+trusted-publishing = true
