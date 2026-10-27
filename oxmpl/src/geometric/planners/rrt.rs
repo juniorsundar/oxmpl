@@ -192,8 +192,8 @@ where
             let mut nearest_node_index = 0;
             let mut min_dist = pd.space.distance(&self.tree[0].state, &q_rand);
 
-            for i in 1..self.tree.len() {
-                let dist = pd.space.distance(&self.tree[i].state, &q_rand);
+            for (i, node) in self.tree.iter().enumerate().skip(1) {
+                let dist = pd.space.distance(&node.state, &q_rand);
                 if dist < min_dist {
                     min_dist = dist;
                     nearest_node_index = i;
