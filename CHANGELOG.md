@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.8.0](https://github.com/juniorsundar/oxmpl/compare/v0.7.0...v0.8.0) (2026-10-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade oxmpl-py to PyO3 0.29 and maturin 1.15, raising the Python floor to 3.11
+* **deps:** move to edition 2024, rand 0.10 and getrandom 0.4
+
+### Bug Fixes
+
+* **ci:** `oxmpl-js/Cargo.toml` corrected repo URL format ([c558556](https://github.com/juniorsundar/oxmpl/commit/c558556b7bc068cdef0bfc93bbabb1a178859816))
+
+
+### Documentation
+
+* add migration guides section and 0.7 to 0.8 guide ([6c06803](https://github.com/juniorsundar/oxmpl/commit/6c06803bd9fbb6b95156a89d8ffd6ccf8ef30ab1))
+
+
+### Build System
+
+* **deps:** move to edition 2024, rand 0.10 and getrandom 0.4 ([edf8dbc](https://github.com/juniorsundar/oxmpl/commit/edf8dbc2fdee1a74058d2d6d45a085f8e6e61b18))
+* **deps:** update oxmpl-js to wasm-bindgen 0.2.129, wasm-pack 0.15, vitest 5, eslint 10 ([cf6c827](https://github.com/juniorsundar/oxmpl/commit/cf6c827be64acfd415c274944892887fbc09251c))
+* **deps:** upgrade oxmpl-py to PyO3 0.29 and maturin 1.15, raising the Python floor to 3.11 ([17c3cae](https://github.com/juniorsundar/oxmpl/commit/17c3cae6279520a72c29c06404dfae972db007db))
+* ship the BSD-3-Clause LICENSE in every published package ([69a5706](https://github.com/juniorsundar/oxmpl/commit/69a570666d4be4cf86e20ed1e668a5f7f7bf4b3a))
+* update dev shell and fix new clippy lints ([3d9c664](https://github.com/juniorsundar/oxmpl/commit/3d9c664d0def874054e143173bc3881b8f12f489))
+
+
+### Continuous Integration
+
+* Add build dry-run and sub-crates inherit root oxmpl version in deps ([87ece85](https://github.com/juniorsundar/oxmpl/commit/87ece85a5fca7c5ccbb7f8820ba3e69b03dbec3f))
+* add Dependabot for actions, cargo, npm and pip (monthly, minor/patch grouped) ([7f6ca5a](https://github.com/juniorsundar/oxmpl/commit/7f6ca5a5622378cf65451a18edde15ec297ac886))
+* bump GitHub Actions to current majors ([92f9f28](https://github.com/juniorsundar/oxmpl/commit/92f9f280288e71e7dbed993b8ba7c003985c4663))
+* **js:** dry-run npm publish on every PR ([93360ef](https://github.com/juniorsundar/oxmpl/commit/93360efd595661362daa76d5190ba1d399bffc71))
+* pin mdbook 0.5.4 and use the wasm-pack devDependency instead of jetli/wasm-pack-action ([c3bdf21](https://github.com/juniorsundar/oxmpl/commit/c3bdf210353e06e3b2daf1ec9841bf193a7c7ac3))
+* publish crates via cargo publish --workspace with crates.io Trusted Publishing ([f0943c4](https://github.com/juniorsundar/oxmpl/commit/f0943c4323b65139e873d132d7bea498e08353b4))
+* **pypi:** pin astral-sh/setup-uv@v10.3.2 and disable emulated pytest ([b8fa945](https://github.com/juniorsundar/oxmpl/commit/b8fa945be1b3a1c74956a4b71a163bb0caae2d40))
+* regenerate pypi.yml with maturin 1.15 and publish via PyPI Trusted Publishing ([d66b375](https://github.com/juniorsundar/oxmpl/commit/d66b375f4f1c6b4a1a57839cef685d89eaa96a19))
+
 ## [0.7.0](https://github.com/juniorsundar/oxmpl/compare/v0.6.0...v0.7.0) (2026-10-05)
 
 
