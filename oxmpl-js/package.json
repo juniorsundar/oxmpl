@@ -18,15 +18,20 @@
   "dependencies": {
     "oxmpl-js": "file:."
   },
+  "engines": {
+    "node": ">=22.12"
+  },
   "devDependencies": {
-    "@eslint/js": "^9.33.0",
-    "eslint": "^9.33.0",
-    "globals": "^16.3.0",
-    "prettier": "^3.6.2",
-    "prettier-plugin-organize-imports": "^4.2.0",
-    "vite-plugin-top-level-await": "^1.4.4",
-    "vite-plugin-wasm": "^3.3.0",
-    "vitest": "^3.2.4",
-    "wasm-pack": "^0.13.1"
+    "@eslint/js": "^10.0.0",
+    "eslint": "^10.0.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.0",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "typescript": "^6.0.0",
+    "vite": "^8.3.5",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0",
+    "vitest": "^5.0.5",
+    "wasm-pack": "^0.15.0"
   }
 }
