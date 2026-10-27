@@ -23,6 +23,9 @@ dev = [
     "pytest>=9",
 ]
 
+[tool.maturin]
+include = [{ path = "LICENSE", format = "sdist" }]
+
 [tool.maturin.generate-ci.github]
 pytest = true
 trusted-publishing = true
