@@ -58,6 +58,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Dry-run npm publish
+        run: node scripts/build-package.js && cd pkg-bundler && npm publish --dry-run
+
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
