@@ -16,5 +16,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = "0.29.3"
-oxmpl = { path = "../oxmpl" }
+oxmpl.workspace = true
 rand = "0.10"

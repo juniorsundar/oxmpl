@@ -37,6 +37,23 @@ jobs:
       - name: Run tests for all packages
         run: cargo test --all
 
+  publish_dry_run:
+    name: Publish dry-run
+    runs-on: ubuntu-latest
+    needs: test_and_lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Dry-run publish operation
+        run: cargo publish --workspace --dry-run
+
   publish:
     name: Publish to crates.io
     runs-on: ubuntu-latest
