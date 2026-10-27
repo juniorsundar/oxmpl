@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.1](https://github.com/juniorsundar/oxmpl/compare/v0.8.0...v0.8.1) (2026-10-27)
+
+
+### Bug Fixes
+
+* **py:** put LICENSE at the sdist root ([2488f68](https://github.com/juniorsundar/oxmpl/commit/2488f6815c57c3aa44cc01862d49896b0ae734a6))
+
+
+### Build System
+
+* sync Cargo.lock workspace versions to 0.8.0 ([413c7c2](https://github.com/juniorsundar/oxmpl/commit/413c7c29ba2cfc376fc61e5f300d6eb5d7debe47))
+
 ## [0.8.0](https://github.com/juniorsundar/oxmpl/compare/v0.7.0...v0.8.0) (2026-10-27)
 
 
