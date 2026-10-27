@@ -8,3 +8,6 @@ package.edition = "2024"
 [profile.release]
 opt-level = "s"
 lto = true
+
+[workspace.dependencies]
+oxmpl = { path = "oxmpl", version = "0.7.0" } # x-release-please-version
