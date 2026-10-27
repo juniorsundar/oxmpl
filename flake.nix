@@ -63,7 +63,8 @@
           uv pip install --quiet -r requirements.txt
 
           uv pip install pre-commit
-          pre-commit install
+
+          [ -f "$(git rev-parse --git-common-dir)/hooks/pre-commit" ] || pre-commit install
           # zsh
         '';
       };

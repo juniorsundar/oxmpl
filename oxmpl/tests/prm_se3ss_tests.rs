@@ -39,17 +39,12 @@ impl StateValidityChecker<SE3State> for ObstacleChecker {
         let obs2_z_min = 2.0;
         let obs2_z_max = 5.0;
 
-        if x >= obs2_x_min
+        !(x >= obs2_x_min
             && x <= obs2_x_max
             && y >= obs2_y_min
             && y <= obs2_y_max
             && z >= obs2_z_min
-            && z <= obs2_z_max
-        {
-            return false;
-        }
-
-        true
+            && z <= obs2_z_max)
     }
 }
 

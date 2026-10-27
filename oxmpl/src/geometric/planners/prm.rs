@@ -273,8 +273,8 @@ where
 
         // Find goal nodes in the roadmap
         let mut goal_indices = Vec::new();
-        for i in 0..self.roadmap.len() {
-            if goal.is_satisfied(&self.roadmap[i].state) {
+        for (i, node) in self.roadmap.iter().enumerate() {
+            if goal.is_satisfied(&node.state) {
                 goal_indices.push(i);
             }
         }

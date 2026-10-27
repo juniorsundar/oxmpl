@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
@@ -21,7 +21,7 @@ repos:
         name: clippy
         description: Check for lints using clippy.
         entry: cargo
-        args: ['clippy', '--workspace', '--', '-D', 'warnings']
+        args: ['clippy', '--workspace', '--all-targets', '--', '-D', 'warnings']
         language: rust
         types: [rust]
         pass_filenames: false
