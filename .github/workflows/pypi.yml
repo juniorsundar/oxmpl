@@ -24,8 +24,8 @@ jobs:
     name: Run maturin develop
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.x
       - name: Create venv and run maturin develop
@@ -55,8 +55,8 @@ jobs:
           - runner: ubuntu-22.04
             target: ppc64le
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.x
       - name: Build wheels
@@ -68,7 +68,7 @@ jobs:
           manylinux: auto
           working-directory: ./oxmpl-py # Added working directory for build
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-linux-${{ matrix.platform.target }}
           path: oxmpl-py/dist
@@ -87,8 +87,8 @@ jobs:
           - runner: ubuntu-22.04
             target: armv7
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.x
       - name: Build wheels
@@ -100,7 +100,7 @@ jobs:
           manylinux: musllinux_1_2
           working-directory: ./oxmpl-py # Added working directory for build
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
           path: oxmpl-py/dist
@@ -115,8 +115,8 @@ jobs:
           - runner: windows-latest
             target: x86
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.x
           architecture: ${{ matrix.platform.target }}
@@ -128,7 +128,7 @@ jobs:
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           working-directory: ./oxmpl-py # Added working directory for build
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-windows-${{ matrix.platform.target }}
           path: oxmpl-py/dist
@@ -143,8 +143,8 @@ jobs:
           - runner: macos-14
             target: aarch64
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.x
       - name: Build wheels
@@ -155,7 +155,7 @@ jobs:
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           working-directory: ./oxmpl-py # Added working directory for build
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-macos-${{ matrix.platform.target }}
           path: oxmpl-py/dist
@@ -163,7 +163,7 @@ jobs:
   sdist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
@@ -171,7 +171,7 @@ jobs:
           args: --out dist
           working-directory: ./oxmpl-py # Added working directory for build
       - name: Upload sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-sdist
           path: oxmpl-py/dist
@@ -189,7 +189,7 @@ jobs:
       # Used to generate artifact attestation
       attestations: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           # The '*' downloads all artifacts.
           # We need to specify a directory to avoid conflicts.
@@ -201,7 +201,7 @@ jobs:
           mkdir -p dist
           find artifacts -type f -name "*.whl" -o -name "*.tar.gz" | xargs -I {} mv {} dist/
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest@v4
         with:
           subject-path: 'dist/*'
       - name: Publish to PyPI
