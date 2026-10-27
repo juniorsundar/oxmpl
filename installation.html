@@ -45,10 +45,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7c08850b.js";
+            window.path_to_searchindex_js = "searchindex-10d90353.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-62ebb65a.js"></script>
+        <script src="toc-d2a91a4d.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -192,13 +192,27 @@
                     <main>
                         <h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
 <p>You can use <code>oxmpl</code> in Rust, Python, or JavaScript projects.</p>
+<h2 id="supported-versions"><a class="header" href="#supported-versions">Supported versions</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Toolchain</th><th>Minimum</th></tr>
+</thead>
+<tbody>
+<tr><td>Rust</td><td>1.85 (edition 2024)</td></tr>
+<tr><td>Python</td><td>3.11</td></tr>
+<tr><td>Node.js</td><td>22.12 (building from source only)</td></tr>
+</tbody>
+</table>
+</div>
+<p>Upgrading from an earlier release? See <a href="migration/index.html">Migration Guides</a>.</p>
 <h2 id="rust"><a class="header" href="#rust">Rust</a></h2>
 <p>The core library is available on crates.io and can be added to your project’s <code>Cargo.toml</code>:</p>
 <pre><code class="language-toml">[dependencies]
-oxmpl = "0.4.0" # Replace with the latest version
+oxmpl = "0.8" # Replace with the latest version
 </code></pre>
 <h2 id="python"><a class="header" href="#python">Python</a></h2>
-<p>The library is available on PyPI and can be installed with <code>pip</code>:</p>
+<p>The library is available on PyPI and can be installed with <code>pip</code> (Python 3.11 or later):</p>
 <pre><code class="language-bash">pip install oxmpl-py
 </code></pre>
 <h2 id="javascript--wasm"><a class="header" href="#javascript--wasm">JavaScript / WASM</a></h2>
@@ -209,6 +223,10 @@ oxmpl = "0.4.0" # Replace with the latest version
 <p>If you want to use the latest features or contribute to the project, you can build the libraries from source.</p>
 <h2 id="rust-1"><a class="header" href="#rust-1">Rust</a></h2>
 <p>To build the core Rust library:</p>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<ul>
+<li>Rust 1.85+ (edition 2024)</li>
+</ul>
 <pre><code class="language-bash"># Clone the repository
 git clone https://github.com/juniorsundar/oxmpl.git
 cd oxmpl
@@ -218,10 +236,10 @@ cargo build --release
 </code></pre>
 <h2 id="python-1"><a class="header" href="#python-1">Python</a></h2>
 <p>To build the Python bindings (<code>oxmpl-py</code>):</p>
-<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<h3 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h3>
 <ul>
-<li>Python 3.8+</li>
-<li><code>maturin</code> (install via <code>pip install maturin</code>)</li>
+<li>Python 3.11+</li>
+<li><code>maturin</code> 1.15+ (install via <code>pip install "maturin&gt;=1.15"</code>)</li>
 </ul>
 <h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
 <pre><code class="language-bash"># Build and install in the current environment
@@ -229,9 +247,9 @@ maturin develop -m oxmpl-py/Cargo.toml
 </code></pre>
 <h2 id="javascript--wasm-1"><a class="header" href="#javascript--wasm-1">JavaScript / WASM</a></h2>
 <p>If you need to build the JavaScript bindings from source:</p>
-<h3 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h3>
+<h3 id="prerequisites-2"><a class="header" href="#prerequisites-2">Prerequisites</a></h3>
 <ul>
-<li>Node.js (v22 or later recommended)</li>
+<li>Node.js 22.12+</li>
 <li>Rust toolchain with <code>wasm32-unknown-unknown</code> target</li>
 <li><code>wasm-pack</code> (installed automatically via <code>npm install</code>)</li>
 </ul>
@@ -256,7 +274,7 @@ npm run pack
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="concepts.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="migration/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -270,7 +288,7 @@ npm run pack
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="concepts.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="migration/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

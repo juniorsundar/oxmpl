@@ -46,10 +46,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7c08850b.js";
+            window.path_to_searchindex_js = "searchindex-10d90353.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-62ebb65a.js"></script>
+        <script src="toc-d2a91a4d.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -215,13 +215,27 @@
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
 <p>You can use <code>oxmpl</code> in Rust, Python, or JavaScript projects.</p>
+<h2 id="supported-versions"><a class="header" href="#supported-versions">Supported versions</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Toolchain</th><th>Minimum</th></tr>
+</thead>
+<tbody>
+<tr><td>Rust</td><td>1.85 (edition 2024)</td></tr>
+<tr><td>Python</td><td>3.11</td></tr>
+<tr><td>Node.js</td><td>22.12 (building from source only)</td></tr>
+</tbody>
+</table>
+</div>
+<p>Upgrading from an earlier release? See <a href="#migration-guides">Migration Guides</a>.</p>
 <h2 id="rust"><a class="header" href="#rust">Rust</a></h2>
 <p>The core library is available on crates.io and can be added to your project’s <code>Cargo.toml</code>:</p>
 <pre><code class="language-toml">[dependencies]
-oxmpl = "0.4.0" # Replace with the latest version
+oxmpl = "0.8" # Replace with the latest version
 </code></pre>
 <h2 id="python"><a class="header" href="#python">Python</a></h2>
-<p>The library is available on PyPI and can be installed with <code>pip</code>:</p>
+<p>The library is available on PyPI and can be installed with <code>pip</code> (Python 3.11 or later):</p>
 <pre><code class="language-bash">pip install oxmpl-py
 </code></pre>
 <h2 id="javascript--wasm"><a class="header" href="#javascript--wasm">JavaScript / WASM</a></h2>
@@ -232,6 +246,10 @@ oxmpl = "0.4.0" # Replace with the latest version
 <p>If you want to use the latest features or contribute to the project, you can build the libraries from source.</p>
 <h2 id="rust-1"><a class="header" href="#rust-1">Rust</a></h2>
 <p>To build the core Rust library:</p>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<ul>
+<li>Rust 1.85+ (edition 2024)</li>
+</ul>
 <pre><code class="language-bash"># Clone the repository
 git clone https://github.com/juniorsundar/oxmpl.git
 cd oxmpl
@@ -241,10 +259,10 @@ cargo build --release
 </code></pre>
 <h2 id="python-1"><a class="header" href="#python-1">Python</a></h2>
 <p>To build the Python bindings (<code>oxmpl-py</code>):</p>
-<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<h3 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h3>
 <ul>
-<li>Python 3.8+</li>
-<li><code>maturin</code> (install via <code>pip install maturin</code>)</li>
+<li>Python 3.11+</li>
+<li><code>maturin</code> 1.15+ (install via <code>pip install "maturin&gt;=1.15"</code>)</li>
 </ul>
 <h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
 <pre><code class="language-bash"># Build and install in the current environment
@@ -252,9 +270,9 @@ maturin develop -m oxmpl-py/Cargo.toml
 </code></pre>
 <h2 id="javascript--wasm-1"><a class="header" href="#javascript--wasm-1">JavaScript / WASM</a></h2>
 <p>If you need to build the JavaScript bindings from source:</p>
-<h3 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h3>
+<h3 id="prerequisites-2"><a class="header" href="#prerequisites-2">Prerequisites</a></h3>
 <ul>
-<li>Node.js (v22 or later recommended)</li>
+<li>Node.js 22.12+</li>
 <li>Rust toolchain with <code>wasm32-unknown-unknown</code> target</li>
 <li><code>wasm-pack</code> (installed automatically via <code>npm install</code>)</li>
 </ul>
@@ -270,6 +288,63 @@ npm run build
 # Create a packaged version
 npm run pack
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="migration-guides"><a class="header" href="#migration-guides">Migration Guides</a></h1>
+<p>OxMPL is pre-1.0: breaking changes ship in minor releases. Each guide below lists what you need to change when upgrading across one minor version. If you are skipping several versions, apply the guides in order.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Upgrade</th><th>Rust</th><th>Python</th><th>JavaScript</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#migrating-from-07-to-08">0.7 → 0.8</a></td><td>Breaking: rand 0.10 trait rename, Rust 1.85+</td><td>Breaking: Python 3.11+</td><td>No changes</td></tr>
+</tbody>
+</table>
+</div>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="migrating-from-07-to-08"><a class="header" href="#migrating-from-07-to-08">Migrating from 0.7 to 0.8</a></h1>
+<p>0.8 is a toolchain refresh: no planner behaviour changed, but the minimum supported toolchains went up and the Rust API follows <code>rand</code> 0.10.</p>
+<h2 id="rust-2"><a class="header" href="#rust-2">Rust</a></h2>
+<h3 id="minimum-rust-version-is-now-185"><a class="header" href="#minimum-rust-version-is-now-185">Minimum Rust version is now 1.85</a></h3>
+<p>All crates are on edition 2024 and declare <code>rust-version = "1.85"</code>. Older compilers fail with a clear “requires rustc 1.85” error.</p>
+<h3 id="rand-010-trait-rename"><a class="header" href="#rand-010-trait-rename"><code>rand</code> 0.10 trait rename</a></h3>
+<p>OxMPL’s sampling traits take a random number generator, so they follow <code>rand</code>’s 0.10 rename:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>rand 0.9</th><th>rand 0.10</th><th>What it is</th></tr>
+</thead>
+<tbody>
+<tr><td><code>RngCore</code></td><td><code>Rng</code></td><td>The core generator (<code>next_u32</code>, <code>next_u64</code>, <code>fill_bytes</code>)</td></tr>
+<tr><td><code>Rng</code></td><td><code>RngExt</code></td><td>The convenience methods (<code>random</code>, <code>random_range</code>, <code>random_bool</code>)</td></tr>
+</tbody>
+</table>
+</div>
+<p>This affects you if you implement <code>StateSpace</code>, <code>Goal</code> / <code>GoalSampleableRegion</code> or <code>AnyStateSpace</code> yourself.</p>
+<p><strong>Trait bounds stay <code>Rng</code>.</strong> The signatures are unchanged in name:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn sample_uniform(&amp;self, rng: &amp;mut impl Rng) -&gt; Result&lt;Self::StateType, StateSamplingError&gt;;
+fn sample_goal(&amp;self, rng: &amp;mut impl Rng) -&gt; Result&lt;S, StateSamplingError&gt;;
+<span class="boring">}</span></code></pre>
+<p><strong>Calling the convenience methods now needs <code>RngExt</code> in scope.</strong> Update your <code>rand</code> dependency to <code>0.10</code> and change the import wherever you call <code>.random()</code>, <code>.random_range()</code> or <code>.random_bool()</code>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 0.7
+use rand::Rng;
+
+// 0.8
+use rand::{Rng, RngExt};
+<span class="boring">}</span></code></pre>
+<p>If a file only names <code>Rng</code> in a signature and never calls those methods, keep <code>use rand::Rng;</code>. Importing <code>RngExt</code> there triggers an unused-import warning.</p>
+<p><strong><code>AnyStateSpace::sample_uniform_dyn</code></strong> now takes <code>&amp;mut dyn Rng</code> instead of <code>&amp;mut dyn RngCore</code>.</p>
+<p><strong>Seeded runs are unaffected:</strong> a given seed produces the same sequence on 0.8 as on 0.7.</p>
+<h2 id="python-2"><a class="header" href="#python-2">Python</a></h2>
+<h3 id="python-311-or-later-is-required"><a class="header" href="#python-311-or-later-is-required">Python 3.11 or later is required</a></h3>
+<p><code>oxmpl-py</code> 0.8 requires Python 3.11+; Python 3.8–3.10 are no longer supported. <code>pip</code> on an older interpreter resolves to the last compatible release (0.7.x) instead of installing 0.8.</p>
+<p>The Python API itself is unchanged.</p>
+<h2 id="javascript"><a class="header" href="#javascript">JavaScript</a></h2>
+<p>No changes are needed. Building from source now requires Node.js 22.12+; using the published npm package does not.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="concepts"><a class="header" href="#concepts">Concepts</a></h1>
 <p>OxMPL follows the modular design principles of OMPL. Understanding these core concepts is key to using the library effectively.</p>
@@ -324,7 +399,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::RRT;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 /// A StateValidityChecker that defines a simple vertical wall obstacle.
 struct WallObstacleChecker {
@@ -532,7 +607,7 @@ use oxmpl::base::{
 };
 use oxmpl::geometric::RRT;
 
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 /// A StateValidityChecker that checks for collision with a box obstacle.
 /// The robot is considered a point with orientation, but we check if the point
@@ -954,7 +1029,7 @@ try {
 <code>fn(state) -&gt; bool</code></p>
 <p>Since planners call this function thousands of times, it <strong>must be efficient</strong>.</p>
 <h2 id="implementations"><a class="header" href="#implementations">Implementations</a></h2>
-<h3 id="rust-2"><a class="header" href="#rust-2">Rust</a></h3>
+<h3 id="rust-3"><a class="header" href="#rust-3">Rust</a></h3>
 <p>In Rust, you implement the <code>StateValidityChecker</code> trait for your specific state type.</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -980,7 +1055,7 @@ impl StateValidityChecker&lt;RealVectorState&gt; for MyObstacleChecker {
     }
 }
 <span class="boring">}</span></code></pre>
-<h3 id="python-2"><a class="header" href="#python-2">Python</a></h3>
+<h3 id="python-3"><a class="header" href="#python-3">Python</a></h3>
 <p>In Python, you simply provide a callable (function or lambda) that accepts a state and returns a boolean.</p>
 <pre><code class="language-python">from oxmpl_py.base import RealVectorState
 
@@ -1000,7 +1075,7 @@ def is_state_valid(state: RealVectorState) -&gt; bool:
 # Pass this function to the planner setup
 planner.setup(is_state_valid)
 </code></pre>
-<h3 id="javascript"><a class="header" href="#javascript">JavaScript</a></h3>
+<h3 id="javascript-1"><a class="header" href="#javascript-1">JavaScript</a></h3>
 <p>In JavaScript, you pass a callback function to the <code>StateValidityChecker</code> constructor.</p>
 <pre><code class="language-javascript">const validityChecker = new oxmpl.base.StateValidityChecker((state) =&gt; {
     // Assuming RealVectorState
@@ -1033,7 +1108,7 @@ planner.setup(validityChecker);
 <li><strong><code>sample_goal() -&gt; State</code></strong>: Returns a random state within the goal region. Required by bi-directional planners (like <code>RRTConnect</code>) to grow trees from the goal.</li>
 </ol>
 <h2 id="implementations-1"><a class="header" href="#implementations-1">Implementations</a></h2>
-<h3 id="rust-3"><a class="header" href="#rust-3">Rust</a></h3>
+<h3 id="rust-4"><a class="header" href="#rust-4">Rust</a></h3>
 <p>OxMPL provides traits for different levels of goal capability: <code>Goal</code>, <code>GoalRegion</code>, and <code>GoalSampleableRegion</code>.</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -1044,7 +1119,7 @@ planner.setup(validityChecker);
     error::StateSamplingError
 };
 use std::sync::Arc;
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 struct MyGoal {
     target: RealVectorState,
@@ -1076,7 +1151,7 @@ impl GoalSampleableRegion&lt;RealVectorState&gt; for MyGoal {
     }
 }
 <span class="boring">}</span></code></pre>
-<h3 id="python-3"><a class="header" href="#python-3">Python</a></h3>
+<h3 id="python-4"><a class="header" href="#python-4">Python</a></h3>
 <p>In Python, you define a class that implements the required methods.</p>
 <pre><code class="language-python">import random
 from oxmpl_py.base import RealVectorStateSpace, RealVectorState
@@ -1106,7 +1181,7 @@ class MyGoal:
 goal = MyGoal(space, 5.0, 5.0, 0.5)
 problem = ProblemDefinition.from_real_vector(space, start, goal)
 </code></pre>
-<h3 id="javascript-1"><a class="header" href="#javascript-1">JavaScript</a></h3>
+<h3 id="javascript-2"><a class="header" href="#javascript-2">JavaScript</a></h3>
 <p>In JavaScript, you pass an object (or class instance) with the required function properties.</p>
 <pre><code class="language-javascript">const goal = new oxmpl.base.Goal({
     isSatisfied: (state) =&gt; {
@@ -1786,7 +1861,7 @@ impl JsMyPlanner {
 When implementing <code>from_js_value</code> for your state, you often need to inspect the JS object properties to ensure it matches your state type (e.g., check for <code>x</code>, <code>y</code> for a 2D point).</p>
 <h2 id="integration-testing-1"><a class="header" href="#integration-testing-1">Integration Testing</a></h2>
 <p>Ensure your new state space is robust by adding tests across the stack.</p>
-<h3 id="rust-4"><a class="header" href="#rust-4">Rust</a></h3>
+<h3 id="rust-5"><a class="header" href="#rust-5">Rust</a></h3>
 <ul>
 <li><strong>Unit Tests</strong>: Add <code>#[test]</code> functions in your implementation file (or a separate test module) to verify:
 <ul>
