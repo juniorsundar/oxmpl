@@ -87,7 +87,7 @@ describe('PRM Integration Tests', () => {
       path = planner.solve(solveTimeoutSecs);
       console.log(`Solution found with ${path.getLength()} states.`);
     } catch (error) {
-      throw new Error(`Planner failed to find a solution when one should exist. Error: ${error}`);
+      throw new Error(`Planner failed to find a solution when one should exist.`, { cause: error });
     }
 
     const states = path.getStates();

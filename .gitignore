@@ -5,3 +5,5 @@ oxmpl-py/tests/__pycache__
 .direnv
 .pi
 docs/book
+.vscode/settings.json
+.serena/*
