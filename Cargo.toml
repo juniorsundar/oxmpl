@@ -1,7 +1,7 @@
 [workspace]
 members = ["oxmpl", "oxmpl-py", "oxmpl-js", "docs"]
 resolver = "2"
-package.version = "0.8.0"                   # x-release-please-version
+package.version = "0.8.1"                   # x-release-please-version
 package.rust-version = "1.85"
 package.edition = "2024"
 
@@ -10,4 +10,4 @@ opt-level = "s"
 lto = true
 
 [workspace.dependencies]
-oxmpl = { path = "oxmpl", version = "0.8.0" } # x-release-please-version
+oxmpl = { path = "oxmpl", version = "0.8.1" } # x-release-please-version
