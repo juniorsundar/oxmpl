@@ -57,8 +57,11 @@ jobs:
   publish:
     name: Publish to crates.io
     runs-on: ubuntu-latest
-    needs: test_and_lint
+    needs: [test_and_lint, publish_dry_run]
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -67,34 +70,11 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Publish `oxmpl` core crate
-        run: cargo publish --package oxmpl --token ${{ secrets.CARGO_TOKEN }}
+      - name: Authenticate with crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
 
-      - name: Wait for `oxmpl` to be indexed
-        run: sleep 60
-
-      - name: Update dependency and publish `oxmpl-py` bindings crate
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          VERSION="${TAG_NAME#v}"
-          echo "Preparing to publish oxmpl-py version ${VERSION}"
-
-          sed -i "s|oxmpl = { path = \"../oxmpl\" }|oxmpl = \"$VERSION\"|" oxmpl-py/Cargo.toml
-
-          echo "Updated oxmpl-py/Cargo.toml:"
-          cat oxmpl-py/Cargo.toml
-
-          cargo publish --package oxmpl-py --token ${{ secrets.CARGO_TOKEN }} --allow-dirty
-
-      - name: Update dependency and publish `oxmpl-js` bindings crate
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          VERSION="${TAG_NAME#v}"
-          echo "Preparing to publish oxmpl-js version ${VERSION}"
-
-          sed -i "s|oxmpl = { path = \"../oxmpl\" }|oxmpl = \"$VERSION\"|" oxmpl-js/Cargo.toml
-
-          echo "Updated oxmpl-js/Cargo.toml:"
-          cat oxmpl-js/Cargo.toml
-
-          cargo publish --package oxmpl-js --token ${{ secrets.CARGO_TOKEN }} --allow-dirty
+      - name: Publish workspace crates
+        run: cargo publish --workspace
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
